@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-pitch text-white antialiased;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(17, 213, 255, 0.16), transparent 16%),
+    radial-gradient(circle at 85% 20%, rgba(255, 60, 172, 0.15), transparent 15%),
+    linear-gradient(180deg, #09111b 0%, #07111f 46%, #050b14 100%);
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.glass {
+  @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+}
+
+.panel {
+  @apply glass rounded-3xl shadow-glow;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full border border-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/75;
+}
+
+.section-title {
+  @apply text-2xl font-black uppercase tracking-[0.18em] text-white md:text-4xl;
+}
