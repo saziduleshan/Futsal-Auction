@@ -20,10 +20,8 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <div className="bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-12">
-        <TeamRoster team={bundle.team} players={bundle.players} />
-      </div>
+    <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-12">
+      <TeamRoster team={bundle.team} players={bundle.players} />
     </div>
   );
 }

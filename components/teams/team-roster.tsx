@@ -50,12 +50,12 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
               <Icon className="h-6 w-6 text-cyan" />
               <h2 className="text-2xl font-black uppercase tracking-[0.12em]">{formatCategory(group.category)}</h2>
               {group.players.length > 0 && (
-                <span className="ml-auto rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-gray-500">{group.players.length}</span>
+                <span className="ml-auto rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white/60">{group.players.length}</span>
               )}
             </div>
             <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {group.players.length ? group.players.map((player) => (
-                <article key={player.id} className="overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white">
+                <article key={player.id} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 shadow-lg backdrop-blur-xl">
                   {player.card_image_url ? (
                     <Image src={player.card_image_url} alt={player.name} width={720} height={900} className="aspect-[4/5] w-full object-cover" />
                   ) : (
@@ -65,12 +65,12 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
                   )}
                   <div className="p-5">
                     <p className="text-xl font-black uppercase tracking-[0.08em]">{player.name}</p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-gray-400">Bought for</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/60">Bought for</p>
                     <p className="mt-1 text-2xl font-black text-gold">{currency(player.sold_price)}</p>
                   </div>
                 </article>
               )) : (
-                <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-6 text-sm text-gray-400">
+                <div className="rounded-2xl border border-dashed border-white/20 bg-white/30 p-6 text-sm text-white/60 backdrop-blur-sm">
                   No players purchased yet in this category.
                 </div>
               )}

@@ -11,15 +11,15 @@ body {
 }
 
 .glass {
-  @apply border border-gray-200 bg-white/80 backdrop-blur-xl;
+  @apply border border-white/20 bg-white/80 backdrop-blur-xl;
 }
 
 .panel {
-  @apply glass rounded-3xl shadow-sm;
+  @apply glass rounded-3xl shadow-lg;
 }
 
 .badge {
-  @apply inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gray-500;
+  @apply inline-flex items-center rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/60;
 }
 
 .section-title {

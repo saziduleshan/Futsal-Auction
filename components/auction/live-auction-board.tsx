@@ -64,20 +64,20 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
 
   return (
     <div className="panel overflow-hidden">
-      <div className="border-b border-gray-200 px-6 py-5 md:px-8">
+      <div className="border-b border-white/10 px-6 py-5 md:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="badge">{divisionLabel}</p>
             <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.14em] md:text-4xl">Live Auction Room</h2>
           </div>
           <div className="flex flex-wrap gap-3">
-            <div className="rounded-2xl border border-gray-200 bg-gradient-to-br from-cyan/10 to-purple/10 px-4 py-3 text-right">
+            <div className="rounded-2xl border border-white/20 bg-gradient-to-br from-cyan/10 to-purple/10 px-4 py-3 text-right backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Status</p>
               <p className="mt-1 inline-flex items-center gap-2 text-lg font-bold uppercase text-lime">
                 <Radio className="h-4 w-4" /> {room.status}
               </p>
             </div>
-            <div className="rounded-2xl border border-orange/20 bg-orange/5 px-4 py-3 text-right">
+            <div className="rounded-2xl border border-orange/20 bg-orange/5 px-4 py-3 text-right backdrop-blur-sm">
               <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Bid step</p>
               <p className="mt-1 text-lg font-bold text-orange">{currency(room.bid_increment)}</p>
             </div>
@@ -86,10 +86,10 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
       </div>
 
       <div className="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="border-b border-gray-200 p-6 md:border-b-0 md:border-r md:border-gray-200 md:p-8">
+        <div className="border-b border-white/10 p-6 md:border-b-0 md:border-r md:border-white/10 md:p-8">
           {currentPlayer ? (
             <>
-              <div className="relative overflow-hidden rounded-[2rem] border border-gray-200 bg-gray-50">
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-black/20 backdrop-blur-sm">
                 {currentPlayer.card_image_url ? (
                   <Image
                     src={currentPlayer.card_image_url}
@@ -124,53 +124,53 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
               </div>
             </>
           ) : (
-            <div className="flex min-h-[460px] items-center justify-center rounded-[2rem] border border-dashed border-gray-300 bg-gray-50 p-10 text-center">
+            <div className="flex min-h-[460px] items-center justify-center rounded-[2rem] border border-dashed border-white/20 bg-white/30 p-10 text-center backdrop-blur-sm">
               <div>
                 <ShieldAlert className="mx-auto h-10 w-10 text-gray-300" />
-                <p className="mt-4 text-lg font-bold uppercase tracking-[0.16em] text-gray-700">No player is currently nominated</p>
-                <p className="mt-2 text-sm text-gray-400">An admin can start the next lot from the control room.</p>
+                <p className="mt-4 text-lg font-bold uppercase tracking-[0.16em] text-white/90">No player is currently nominated</p>
+                <p className="mt-2 text-sm text-white/70">An admin can start the next lot from the control room.</p>
               </div>
             </div>
           )}
         </div>
 
         <div className="p-6 md:p-8">
-          <div className="rounded-3xl border border-gold/20 bg-gradient-to-br from-gold/[0.06] to-transparent p-6 shadow-sm">
+          <div className="rounded-3xl border border-gold/20 bg-gradient-to-br from-gold/[0.06] to-transparent p-6 shadow-sm backdrop-blur-sm">
             <p className="text-xs uppercase tracking-[0.22em] text-gray-400">Current leader</p>
             <p className="mt-3 text-4xl font-black uppercase tracking-[0.12em] text-gold">
               {highestTeam?.name ?? 'Waiting for first bid'}
             </p>
-            <div className="mt-5 flex items-center gap-3 text-gray-500">
+            <div className="mt-5 flex items-center gap-3 text-white/60">
               <Gavel className="h-5 w-5 text-gold" />
-              Highest bid: <span className="font-black text-gray-900">{currency(room.current_bid)}</span>
+              Highest bid: <span className="font-black text-white">{currency(room.current_bid)}</span>
             </div>
 
             {viewerRole === 'team' ? (
               <button
                 onClick={placeBid}
                 disabled={!canBid || isPending}
-                className="mt-6 w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-4 font-black uppercase tracking-[0.18em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:cursor-not-allowed disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400"
+                className="mt-6 w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-4 font-black uppercase tracking-[0.18em] text-white shadow-lg transition hover:from-gray-800 hover:to-gray-800 disabled:cursor-not-allowed disabled:from-white/20 disabled:to-white/20 disabled:text-white/40"
               >
                 {isPending ? 'Submitting…' : nextBidLabel}
               </button>
             ) : null}
 
-            {message ? <p className="mt-3 text-sm text-gray-500">{message}</p> : null}
+            {message ? <p className="mt-3 text-sm text-white/70">{message}</p> : null}
           </div>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {teams.map((team) => (
-              <div key={team.id} className={`rounded-2xl border p-4 transition ${room.current_highest_team_id === team.id ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent' : 'border-gray-200 bg-white'}`}>
+              <div key={team.id} className={`rounded-2xl border p-4 transition ${room.current_highest_team_id === team.id ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent' : 'border-white/20 bg-white/80 backdrop-blur-sm'}`}>
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-bold uppercase tracking-[0.08em]">{team.name}</p>
                   {room.current_highest_team_id === team.id ? <span className="badge border-gold/30 text-gold">Leading</span> : null}
                 </div>
-                <p className={`mt-3 inline-flex items-center gap-2 text-sm ${room.current_highest_team_id === team.id ? 'text-gold/80' : 'text-gray-500'}`}><Wallet className="h-4 w-4 text-cyan" />Purse {currency(team.purse)}</p>
+                <p className={`mt-3 inline-flex items-center gap-2 text-sm ${room.current_highest_team_id === team.id ? 'text-gold/80' : 'text-white/60'}`}><Wallet className="h-4 w-4 text-cyan" />Purse {currency(team.purse)}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-6 rounded-3xl border border-purple/20 bg-gradient-to-br from-purple/[0.06] to-transparent p-6">
+          <div className="mt-6 rounded-3xl border border-purple/20 bg-gradient-to-br from-purple/[0.06] to-transparent p-6 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <Clock3 className="h-5 w-5 text-purple" />
               <h3 className="text-lg font-black uppercase tracking-[0.12em]">Recent bids</h3>
@@ -179,7 +179,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
               {recentBids.length ? recentBids.map((bid) => {
                 const team = teams.find((item) => item.id === bid.team_id);
                 return (
-                  <div key={bid.id} className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm hover:border-purple/20">
+                  <div key={bid.id} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/20 px-4 py-3 text-sm backdrop-blur-sm hover:border-purple/30">
                     <span className={team?.id === room.current_highest_team_id ? 'text-gold font-semibold' : ''}>{team?.name ?? 'Unknown team'}</span>
                     <span className="font-bold text-lime">{currency(bid.amount)}</span>
                   </div>
