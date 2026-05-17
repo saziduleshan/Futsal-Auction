@@ -43,9 +43,9 @@ export default function HomePage() {
         <Image
           src="/joga-bonito-logo.png"
           alt="Joga Bonito"
-          width={320}
-          height={100}
-          className="h-auto w-72 md:w-80"
+          width={500}
+          height={156}
+          className="h-auto w-80 md:w-[500px]"
           priority
         />
 
