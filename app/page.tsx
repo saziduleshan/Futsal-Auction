@@ -37,19 +37,19 @@ export default function HomePage() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: 'url(/joga-bonito-bg.jpg)' }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/60 to-black/75" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center px-6 text-center">
         <Image
           src="/joga-bonito-logo.png"
           alt="Joga Bonito"
-          width={500}
-          height={156}
-          className="h-auto w-80 md:w-[500px]"
+          width={800}
+          height={250}
+          className="h-auto w-full max-w-xl"
           priority
         />
 
-        <p className="mt-6 text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-3xl">
+        <p className="mt-6 whitespace-nowrap text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-3xl">
           PLAY IT. LIVE IT. OWN IT.
         </p>
 
