@@ -83,7 +83,7 @@ export function PlayerForm() {
         </label>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Player card image</span>
-          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-gray-600 file:mr-3 file:rounded-full file:border-0 file:bg-gold/20 file:px-3 file:py-1 file:text-sm file:text-gold backdrop-blur-sm transition hover:border-gold/40" />
+          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-gray-400 file:mr-3 file:rounded-full file:border-0 file:bg-gray-800 file:px-3 file:py-1 file:text-sm file:text-white backdrop-blur-sm transition hover:border-gold/40" />
         </label>
       </div>
       <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-gradient-to-r from-gold to-orange px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400">

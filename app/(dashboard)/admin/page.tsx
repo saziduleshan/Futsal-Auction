@@ -25,7 +25,7 @@ export default async function AdminPage() {
                   </h3>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-white/70">
+              <p className="mt-4 text-base leading-relaxed text-white/70">
                 Browse the full player catalog with division tabs, tier and position filters. Scroll through card views and inspect player details.
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.14em] text-gold">
@@ -47,7 +47,7 @@ export default async function AdminPage() {
                   </h3>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-white/70">
+              <p className="mt-4 text-base leading-relaxed text-white/70">
                 Configure division, teams, purse size, and bid settings. Then manage the live auction — nominate players, track bids, and close lots.
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.14em] text-cyan">
