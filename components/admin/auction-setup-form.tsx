@@ -51,7 +51,7 @@ export function AuctionSetupForm() {
         </h2>
       </div>
 
-      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white p-8 shadow-sm">
+      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 p-8 shadow-lg backdrop-blur-xl">
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
             <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">
@@ -65,7 +65,7 @@ export function AuctionSetupForm() {
                 setDivision(val);
                 setTeamCount(val === 'men' ? 8 : 3);
               }}
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+              className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             >
               <option value="men">Male Futsal</option>
               <option value="women">Female Futsal</option>
@@ -83,7 +83,7 @@ export function AuctionSetupForm() {
               max={20}
               value={teamCount}
               onChange={(e) => setTeamCount(Number(e.target.value))}
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+              className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             />
           </label>
 
@@ -99,7 +99,7 @@ export function AuctionSetupForm() {
               step={50}
               value={purseSize}
               onChange={(e) => setPurseSize(Number(e.target.value))}
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+              className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             />
           </label>
 
@@ -115,7 +115,7 @@ export function AuctionSetupForm() {
               step={5}
               defaultValue={25}
               name="bidIncrement"
-              className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+              className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             />
           </label>
         </div>

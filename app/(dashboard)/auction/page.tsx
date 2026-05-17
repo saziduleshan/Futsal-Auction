@@ -20,7 +20,8 @@ export default async function AuctionPage() {
   const bundles = await Promise.all(divisions.map((division) => getRoomBundle(division)));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-10 md:px-6 md:py-12">
+    <div className="bg-gray-50">
+      <div className="mx-auto max-w-7xl space-y-8 px-4 py-10 md:px-6 md:py-12">
       {bundles.map((bundle) => (
         <LiveAuctionBoard
           key={bundle.room.id}
@@ -33,6 +34,7 @@ export default async function AuctionPage() {
           recentBids={bundle.recentBids}
         />
       ))}
+    </div>
     </div>
   );
 }

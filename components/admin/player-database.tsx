@@ -79,14 +79,14 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'men'
               ? 'bg-gradient-to-r from-brazil-green to-brazil-yellow text-white shadow-lg'
-              : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:shadow-sm'
+              : 'border border-white/20 bg-white/70 text-gray-200 backdrop-blur-sm hover:border-white/40 hover:shadow-sm'
           }`}
         >
           <Users className="h-4 w-4" />
           Male Futsal
           <span
             className={`ml-1 rounded-full px-2 py-0.5 text-xs ${
-              activeDivision === 'men' ? 'bg-white/20' : 'bg-gray-100'
+              activeDivision === 'men' ? 'bg-white/20' : 'bg-white/20'
             }`}
           >
             {menCount}
@@ -97,14 +97,14 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'women'
               ? 'bg-gradient-to-r from-magenta to-purple text-white shadow-lg'
-              : 'border border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:shadow-sm'
+              : 'border border-white/20 bg-white/70 text-gray-200 backdrop-blur-sm hover:border-white/40 hover:shadow-sm'
           }`}
         >
           <Users className="h-4 w-4" />
           Female Futsal
           <span
             className={`ml-1 rounded-full px-2 py-0.5 text-xs ${
-              activeDivision === 'women' ? 'bg-white/20' : 'bg-gray-100'
+              activeDivision === 'women' ? 'bg-white/20' : 'bg-white/20'
             }`}
           >
             {womenCount}
@@ -124,7 +124,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
                   : (Number(e.target.value) as PlayerYear)
             )
           }
-          className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+          className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
         >
           <option value="all">All tiers</option>
           {YEAR_TIERS.map((yt) => (
@@ -136,7 +136,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
         <select
           value={positionFilter}
           onChange={(e) => setPositionFilter(e.target.value as PlayerCategory | 'all')}
-          className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+          className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
         >
           <option value="all">All positions</option>
           {PLAYER_CATEGORIES.map((cat) => (
@@ -151,7 +151,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
               setTierFilter('all');
               setPositionFilter('all');
             }}
-            className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-500 transition hover:border-red-300 hover:text-red-500"
+            className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-300 backdrop-blur-sm transition hover:border-red-400 hover:text-red-400"
           >
             Clear filters
           </button>
@@ -167,12 +167,12 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
       )}
 
       {filtered.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-gray-300 bg-gray-50 p-16 text-center">
-          <Eye className="mx-auto h-10 w-10 text-gray-300" />
-          <p className="mt-4 text-lg font-bold uppercase tracking-[0.16em] text-gray-600">
+        <div className="rounded-3xl border border-dashed border-white/20 bg-white/40 p-16 text-center backdrop-blur-sm">
+          <Eye className="mx-auto h-10 w-10 text-white/40" />
+          <p className="mt-4 text-lg font-bold uppercase tracking-[0.16em] text-white/80">
             No players match the selected filters
           </p>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-white/60">
             Try adjusting the filters or add new players.
           </p>
         </div>
@@ -184,7 +184,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
             return (
               <article
                 key={player.id}
-                className="group overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-0.5"
+                className="group overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
               >
                 {player.card_image_url ? (
                   <Image
@@ -204,9 +204,9 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
                     </div>
                   </div>
                 )}
-                <div className="border-t border-gray-100 p-5">
+                <div className="border-t border-white/10 p-5">
                   <p className="text-lg font-black uppercase tracking-[0.08em]">{player.name}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-400">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
                       <Icon className="h-3.5 w-3.5" />
                       {formatCategory(player.category)}

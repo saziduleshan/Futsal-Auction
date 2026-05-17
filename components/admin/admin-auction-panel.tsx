@@ -33,8 +33,8 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm">
-      <div className="border-b border-gray-100 p-8">
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 shadow-lg backdrop-blur-xl">
+      <div className="border-b border-white/10 p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="badge">Live control room</p>
@@ -52,7 +52,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
             <div key={room.id} className={`rounded-[1.75rem] border p-6 transition ${
               room.status === 'live'
                 ? 'border-gold/30 bg-gradient-to-br from-gold/[0.06] to-transparent shadow-md'
-                : 'border-gray-200 bg-gray-50/50'
+                : 'border-white/20 bg-white/50'
             }`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -64,7 +64,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                 <div className={`rounded-2xl border px-4 py-3 text-right ${
                   room.status === 'live'
                     ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent'
-                    : 'border-gray-200 bg-white'
+                    : 'border-white/20 bg-white/60'
                 }`}>
                   <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Current bid</p>
                   <p className="mt-1 text-2xl font-black text-gold">{currency(room.current_bid)}</p>
@@ -74,7 +74,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
               <div className="mt-5 space-y-4">
                 <label className="space-y-2 block">
                   <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Nominate player</span>
-                  <select id={`player-${room.id}`} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30">
+                  <select id={`player-${room.id}`} className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
                     <option value="">Select a player</option>
                     {availableByDivision[room.division].map((player) => (
                       <option key={player.id} value={player.id}>{player.name} · {formatCategory(player.category)} · {currency(player.base_price)}</option>
@@ -100,7 +100,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                   <button
                     disabled={!room.current_player_id || (isPending && busyKey === `unsold-${room.id}`)}
                     onClick={() => runAction('/api/admin/auction/close', { roomId: room.id, outcome: 'unsold' }, `unsold-${room.id}`)}
-                    className="rounded-2xl border border-gray-200 bg-white px-5 py-3 font-black uppercase tracking-[0.16em] text-gray-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:text-gray-300"
+                    className="rounded-2xl border border-white/20 bg-white/60 px-5 py-3 font-black uppercase tracking-[0.16em] text-gray-700 backdrop-blur-sm transition hover:border-red-400 hover:bg-red-500/10 hover:text-red-400 disabled:text-gray-400"
                   >
                     Mark unsold
                   </button>
@@ -117,7 +117,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
               <div className={`mt-6 rounded-2xl border p-4 text-sm ${
                 room.status === 'live'
                   ? 'border-gold/20 bg-gold/[0.04] text-gold/80'
-                  : 'border-gray-200 bg-white text-gray-500'
+                  : 'border-white/20 bg-white/50 text-gray-400'
               }`}>
                 <p><span className="font-semibold text-gray-900">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
                 <p className="mt-2"><span className="font-semibold text-gray-900">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>

@@ -28,7 +28,7 @@ export function PlayerForm() {
   }
 
   return (
-    <form action={onSubmit} className="panel overflow-hidden p-8">
+    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 p-8 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="badge border-gold/30 text-gold">Player management</p>
@@ -38,18 +38,18 @@ export function PlayerForm() {
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player name</span>
-          <input name="name" required className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30" />
+          <input name="name" required className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30" />
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Division</span>
-          <select name="division" defaultValue="men" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30">
+          <select name="division" defaultValue="men" className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="men">Male Futsal</option>
             <option value="women">Female Futsal</option>
           </select>
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Position</span>
-          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30">
+          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="defender">Defender</option>
             <option value="midfielder">Midfielder</option>
             <option value="forward">Forward</option>
@@ -62,7 +62,7 @@ export function PlayerForm() {
             name="year"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value === 'final' ? 'final' : Number(e.target.value))}
-            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+            className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
           >
             {YEAR_TIERS.map((yt) => (
               <option key={String(yt.value)} value={String(yt.value)}>{yt.label}</option>
@@ -83,13 +83,13 @@ export function PlayerForm() {
         </label>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player card image</span>
-          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-sm text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-gold/10 file:px-3 file:py-1 file:text-sm file:text-gold transition hover:border-gold/40" />
+          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-gray-600 file:mr-3 file:rounded-full file:border-0 file:bg-gold/20 file:px-3 file:py-1 file:text-sm file:text-gold backdrop-blur-sm transition hover:border-gold/40" />
         </label>
       </div>
       <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-gradient-to-r from-gold to-orange px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400">
         {isPending ? 'Uploading…' : 'Create player'}
       </button>
-      {message ? <p className="mt-4 text-sm text-gray-500">{message}</p> : null}
+      {message ? <p className="mt-4 text-sm text-gray-200">{message}</p> : null}
     </form>
   );
 }
