@@ -10,7 +10,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <div
         className="fixed inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/New bg image.jpg)' }}
+        style={{ backgroundImage: 'url(/new-bg.jpg)' }}
       />
       <div className="fixed inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
