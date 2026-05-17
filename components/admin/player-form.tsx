@@ -28,11 +28,11 @@ export function PlayerForm() {
   }
 
   return (
-    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 p-8 shadow-lg backdrop-blur-xl">
+    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 p-8 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="badge border-gold/30 text-gold">Player management</p>
-          <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">Add player card</h2>
+          <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">Add player card</h2>
         </div>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-2">

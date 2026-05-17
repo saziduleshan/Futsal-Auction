@@ -23,7 +23,7 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <span className="badge">{team.division === 'men' ? 'Male Futsal' : 'Female Futsal'}</span>
-            <h1 className="mt-4 text-4xl font-black uppercase tracking-[0.12em] md:text-5xl">{team.name}</h1>
+            <h1 className="mt-4 text-4xl font-black uppercase tracking-[0.12em] text-gold md:text-5xl">{team.name}</h1>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/[0.08] to-transparent p-4">
@@ -48,7 +48,7 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
           <section key={group.category} className="panel p-8">
             <div className="flex items-center gap-3">
               <Icon className="h-6 w-6 text-cyan" />
-              <h2 className="text-2xl font-black uppercase tracking-[0.12em]">{formatCategory(group.category)}</h2>
+              <h2 className="text-2xl font-black uppercase tracking-[0.12em] text-gold">{formatCategory(group.category)}</h2>
               {group.players.length > 0 && (
                 <span className="ml-auto rounded-full bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white/60">{group.players.length}</span>
               )}

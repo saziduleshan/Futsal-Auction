@@ -68,7 +68,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="badge">{divisionLabel}</p>
-            <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.14em] md:text-4xl">Live Auction Room</h2>
+            <h2 className="mt-3 text-3xl font-black uppercase tracking-[0.14em] text-gold md:text-4xl">Live Auction Room</h2>
           </div>
           <div className="flex flex-wrap gap-3">
             <div className="rounded-2xl border border-white/20 bg-gradient-to-br from-cyan/10 to-purple/10 px-4 py-3 text-right backdrop-blur-sm">

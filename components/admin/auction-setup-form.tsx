@@ -46,12 +46,12 @@ export function AuctionSetupForm() {
           Back to admin
         </Link>
         <p className="badge border-gold/30 text-gold">Auction setup</p>
-        <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">
+        <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">
           Create auction room
         </h2>
       </div>
 
-      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 p-8 shadow-lg backdrop-blur-xl">
+      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 p-8 shadow-lg backdrop-blur-xl">
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
             <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">

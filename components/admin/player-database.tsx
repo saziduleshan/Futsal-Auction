@@ -64,7 +64,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
             Back to admin
           </Link>
           <p className="badge border-gold/30 text-gold">Player database</p>
-          <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">
+          <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">
             Available players
           </h2>
         </div>
@@ -184,7 +184,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
             return (
               <article
                 key={player.id}
-                className="group overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
+                className="group overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
               >
                 {player.card_image_url ? (
                   <Image

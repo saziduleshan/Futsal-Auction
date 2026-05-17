@@ -33,12 +33,12 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/90 shadow-lg backdrop-blur-xl">
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl">
       <div className="border-b border-white/10 p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="badge">Live control room</p>
-            <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">Run auctions</h2>
+            <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">Run auctions</h2>
           </div>
           {message ? <p className="text-sm font-semibold text-gray-500">{message}</p> : null}
         </div>
