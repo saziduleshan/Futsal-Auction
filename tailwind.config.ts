@@ -17,7 +17,11 @@ const config: Config = {
         orange: '#ff6a00',
         purple: '#a855f7',
         rose: '#ff2050',
-        panel: '#0a1628'
+        panel: '#0a1628',
+        'brazil-green': '#009739',
+        'brazil-yellow': '#ffcc00',
+        'brazil-blue': '#002776',
+        'brazil-white': '#f0f0f0'
       },
       boxShadow: {
         glow: '0 0 0 1px rgba(0,229,255,0.25), 0 0 32px rgba(0,229,255,0.18)',
