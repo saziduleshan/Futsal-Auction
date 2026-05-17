@@ -31,25 +31,25 @@ export function PlayerForm() {
     <form action={onSubmit} className="panel overflow-hidden p-8">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="badge">Player management</p>
+          <p className="badge border-gold/30 text-gold">Player management</p>
           <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">Add player card</h2>
         </div>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player name</span>
-          <input name="name" required className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-lime" />
+          <input name="name" required className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30" />
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Division</span>
-          <select name="division" defaultValue="men" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-purple">
+          <select name="division" defaultValue="men" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="men">Male Futsal</option>
             <option value="women">Female Futsal</option>
           </select>
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Position</span>
-          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan">
+          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="defender">Defender</option>
             <option value="midfielder">Midfielder</option>
             <option value="forward">Forward</option>
@@ -62,7 +62,7 @@ export function PlayerForm() {
             name="year"
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value === 'final' ? 'final' : Number(e.target.value))}
-            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold"
+            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
           >
             {YEAR_TIERS.map((yt) => (
               <option key={String(yt.value)} value={String(yt.value)}>{yt.label}</option>
@@ -71,22 +71,22 @@ export function PlayerForm() {
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Tier</span>
-          <div className="flex h-[46px] items-center rounded-2xl border border-gray-100 bg-gray-50 px-4 text-sm font-bold uppercase tracking-[0.12em] text-purple">
+          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-gold">
             {tier.tier}
           </div>
         </label>
         <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Base price</span>
-          <div className="flex h-[46px] items-center rounded-2xl border border-gray-100 bg-gray-50 px-4 text-xl font-black text-gold">
+          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-xl font-black text-gold">
             ${tier.basePrice}
           </div>
         </label>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player card image</span>
-          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-sm text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-cyan/10 file:px-3 file:py-1 file:text-sm file:text-cyan transition hover:border-cyan/40" />
+          <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-4 text-sm text-gray-500 file:mr-3 file:rounded-full file:border-0 file:bg-gold/10 file:px-3 file:py-1 file:text-sm file:text-gold transition hover:border-gold/40" />
         </label>
       </div>
-      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400">
+      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-gradient-to-r from-gold to-orange px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400">
         {isPending ? 'Uploading…' : 'Create player'}
       </button>
       {message ? <p className="mt-4 text-sm text-gray-500">{message}</p> : null}

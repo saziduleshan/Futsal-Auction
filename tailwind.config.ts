@@ -13,7 +13,7 @@ const config: Config = {
         cyan: '#00e5ff',
         lime: '#84ff00',
         magenta: '#ff1a8c',
-        gold: '#ffd700',
+        gold: '#f5c542',
         orange: '#ff6a00',
         purple: '#a855f7',
         rose: '#ff2050',

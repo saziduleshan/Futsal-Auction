@@ -26,9 +26,14 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
               <span className="inline-flex items-center gap-2"><Swords className="h-4 w-4" />Live Auction</span>
             </Link>
             {session?.role === 'admin' ? (
-              <Link href="/admin" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-orange-400 hover:text-orange-600">
-                <span className="inline-flex items-center gap-2"><Shield className="h-4 w-4" />Admin</span>
-              </Link>
+              <>
+                <Link href="/admin/players" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-gold hover:text-gold">
+                  <span className="inline-flex items-center gap-2"><Shield className="h-4 w-4" />Players</span>
+                </Link>
+                <Link href="/admin" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-orange-400 hover:text-orange-600">
+                  <span className="inline-flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />Admin</span>
+                </Link>
+              </>
             ) : null}
             {session?.teamId ? (
               <Link href="/teams/me" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-purple-400 hover:text-purple-600">

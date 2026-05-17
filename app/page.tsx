@@ -52,7 +52,7 @@ export default function HomePage() {
             />
           </div>
 
-          <p className="mt-6 whitespace-nowrap pl-8 text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:pl-10 md:text-3xl">
+          <p className="mt-6 whitespace-nowrap pl-8 text-2xl font-black tracking-[0.22em] text-gold drop-shadow-lg md:pl-10 md:text-3xl">
             PLAY IT. LIVE IT. OWN IT.
           </p>
 
@@ -91,8 +91,8 @@ export default function HomePage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
-                  className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-[#f5c542]/60 focus:bg-black/50"
-                  placeholder={mode === 'admin' ? 'e.g. admin' : 'e.g. team-men-1'}
+                    className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-gold/60 focus:bg-black/50"
+                    placeholder={mode === 'admin' ? 'e.g. admin' : 'e.g. team-men-1'}
                 />
               </div>
               <div className="text-left">
@@ -104,8 +104,8 @@ export default function HomePage() {
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
                   required
-                  className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-[#f5c542]/60 focus:bg-black/50"
-                  placeholder="••••••••"
+                    className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-gold/60 focus:bg-black/50"
+                    placeholder="••••••••"
                 />
               </div>
 
@@ -117,7 +117,7 @@ export default function HomePage() {
 
               <button
                 type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5c542] px-5 py-4 font-black uppercase tracking-[0.16em] text-[#1a1a1a] shadow-lg transition hover:bg-white"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 py-4 font-black uppercase tracking-[0.16em] text-[#1a1a1a] shadow-lg transition hover:bg-white"
               >
                 <LogIn className="h-5 w-5" />
                 Enter the Arena

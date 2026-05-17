@@ -94,6 +94,18 @@ export async function getTeamBundleBySlug(slug: string) {
   };
 }
 
+export async function getPlayers() {
+  const supabase = createServerSupabase();
+  const { data, error } = await supabase
+    .from('players')
+    .select('id, name, division, category, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+    .order('created_at', { ascending: false })
+    .returns<Player[]>();
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function getAdminPageData() {
   const supabase = createServerSupabase();
   const [{ data: teams, error: teamsError }, { data: players, error: playersError }, { data: rooms, error: roomsError }] = await Promise.all([
