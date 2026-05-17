@@ -9,7 +9,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <div className="relative z-10">
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-black/70 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-black/90 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
             <Link href="/" className="flex-shrink-0">
               <Image
