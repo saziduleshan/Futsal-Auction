@@ -8,12 +8,6 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <div
-        className="fixed inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/new-bg.jpg)' }}
-      />
-      <div className="fixed inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
-
       <div className="relative z-10">
         <header className="sticky top-0 z-30 border-b border-white/10 bg-black/70 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 md:px-6">
@@ -61,7 +55,14 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
         </header>
-        <main>{children}</main>
+        <main className="relative min-h-[calc(100vh-97px)]">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: 'url(/new-bg.jpg)' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
+          <div className="relative z-10">{children}</div>
+        </main>
       </div>
     </div>
   );
