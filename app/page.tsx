@@ -54,7 +54,7 @@ export default function HomePage() {
             PLAY IT. LIVE IT. OWN IT.
           </p>
 
-          <div className="mt-12 w-full max-w-lg rounded-3xl border border-white/20 bg-black/60 p-8 backdrop-blur-2xl md:p-10">
+          <div className="mt-12 w-full rounded-3xl border border-white/20 bg-black/60 p-8 backdrop-blur-2xl md:p-10">
             <div className="mb-6 flex rounded-2xl border border-white/15 bg-black/30 p-1.5">
               <button
                 onClick={() => setMode('admin')}
