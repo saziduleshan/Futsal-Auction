@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { LogIn, Shield, User } from 'lucide-react';
 
@@ -39,27 +40,26 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
 
       <div className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center px-6 text-center">
-        <div className="mb-2 inline-flex items-center gap-3 rounded-full bg-white/20 px-5 py-2 text-sm font-bold uppercase tracking-[0.2em] text-white backdrop-blur-sm">
-          <span className="h-2 w-2 rounded-full bg-brazil-yellow" />
-          Futsal Tournament 2026
-          <span className="h-2 w-2 rounded-full bg-brazil-yellow" />
-        </div>
+        <Image
+          src="/joga-bonito-logo.png"
+          alt="Joga Bonito"
+          width={320}
+          height={100}
+          className="h-auto w-72 md:w-80"
+          priority
+        />
 
-        <h1 className="mt-6 text-6xl font-black uppercase leading-none tracking-[0.02em] text-white drop-shadow-lg md:text-8xl">
-          Joga Bonito
-        </h1>
-        <p className="mt-1 text-3xl font-black tracking-[0.25em] text-white/90 md:text-4xl">2026</p>
-        <p className="mt-6 text-xl font-semibold tracking-[0.2em] text-white drop-shadow">
+        <p className="mt-6 text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-3xl">
           PLAY IT. LIVE IT. OWN IT.
         </p>
 
-        <div className="mt-12 w-full rounded-3xl border border-white/30 bg-white/10 p-8 backdrop-blur-xl">
-          <div className="mb-6 flex rounded-2xl border border-white/20 bg-white/5 p-1">
+        <div className="mt-12 w-full rounded-3xl border border-white/20 bg-black/60 p-8 backdrop-blur-2xl">
+          <div className="mb-6 flex rounded-2xl border border-white/15 bg-black/30 p-1">
             <button
               onClick={() => setMode('admin')}
               className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
                 mode === 'admin'
-                  ? 'bg-white text-[#006633] shadow-lg'
+                  ? 'bg-white text-[#1a1a1a] shadow-lg'
                   : 'text-white/70 hover:text-white'
               }`}
             >
@@ -70,7 +70,7 @@ export default function HomePage() {
               onClick={() => setMode('manager')}
               className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
                 mode === 'manager'
-                  ? 'bg-white text-[#006633] shadow-lg'
+                  ? 'bg-white text-[#1a1a1a] shadow-lg'
                   : 'text-white/70 hover:text-white'
               }`}
             >
@@ -88,7 +88,7 @@ export default function HomePage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-white/40 focus:border-white/50 focus:bg-white/15"
+                className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-white outline-none transition placeholder:text-white/40 focus:border-[#f5c542]/60 focus:bg-black/50"
                 placeholder={mode === 'admin' ? 'e.g. admin' : 'e.g. team-men-1'}
               />
             </div>
@@ -101,7 +101,7 @@ export default function HomePage() {
                 onChange={(e) => setPassword(e.target.value)}
                 type="password"
                 required
-                className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white outline-none transition placeholder:text-white/40 focus:border-white/50 focus:bg-white/15"
+                className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 text-white outline-none transition placeholder:text-white/40 focus:border-[#f5c542]/60 focus:bg-black/50"
                 placeholder="••••••••"
               />
             </div>
@@ -114,7 +114,7 @@ export default function HomePage() {
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-5 py-4 font-black uppercase tracking-[0.16em] text-[#006633] shadow-lg transition hover:bg-[#ffcc00] hover:text-[#006633]"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f5c542] px-5 py-4 font-black uppercase tracking-[0.16em] text-[#1a1a1a] shadow-lg transition hover:bg-white"
             >
               <LogIn className="h-5 w-5" />
               Enter the Arena
