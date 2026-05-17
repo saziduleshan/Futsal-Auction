@@ -41,16 +41,18 @@ export default function HomePage() {
 
       <div className="relative z-10 flex min-h-screen items-center">
         <div className="flex w-full max-w-3xl flex-col items-start px-8 md:px-16 lg:px-24">
-          <Image
-            src="/joga-bonito-logo.png"
-            alt="Joga Bonito"
-            width={1100}
-            height={340}
-            className="h-auto w-full"
-            priority
-          />
+          <div className="w-full pl-8 md:pl-10">
+            <Image
+              src="/joga-bonito-logo.png"
+              alt="Joga Bonito"
+              width={1100}
+              height={340}
+              className="h-auto w-full"
+              priority
+            />
+          </div>
 
-          <p className="mt-6 whitespace-nowrap text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-3xl">
+          <p className="mt-6 whitespace-nowrap pl-8 text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:pl-10 md:text-3xl">
             PLAY IT. LIVE IT. OWN IT.
           </p>
 
