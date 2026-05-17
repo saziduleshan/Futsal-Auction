@@ -39,7 +39,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
           <p className="badge">Live control room</p>
           <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em]">Run auctions</h2>
         </div>
-        {message ? <p className="text-sm text-white/70">{message}</p> : null}
+        {message ? <p className="text-sm text-gray-500">{message}</p> : null}
       </div>
 
       <div className="mt-8 grid gap-6 xl:grid-cols-2">
@@ -47,22 +47,22 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
           const currentPlayer = players.find((player) => player.id === room.current_player_id);
           const winningTeam = teams.find((team) => team.id === room.current_highest_team_id);
           return (
-            <div key={room.id} className={`rounded-[1.75rem] border p-6 ${room.status === 'live' ? 'border-lime/30 bg-gradient-to-br from-lime/[0.06] to-transparent' : 'border-white/10 bg-white/5'}`}>
+            <div key={room.id} className={`rounded-[1.75rem] border p-6 ${room.status === 'live' ? 'border-lime/40 bg-gradient-to-br from-lime/[0.08] to-transparent' : 'border-gray-200 bg-white'}`}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="badge">{room.division === 'men' ? 'Male Futsal' : 'Female Futsal'}</p>
                   <h3 className={`mt-3 text-2xl font-black uppercase tracking-[0.12em] ${room.status === 'live' ? 'text-lime' : ''}`}>{room.status}</h3>
                 </div>
-                <div className={`rounded-2xl border px-4 py-3 text-right ${room.status === 'live' ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent' : 'border-white/10'}`}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/55">Current bid</p>
+                <div className={`rounded-2xl border px-4 py-3 text-right ${room.status === 'live' ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent' : 'border-gray-200'}`}>
+                  <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Current bid</p>
                   <p className="mt-1 text-2xl font-black text-gold">{currency(room.current_bid)}</p>
                 </div>
               </div>
 
               <div className="mt-5 space-y-4">
                 <label className="space-y-2 block">
-                  <span className="text-sm font-semibold uppercase tracking-[0.18em] text-white/70">Nominate player</span>
-                  <select id={`player-${room.id}`} className="w-full rounded-2xl border border-white/10 bg-pitch px-4 py-3 outline-none transition focus:border-cyan/50">
+                  <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Nominate player</span>
+                  <select id={`player-${room.id}`} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan">
                     <option value="">Select a player</option>
                     {availableByDivision[room.division].map((player) => (
                       <option key={player.id} value={player.id}>{player.name} · {formatCategory(player.category)} · {currency(player.base_price)}</option>
@@ -81,14 +81,14 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                       }
                       runAction('/api/admin/auction/start', { roomId: room.id, playerId: element.value }, `start-${room.id}`);
                     }}
-                    className="rounded-2xl bg-gradient-to-r from-cyan to-purple px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-white hover:to-white hover:text-pitch disabled:from-white/10 disabled:to-white/10 disabled:text-white/40"
+                    className="rounded-2xl bg-gradient-to-r from-cyan to-purple px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400"
                   >
                     Start lot
                   </button>
                   <button
                     disabled={!room.current_player_id || (isPending && busyKey === `unsold-${room.id}`)}
                     onClick={() => runAction('/api/admin/auction/close', { roomId: room.id, outcome: 'unsold' }, `unsold-${room.id}`)}
-                    className="rounded-2xl border border-white/10 px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:border-magenta/40 hover:bg-magenta/10 disabled:text-white/40"
+                    className="rounded-2xl border border-gray-200 px-5 py-3 font-black uppercase tracking-[0.16em] text-gray-700 transition hover:border-magenta/40 hover:bg-magenta/5 disabled:text-gray-300"
                   >
                     Mark unsold
                   </button>
@@ -96,15 +96,15 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                 <button
                   disabled={!room.current_player_id || !room.current_highest_team_id || (isPending && busyKey === `sold-${room.id}`)}
                   onClick={() => runAction('/api/admin/auction/close', { roomId: room.id, outcome: 'sold' }, `sold-${room.id}`)}
-                  className="w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-3 font-black uppercase tracking-[0.16em] text-pitch transition hover:from-white hover:to-white disabled:from-white/10 disabled:to-white/10 disabled:text-white/40"
+                  className="w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400"
                 >
                   Sell to current highest bidder
                 </button>
               </div>
 
-              <div className={`mt-6 rounded-2xl border p-4 text-sm ${room.status === 'live' ? 'border-lime/20 bg-lime/[0.04] text-lime/80' : 'border-white/10 bg-black/20 text-white/70'}`}>
-                <p><span className="font-semibold text-white">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
-                <p className="mt-2"><span className="font-semibold text-white">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>
+              <div className={`mt-6 rounded-2xl border p-4 text-sm ${room.status === 'live' ? 'border-lime/30 bg-lime/[0.04] text-lime/80' : 'border-gray-200 bg-gray-50 text-gray-500'}`}>
+                <p><span className="font-semibold text-gray-900">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
+                <p className="mt-2"><span className="font-semibold text-gray-900">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>
               </div>
             </div>
           );

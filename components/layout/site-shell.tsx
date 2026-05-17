@@ -1,47 +1,49 @@
 import Link from 'next/link';
-import { LayoutDashboard, LogIn, Shield, Swords, Trophy } from 'lucide-react';
+import Image from 'next/image';
+import { LayoutDashboard, LogOut, Shield, Swords } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   const session = await getSession();
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-pitch/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan/40 bg-gradient-to-br from-cyan/20 via-purple/20 to-magenta/20 text-cyan shadow-glow">
-              <Trophy className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan">Joga Bonito 2026</p>
-              <p className="text-sm text-white/70">Play beautiful. Bid live.</p>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/joga-bonito-logo.png"
+              alt="Joga Bonito"
+              width={140}
+              height={44}
+              className="h-9 w-auto"
+              priority
+            />
           </Link>
 
-          <nav className="flex items-center gap-2 text-sm font-semibold text-white/80">
-            <Link href="/auction" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-cyan/50 hover:text-white">
+          <nav className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <Link href="/auction" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-gray-400 hover:text-gray-900">
               <span className="inline-flex items-center gap-2"><Swords className="h-4 w-4" />Live Auction</span>
             </Link>
             {session?.role === 'admin' ? (
-              <Link href="/admin" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange/50 hover:bg-orange/10 hover:text-orange">
+              <Link href="/admin" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-orange-400 hover:text-orange-600">
                 <span className="inline-flex items-center gap-2"><Shield className="h-4 w-4" />Admin</span>
               </Link>
             ) : null}
             {session?.teamId ? (
-              <Link href="/teams/me" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-purple/50 hover:bg-purple/10 hover:text-purple">
+              <Link href="/teams/me" className="rounded-full border border-gray-200 px-4 py-2 transition hover:border-purple-400 hover:text-purple-600">
                 <span className="inline-flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />My Team</span>
               </Link>
             ) : null}
             {session ? (
               <form action="/api/auth/logout" method="post">
-                <button className="rounded-full bg-white px-4 py-2 font-bold text-pitch transition hover:bg-rose hover:text-white">
-                  Logout
+                <button className="rounded-full bg-gray-900 px-4 py-2 font-bold text-white transition hover:bg-gray-700">
+                  <span className="inline-flex items-center gap-2"><LogOut className="h-4 w-4" />Logout</span>
                 </button>
               </form>
             ) : (
-              <Link href="/login" className="rounded-full bg-white px-4 py-2 font-bold text-pitch transition hover:bg-lime">
-                <span className="inline-flex items-center gap-2"><LogIn className="h-4 w-4" />Login</span>
+              <Link href="/login" className="rounded-full bg-gray-900 px-4 py-2 font-bold text-white transition hover:bg-gray-700">
+                <span className="inline-flex items-center gap-2">Login</span>
               </Link>
             )}
           </nav>

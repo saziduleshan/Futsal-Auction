@@ -2,39 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  @apply antialiased;
-  background: #f0f0f0;
-  color: #1a1a1a;
-}
-
-.grid-overlay {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
+  @apply bg-gray-50 text-gray-900 antialiased;
 }
 
 .glass {
-  @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+  @apply border border-gray-200 bg-white/80 backdrop-blur-xl;
 }
 
 .panel {
-  @apply glass rounded-3xl shadow-glow;
+  @apply glass rounded-3xl shadow-sm;
 }
 
 .badge {
-  @apply inline-flex items-center rounded-full border border-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/75;
+  @apply inline-flex items-center rounded-full border border-gray-200 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-gray-500;
 }
 
 .section-title {
-  @apply text-2xl font-black uppercase tracking-[0.18em] text-white md:text-4xl;
+  @apply text-2xl font-black uppercase tracking-[0.18em] text-gray-900 md:text-4xl;
 }
