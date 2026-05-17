@@ -117,3 +117,11 @@ alter publication supabase_realtime add table teams;
 alter publication supabase_realtime add table players;
 alter publication supabase_realtime add table auction_rooms;
 alter publication supabase_realtime add table bids;
+
+-- ═══════════════════════════════════════════════
+-- MIGRATION: add year column (run if upgrading)
+-- ═══════════════════════════════════════════════
+-- Run this separately if the players table already exists:
+--
+--   create type player_year_t as enum ('1', '2', '3', '4', 'final');
+--   alter table players add column year player_year_t not null default '1';

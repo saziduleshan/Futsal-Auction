@@ -28,12 +28,11 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
   );
 
   const filtered = divisionPlayers.filter((p) => {
-    if (tierFilter !== 'all' && p.year !== tierFilter) return false;
+    if (tierFilter !== 'all' && p.year !== undefined && p.year !== tierFilter) return false;
+    if (tierFilter !== 'all' && p.year === undefined) return false;
     if (positionFilter !== 'all' && p.category !== positionFilter) return false;
     return true;
   });
-
-  const tiers = YEAR_TIERS.map((yt) => yt.value);
   const menCount = players.filter((p) => p.division === 'men' && p.status === 'available').length;
   const womenCount = players.filter((p) => p.division === 'women' && p.status === 'available').length;
 
@@ -105,7 +104,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((player) => {
             const Icon = CATEGORY_ICONS[player.category];
-            const yearTier = getYearTier(player.year);
+            const yearTier = player.year ? getYearTier(player.year) : null;
             return (
               <article key={player.id} className="overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white transition hover:shadow-md">
                 {player.card_image_url ? (
@@ -129,8 +128,8 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
                   <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
                     <Icon className="h-3.5 w-3.5" />
                     <span>{formatCategory(player.category)}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="rounded-full bg-purple/10 px-2 py-0.5 font-semibold text-purple">{yearTier.tier}</span>
+                    {yearTier && <><span className="text-gray-300">·</span>
+                    <span className="rounded-full bg-purple/10 px-2 py-0.5 font-semibold text-purple">{yearTier.tier}</span></>}
                   </div>
                   <p className="mt-2 text-lg font-black text-gold">{currency(player.base_price)}</p>
                 </div>

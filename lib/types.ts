@@ -26,7 +26,7 @@ export interface Player {
   name: string;
   division: Division;
   category: PlayerCategory;
-  year: PlayerYear;
+  year?: PlayerYear;
   base_price: number;
   status: 'available' | 'sold' | 'unsold';
   card_image_url: string | null;

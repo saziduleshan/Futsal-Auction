@@ -50,7 +50,6 @@ export async function POST(request: Request) {
     name,
     division,
     category: position,
-    year: yearTier.value,
     base_price: yearTier.basePrice,
     card_image_url: cardImageUrl,
     created_by: session.userId
