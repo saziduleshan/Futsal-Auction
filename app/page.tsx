@@ -40,17 +40,17 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
       <div className="relative z-10 flex min-h-screen items-center">
-        <div className="flex w-full max-w-2xl flex-col items-start px-8 md:px-16 lg:px-24">
+        <div className="flex w-full max-w-3xl flex-col items-start px-8 md:px-16 lg:px-24">
           <Image
             src="/joga-bonito-logo.png"
             alt="Joga Bonito"
-            width={900}
-            height={280}
-            className="h-auto w-full max-w-2xl"
+            width={1100}
+            height={340}
+            className="h-auto w-full"
             priority
           />
 
-          <p className="mt-8 whitespace-nowrap text-3xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-4xl lg:text-5xl">
+          <p className="mt-6 whitespace-nowrap text-2xl font-black tracking-[0.22em] text-[#f5c542] drop-shadow-lg md:text-3xl">
             PLAY IT. LIVE IT. OWN IT.
           </p>
 
