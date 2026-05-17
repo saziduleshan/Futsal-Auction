@@ -33,7 +33,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
   }
 
   return (
-    <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl">
+    <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl">
       <div className="border-b border-white/10 p-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -64,16 +64,16 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                 <div className={`rounded-2xl border px-4 py-3 text-right ${
                   room.status === 'live'
                     ? 'border-gold/30 bg-gradient-to-br from-gold/[0.08] to-transparent'
-                    : 'border-white/20 bg-white/60'
+                    : 'border-white/20 bg-gray-400/30'
                 }`}>
-                  <p className="text-xs uppercase tracking-[0.2em] text-gray-400">Current bid</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-gray-300">Current bid</p>
                   <p className="mt-1 text-2xl font-black text-gold">{currency(room.current_bid)}</p>
                 </div>
               </div>
 
               <div className="mt-5 space-y-4">
                 <label className="space-y-2 block">
-                  <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Nominate player</span>
+                  <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Nominate player</span>
                   <select id={`player-${room.id}`} className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
                     <option value="">Select a player</option>
                     {availableByDivision[room.division].map((player) => (
@@ -100,7 +100,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                   <button
                     disabled={!room.current_player_id || (isPending && busyKey === `unsold-${room.id}`)}
                     onClick={() => runAction('/api/admin/auction/close', { roomId: room.id, outcome: 'unsold' }, `unsold-${room.id}`)}
-                    className="rounded-2xl border border-white/20 bg-white/60 px-5 py-3 font-black uppercase tracking-[0.16em] text-gray-700 backdrop-blur-sm transition hover:border-red-400 hover:bg-red-500/10 hover:text-red-400 disabled:text-gray-400"
+                    className="rounded-2xl border border-white/20 bg-gray-400/30 px-5 py-3 font-black uppercase tracking-[0.16em] text-gray-200 backdrop-blur-sm transition hover:border-red-400 hover:bg-red-500/10 hover:text-red-400 disabled:text-gray-500"
                   >
                     Mark unsold
                   </button>
@@ -119,8 +119,8 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                   ? 'border-gold/20 bg-gold/[0.04] text-gold/80'
                   : 'border-white/20 bg-white/50 text-gray-400'
               }`}>
-                <p><span className="font-semibold text-gray-900">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
-                <p className="mt-2"><span className="font-semibold text-gray-900">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>
+                <p><span className="font-semibold text-gray-100">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
+                <p className="mt-2"><span className="font-semibold text-gray-100">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>
               </div>
             </div>
           );

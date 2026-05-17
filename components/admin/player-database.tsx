@@ -184,7 +184,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
             return (
               <article
                 key={player.id}
-                className="group overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
+                className="group overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
               >
                 {player.card_image_url ? (
                   <Image

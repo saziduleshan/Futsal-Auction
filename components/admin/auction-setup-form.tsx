@@ -51,10 +51,10 @@ export function AuctionSetupForm() {
         </h2>
       </div>
 
-      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 p-8 shadow-lg backdrop-blur-xl">
+      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 p-8 shadow-lg backdrop-blur-xl">
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
               <Users className="mr-1.5 inline h-4 w-4" />
               Division
             </span>
@@ -73,7 +73,7 @@ export function AuctionSetupForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
               <Swords className="mr-1.5 inline h-4 w-4" />
               Number of teams
             </span>
@@ -88,7 +88,7 @@ export function AuctionSetupForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
               <Wallet className="mr-1.5 inline h-4 w-4" />
               Purse size per team ($)
             </span>
@@ -104,7 +104,7 @@ export function AuctionSetupForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-500">
+            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
               <Settings className="mr-1.5 inline h-4 w-4" />
               Starting bid increment ($)
             </span>

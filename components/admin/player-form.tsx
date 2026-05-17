@@ -28,7 +28,7 @@ export function PlayerForm() {
   }
 
   return (
-    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 p-8 shadow-lg backdrop-blur-xl">
+    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 p-8 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="badge border-gold/30 text-gold">Player management</p>
@@ -37,18 +37,18 @@ export function PlayerForm() {
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player name</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Player name</span>
           <input name="name" required className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30" />
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Division</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Division</span>
           <select name="division" defaultValue="men" className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="men">Male Futsal</option>
             <option value="women">Female Futsal</option>
           </select>
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Position</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Position</span>
           <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
             <option value="defender">Defender</option>
             <option value="midfielder">Midfielder</option>
@@ -57,7 +57,7 @@ export function PlayerForm() {
           </select>
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Year</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Year</span>
           <select
             name="year"
             value={selectedYear}
@@ -70,19 +70,19 @@ export function PlayerForm() {
           </select>
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Tier</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Tier</span>
           <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-gold">
             {tier.tier}
           </div>
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Base price</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Base price</span>
           <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-xl font-black text-gold">
             ${tier.basePrice}
           </div>
         </label>
         <label className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player card image</span>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Player card image</span>
           <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-gray-600 file:mr-3 file:rounded-full file:border-0 file:bg-gold/20 file:px-3 file:py-1 file:text-sm file:text-gold backdrop-blur-sm transition hover:border-gold/40" />
         </label>
       </div>

@@ -12,7 +12,7 @@ export default async function AdminPage() {
         <PlayerForm />
 
         <div className="flex flex-col gap-6">
-          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
             <Link href="/admin/players" className="flex h-full flex-col justify-center p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-orange shadow-lg">
@@ -34,7 +34,7 @@ export default async function AdminPage() {
             </Link>
           </div>
 
-          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-white/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
             <Link href="/admin/auction-setup" className="flex h-full flex-col justify-center p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan to-purple shadow-lg">

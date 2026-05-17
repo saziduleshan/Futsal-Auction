@@ -11,7 +11,7 @@ body {
 }
 
 .glass {
-  @apply border border-white/20 bg-white/60 backdrop-blur-xl;
+  @apply border border-white/10 bg-gray-400/40 backdrop-blur-xl;
 }
 
 .panel {
