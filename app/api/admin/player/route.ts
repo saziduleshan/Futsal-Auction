@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { slugify } from '@/lib/utils';
+import { getYearTier } from '@/lib/constants';
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -13,12 +14,15 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const name = String(formData.get('name') ?? '').trim();
   const division = String(formData.get('division') ?? '').trim();
-  const category = String(formData.get('category') ?? '').trim();
-  const basePrice = Number(formData.get('basePrice') ?? 0);
+  const position = String(formData.get('position') ?? '').trim();
+  const yearRaw = formData.get('year');
   const image = formData.get('image');
 
-  if (!name || !division || !category || Number.isNaN(basePrice)) {
-    return NextResponse.json({ message: 'All fields except image are required.' }, { status: 400 });
+  const year = yearRaw === 'final' ? 'final' : Number(yearRaw);
+  const yearTier = getYearTier(year as any);
+
+  if (!name || !division || !position || !yearTier) {
+    return NextResponse.json({ message: 'Name, division, position, and year are required.' }, { status: 400 });
   }
 
   const supabase = createServerSupabase();
@@ -45,8 +49,9 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('players').insert({
     name,
     division,
-    category,
-    base_price: basePrice,
+    category: position,
+    year: yearTier.value,
+    base_price: yearTier.basePrice,
     card_image_url: cardImageUrl,
     created_by: session.userId
   });

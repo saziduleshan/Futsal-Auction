@@ -26,11 +26,14 @@ create table if not exists app_users (
   created_at timestamptz not null default now()
 );
 
+create type player_year_t as enum ('1', '2', '3', '4', 'final');
+
 create table if not exists players (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   division division_t not null,
   category player_category_t not null,
+  year player_year_t not null default '1',
   base_price integer not null,
   status player_status_t not null default 'available',
   card_image_url text,

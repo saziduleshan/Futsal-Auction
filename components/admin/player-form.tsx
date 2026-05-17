@@ -2,11 +2,15 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { YEAR_TIERS, getYearTier } from '@/lib/constants';
 
 export function PlayerForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | 'final'>(1);
+
+  const tier = getYearTier(selectedYear);
 
   async function onSubmit(formData: FormData) {
     setMessage(null);
@@ -32,7 +36,7 @@ export function PlayerForm() {
         </div>
       </div>
       <div className="mt-8 grid gap-5 md:grid-cols-2">
-        <label className="space-y-2">
+        <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player name</span>
           <input name="name" required className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-lime" />
         </label>
@@ -44,8 +48,8 @@ export function PlayerForm() {
           </select>
         </label>
         <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Category</span>
-          <select name="category" defaultValue="defender" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan">
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Position</span>
+          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan">
             <option value="defender">Defender</option>
             <option value="midfielder">Midfielder</option>
             <option value="forward">Forward</option>
@@ -53,8 +57,29 @@ export function PlayerForm() {
           </select>
         </label>
         <label className="space-y-2">
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Year</span>
+          <select
+            name="year"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value === 'final' ? 'final' : Number(e.target.value))}
+            className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold"
+          >
+            {YEAR_TIERS.map((yt) => (
+              <option key={String(yt.value)} value={String(yt.value)}>{yt.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="space-y-2">
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Tier</span>
+          <div className="flex h-[46px] items-center rounded-2xl border border-gray-100 bg-gray-50 px-4 text-sm font-bold uppercase tracking-[0.12em] text-purple">
+            {tier.tier}
+          </div>
+        </label>
+        <label className="space-y-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Base price</span>
-          <input name="basePrice" type="number" min="0" required className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-gold/60" />
+          <div className="flex h-[46px] items-center rounded-2xl border border-gray-100 bg-gray-50 px-4 text-xl font-black text-gold">
+            ${tier.basePrice}
+          </div>
         </label>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">Player card image</span>
