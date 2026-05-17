@@ -1,4 +1,4 @@
-# Futsal Auction 2026
+# Joga Bonito 2026
 
 A full-stack, Vercel-ready auction website for a futsal tournament with:
 
@@ -7,7 +7,7 @@ A full-stack, Vercel-ready auction website for a futsal tournament with:
 - Team dashboards showing bought players
 - Admin panel for uploading player cards and running the live auction
 - Real-time bid updates with Supabase Realtime
-- 2026 World Cup inspired visual direction
+- Vibrant, Joga Bonito inspired visual direction with a colorful neon palette
 - Zero-cost starter stack: Next.js on Vercel + Supabase free tier
 
 ## Stack

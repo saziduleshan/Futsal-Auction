@@ -26,15 +26,15 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
             <h1 className="mt-4 text-4xl font-black uppercase tracking-[0.12em] md:text-5xl">{team.name}</h1>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            <div className="glass rounded-2xl p-4">
+            <div className="rounded-2xl border border-cyan/20 bg-gradient-to-br from-cyan/[0.08] to-transparent p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-white/50">Players bought</p>
               <p className="mt-2 text-3xl font-black uppercase tracking-[0.12em] text-cyan">{players.length}</p>
             </div>
-            <div className="glass rounded-2xl p-4">
+            <div className="rounded-2xl border border-lime/20 bg-gradient-to-br from-lime/[0.08] to-transparent p-4">
               <p className="text-xs uppercase tracking-[0.2em] text-white/50">Remaining purse</p>
               <p className="mt-2 text-3xl font-black uppercase tracking-[0.12em] text-lime">{currency(team.purse)}</p>
             </div>
-            <div className="glass rounded-2xl p-4 md:col-span-2">
+            <div className="rounded-2xl border border-gold/20 bg-gradient-to-br from-gold/[0.08] to-transparent p-4 md:col-span-2">
               <p className="text-xs uppercase tracking-[0.2em] text-white/50">Total spent</p>
               <p className="mt-2 inline-flex items-center gap-2 text-3xl font-black uppercase tracking-[0.12em] text-gold"><Coins className="h-6 w-6" />{currency(totalSpent)}</p>
             </div>
@@ -49,6 +49,9 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
             <div className="flex items-center gap-3">
               <Icon className="h-6 w-6 text-cyan" />
               <h2 className="text-2xl font-black uppercase tracking-[0.12em]">{formatCategory(group.category)}</h2>
+              {group.players.length > 0 && (
+                <span className="ml-auto rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white/70">{group.players.length}</span>
+              )}
             </div>
             <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {group.players.length ? group.players.map((player) => (
@@ -56,14 +59,14 @@ export function TeamRoster({ team, players }: { team: Team; players: Player[] })
                   {player.card_image_url ? (
                     <Image src={player.card_image_url} alt={player.name} width={720} height={900} className="aspect-[4/5] w-full object-cover" />
                   ) : (
-                    <div className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-cyan/20 to-magenta/20">
+                    <div className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-cyan/20 via-purple/10 to-magenta/20">
                       <p className="text-3xl font-black uppercase tracking-[0.12em]">{player.name}</p>
                     </div>
                   )}
                   <div className="p-5">
                     <p className="text-xl font-black uppercase tracking-[0.08em]">{player.name}</p>
-                    <p className="mt-2 text-sm uppercase tracking-[0.18em] text-white/55">Bought for</p>
-                    <p className="mt-1 text-2xl font-black text-lime">{currency(player.sold_price)}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-white/55">Bought for</p>
+                    <p className="mt-1 text-2xl font-black text-gold">{currency(player.sold_price)}</p>
                   </div>
                 </article>
               )) : (

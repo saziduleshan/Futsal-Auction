@@ -13,9 +13,10 @@ html {
 body {
   @apply bg-pitch text-white antialiased;
   background-image:
-    radial-gradient(circle at 20% 10%, rgba(17, 213, 255, 0.16), transparent 16%),
-    radial-gradient(circle at 85% 20%, rgba(255, 60, 172, 0.15), transparent 15%),
-    linear-gradient(180deg, #09111b 0%, #07111f 46%, #050b14 100%);
+    radial-gradient(circle at 15% 8%, rgba(0, 229, 255, 0.2), transparent 18%),
+    radial-gradient(circle at 85% 15%, rgba(255, 26, 140, 0.18), transparent 17%),
+    radial-gradient(circle at 50% 80%, rgba(168, 85, 247, 0.1), transparent 25%),
+    linear-gradient(180deg, #050d1a 0%, #071122 46%, #030a16 100%);
 }
 
 .grid-overlay {

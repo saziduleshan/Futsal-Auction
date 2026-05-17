@@ -3,7 +3,7 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypt
 import { redirect } from 'next/navigation';
 import type { SessionPayload } from '@/lib/types';
 
-const COOKIE_NAME = 'futsal_session';
+const COOKIE_NAME = 'joga_session';
 const MAX_AGE = 60 * 60 * 24 * 7;
 
 function getSecret() {

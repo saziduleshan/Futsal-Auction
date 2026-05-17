@@ -10,12 +10,12 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-white/10 bg-pitch/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan/40 bg-cyan/10 text-cyan shadow-glow">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan/40 bg-gradient-to-br from-cyan/20 via-purple/20 to-magenta/20 text-cyan shadow-glow">
               <Trophy className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan">Futsal Auction 2026</p>
-              <p className="text-sm text-white/70">World Cup inspired live bidding platform</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-cyan">Joga Bonito 2026</p>
+              <p className="text-sm text-white/70">Play beautiful. Bid live.</p>
             </div>
           </Link>
 
@@ -24,18 +24,18 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
               <span className="inline-flex items-center gap-2"><Swords className="h-4 w-4" />Live Auction</span>
             </Link>
             {session?.role === 'admin' ? (
-              <Link href="/admin" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-lime/50 hover:text-white">
+              <Link href="/admin" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange/50 hover:bg-orange/10 hover:text-orange">
                 <span className="inline-flex items-center gap-2"><Shield className="h-4 w-4" />Admin</span>
               </Link>
             ) : null}
             {session?.teamId ? (
-              <Link href="/teams/me" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-magenta/50 hover:text-white">
+              <Link href="/teams/me" className="rounded-full border border-white/10 px-4 py-2 transition hover:border-purple/50 hover:bg-purple/10 hover:text-purple">
                 <span className="inline-flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />My Team</span>
               </Link>
             ) : null}
             {session ? (
               <form action="/api/auth/logout" method="post">
-                <button className="rounded-full bg-white px-4 py-2 font-bold text-pitch transition hover:bg-lime">
+                <button className="rounded-full bg-white px-4 py-2 font-bold text-pitch transition hover:bg-rose hover:text-white">
                   Logout
                 </button>
               </form>
