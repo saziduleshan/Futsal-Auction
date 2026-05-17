@@ -40,7 +40,7 @@ export default function HomePage() {
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
       <div className="relative z-10 flex min-h-screen items-center">
-        <div className="mx-auto flex w-full max-w-2xl flex-col items-start px-8 md:px-16 lg:px-24">
+        <div className="flex w-full max-w-2xl flex-col items-start px-8 md:px-16 lg:px-24">
           <Image
             src="/joga-bonito-logo.png"
             alt="Joga Bonito"
