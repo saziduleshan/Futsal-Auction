@@ -11,9 +11,9 @@ export default async function AdminPage() {
       <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <PlayerForm />
 
-        <div className="space-y-6">
-          <div className="group overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-0.5">
-            <Link href="/admin/players" className="block p-8">
+        <div className="flex flex-col gap-6">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-0.5">
+            <Link href="/admin/players" className="flex h-full flex-col justify-center p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-orange shadow-lg">
                   <Eye className="h-7 w-7 text-white" />
@@ -34,8 +34,8 @@ export default async function AdminPage() {
             </Link>
           </div>
 
-          <div className="group overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-0.5">
-            <Link href="/admin/auction-setup" className="block p-8">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white shadow-sm transition hover:shadow-xl hover:-translate-y-0.5">
+            <Link href="/admin/auction-setup" className="flex h-full flex-col justify-center p-8">
               <div className="flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan to-purple shadow-lg">
                   <Gavel className="h-7 w-7 text-white" />

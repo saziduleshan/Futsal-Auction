@@ -9,14 +9,14 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
           <Link href="/" className="flex-shrink-0">
             <Image
               src="/joga-bonito-logo.png"
               alt="Joga Bonito"
-              width={140}
-              height={44}
-              className="h-9 w-auto"
+              width={200}
+              height={60}
+              className="h-12 w-auto"
               priority
             />
           </Link>
