@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { LayoutDashboard, LogOut, Shield, Swords } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 
-export async function SiteShell({ children }: { children: React.ReactNode }) {
+export async function SiteShell({ children, bgImage }: { children: React.ReactNode; bgImage?: string }) {
   const session = await getSession();
 
   return (
@@ -58,7 +58,7 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         <main className="relative min-h-[calc(100vh-97px)]">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: 'url(/new-bg.jpg)' }}
+            style={{ backgroundImage: `url(${bgImage || '/new-bg.jpg'})` }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
           <div className="relative z-10">{children}</div>
