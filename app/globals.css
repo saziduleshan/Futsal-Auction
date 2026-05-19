@@ -10,18 +10,20 @@ body {
   @apply bg-gray-50 text-gray-900 antialiased;
 }
 
-.glass {
-  @apply border border-white/10 bg-gray-400/40 backdrop-blur-xl;
-}
+@layer components {
+  .glass {
+    @apply border border-white/10 bg-gray-400/40 backdrop-blur-xl;
+  }
 
-.panel {
-  @apply glass rounded-3xl shadow-lg;
-}
+  .panel {
+    @apply glass rounded-3xl shadow-lg;
+  }
 
-.badge {
-  @apply inline-flex items-center rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/60;
-}
+  .badge {
+    @apply inline-flex items-center rounded-full border border-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-white/60;
+  }
 
-.section-title {
-  @apply text-2xl font-black uppercase tracking-[0.18em] text-gray-900 md:text-4xl;
+  .section-title {
+    @apply text-2xl font-black uppercase tracking-[0.18em] text-gray-900 md:text-4xl;
+  }
 }
