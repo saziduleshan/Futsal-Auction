@@ -159,12 +159,9 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             Available players
           </h2>
         </div>
-        <p className="text-sm text-gray-400">
-          {players.filter((p) => p.status === 'available').length} total cards
-        </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={() => setActiveDivision('men')}
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
@@ -193,6 +190,9 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             {womenCount}
           </span>
         </button>
+        <span className="text-sm font-bold text-black">
+          {players.filter((p) => p.status === 'available').length} total players
+        </span>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -225,7 +225,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
         {(tierFilter !== 'all' || positionFilter !== 'all') && (
           <button
             onClick={() => { setTierFilter('all'); setPositionFilter('all'); }}
-            className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-300 backdrop-blur-sm transition hover:border-red-400 hover:text-red-400"
+            className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-800 backdrop-blur-sm transition hover:border-red-400 hover:text-red-400"
           >
             Clear filters
           </button>
@@ -279,39 +279,43 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                   )}
                 </div>
 
-                {player.card_image_url ? (
-                  <Image
-                    src={player.card_image_url}
-                    alt={player.name}
-                    width={720}
-                    height={900}
-                    className="aspect-[4/5] w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex aspect-[4/5] items-center justify-center bg-gradient-to-br from-gold/10 via-brazil-yellow/5 to-orange/10">
-                    <div className="text-center">
-                      <Icon className="mx-auto h-10 w-10 text-gold/40" />
-                      <p className="mt-3 px-4 text-2xl font-black uppercase tracking-[0.1em] text-gray-700">
-                        {player.name}
-                      </p>
+                <div className="relative aspect-[4/5]">
+                  {player.card_image_url ? (
+                    <Image
+                      src={player.card_image_url}
+                      alt={player.name}
+                      width={720}
+                      height={900}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gold/10 via-brazil-yellow/5 to-orange/10">
+                      <div className="text-center">
+                        <Icon className="mx-auto h-10 w-10 text-gold/40" />
+                        <p className="mt-3 px-4 text-2xl font-black uppercase tracking-[0.1em] text-gray-700">
+                          {player.name}
+                        </p>
+                      </div>
                     </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <p className="text-lg font-black uppercase tracking-[0.08em] text-white drop-shadow-sm">
+                      {player.name}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                      <span className="inline-flex items-center gap-1 text-gold">
+                        <Icon className="h-3.5 w-3.5" />
+                        {formatCategory(player.category)}
+                      </span>
+                      <span className="rounded-full bg-gold/10 px-2 py-0.5 font-bold text-gold">
+                        {yearTier.tier}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-xl font-black text-gold drop-shadow-sm">
+                      ${currency(player.base_price)}
+                    </p>
                   </div>
-                )}
-                <div className="border-t border-white/10 p-5">
-                  <p className="text-lg font-black uppercase tracking-[0.08em]">{player.name}</p>
-                  <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Icon className="h-3.5 w-3.5" />
-                      {formatCategory(player.category)}
-                    </span>
-                    <span className="text-gray-300">·</span>
-                    <span className="rounded-full bg-gold/10 px-2 py-0.5 font-bold text-gold">
-                      {yearTier.tier}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-xl font-black text-gold drop-shadow-sm">
-                    ${currency(player.base_price)}
-                  </p>
                 </div>
               </article>
             );
