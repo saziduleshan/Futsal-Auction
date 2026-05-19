@@ -41,7 +41,7 @@ export default async function AdminPage() {
                   <Gavel className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <p className="badge">Run auction</p>
+                  <p className="badge border-gold/30 text-gold">Run auction</p>
                   <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.12em] text-gold">
                     Create auction room
                   </h3>
