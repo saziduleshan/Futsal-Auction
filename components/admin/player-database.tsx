@@ -190,8 +190,9 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             {womenCount}
           </span>
         </button>
-        <span className="text-sm font-bold text-black">
-          {players.filter((p) => p.status === 'available').length} total players
+        <span className="ml-auto inline-flex items-center gap-2 rounded-2xl border border-white/30 bg-white/90 px-5 py-2.5 shadow-sm backdrop-blur-sm">
+          <span className="text-lg font-black text-gray-900">{players.filter((p) => p.status === 'available').length}</span>
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">total players</span>
         </span>
       </div>
 
