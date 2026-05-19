@@ -37,7 +37,7 @@ export async function getRoomBundle(division: Division) {
   if (room.current_player_id) {
     const { data, error } = await supabase
       .from('players')
-      .select('id, name, division, category, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+       .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
       .eq('id', room.current_player_id)
       .single<Player>();
 
@@ -80,7 +80,7 @@ export async function getTeamBundleBySlug(slug: string) {
 
   const { data: players, error: playersError } = await supabase
     .from('players')
-    .select('id, name, division, category, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+    .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
     .eq('sold_to_team_id', team.id)
     .order('category')
     .order('name')
@@ -98,7 +98,7 @@ export async function getPlayers() {
   const supabase = createServerSupabase();
   const { data, error } = await supabase
     .from('players')
-    .select('id, name, division, category, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+    .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
     .order('created_at', { ascending: false })
     .returns<Player[]>();
 
@@ -117,7 +117,7 @@ export async function getAdminPageData() {
       .returns<Team[]>(),
     supabase
       .from('players')
-      .select('id, name, division, category, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+      .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
       .order('created_at', { ascending: false })
       .returns<Player[]>(),
     supabase

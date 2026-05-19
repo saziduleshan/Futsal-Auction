@@ -29,15 +29,9 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
     [players, activeDivision]
   );
 
-  const hasYearData = useMemo(
-    () => players.some((p) => p.year !== undefined),
-    [players]
-  );
-
   const filtered = useMemo(() => {
     return divisionPlayers.filter((p) => {
-      if (tierFilter !== 'all' && p.year !== undefined && p.year !== tierFilter) return false;
-      if (tierFilter !== 'all' && p.year === undefined) return false;
+      if (tierFilter !== 'all' && p.year !== tierFilter) return false;
       if (positionFilter !== 'all' && p.category !== positionFilter) return false;
       return true;
     });
@@ -158,14 +152,6 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
         )}
       </div>
 
-      {!hasYearData && (
-        <div className="rounded-2xl border border-gold/20 bg-gold/5 px-5 py-4">
-          <p className="text-sm font-semibold text-gold">
-            Tier data not yet available. Run the database migration to enable year/tier-based filtering.
-          </p>
-        </div>
-      )}
-
       {filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-white/20 bg-white/40 p-16 text-center backdrop-blur-sm">
           <Eye className="mx-auto h-10 w-10 text-white/40" />
@@ -180,7 +166,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((player) => {
             const Icon = CATEGORY_ICONS[player.category];
-            const yearTier = player.year ? getYearTier(player.year) : null;
+            const yearTier = getYearTier(player.year);
             return (
               <article
                 key={player.id}
@@ -211,14 +197,10 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
                       <Icon className="h-3.5 w-3.5" />
                       {formatCategory(player.category)}
                     </span>
-                    {yearTier && (
-                      <>
-                        <span className="text-gray-300">·</span>
-                        <span className="rounded-full bg-gold/10 px-2 py-0.5 font-bold text-gold">
-                          {yearTier.tier}
-                        </span>
-                      </>
-                    )}
+                    <span className="text-gray-300">·</span>
+                    <span className="rounded-full bg-gold/10 px-2 py-0.5 font-bold text-gold">
+                      {yearTier.tier}
+                    </span>
                   </div>
                   <p className="mt-3 text-xl font-black text-gold drop-shadow-sm">
                     ${currency(player.base_price)}
