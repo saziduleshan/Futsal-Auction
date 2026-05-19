@@ -167,12 +167,12 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'men'
               ? 'bg-gradient-to-r from-brazil-green to-brazil-yellow text-white shadow-lg'
-              : 'border border-white/20 bg-white/70 text-gray-200 backdrop-blur-sm hover:border-white/40 hover:shadow-sm'
+              : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
           <Users className="h-4 w-4" />
           Male Futsal
-          <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${activeDivision === 'men' ? 'bg-white/20' : 'bg-white/20'}`}>
+          <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${activeDivision === 'men' ? 'bg-white/20' : 'bg-white/10 text-gold/60'}`}>
             {menCount}
           </span>
         </button>
@@ -181,12 +181,12 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'women'
               ? 'bg-gradient-to-r from-magenta to-purple text-white shadow-lg'
-              : 'border border-white/20 bg-white/70 text-gray-200 backdrop-blur-sm hover:border-white/40 hover:shadow-sm'
+              : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
           <Users className="h-4 w-4" />
           Female Futsal
-          <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${activeDivision === 'women' ? 'bg-white/20' : 'bg-white/20'}`}>
+          <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${activeDivision === 'women' ? 'bg-white/20' : 'bg-white/10 text-gold/60'}`}>
             {womenCount}
           </span>
         </button>
