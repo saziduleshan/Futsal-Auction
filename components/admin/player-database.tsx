@@ -110,13 +110,7 @@ export function PlayerDatabase({ players }: PlayerDatabaseProps) {
         <select
           value={String(tierFilter)}
           onChange={(e) =>
-            setTierFilter(
-              e.target.value === 'all'
-                ? 'all'
-                : e.target.value === 'final'
-                  ? 'final'
-                  : (Number(e.target.value) as PlayerYear)
-            )
+            setTierFilter(e.target.value === 'all' ? 'all' : (e.target.value as PlayerYear))
           }
           className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
         >

@@ -3,12 +3,13 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { YEAR_TIERS, getYearTier } from '@/lib/constants';
+import type { PlayerYear } from '@/lib/types';
 
 export function PlayerForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
-  const [selectedYear, setSelectedYear] = useState<number | 'final'>(1);
+  const [selectedYear, setSelectedYear] = useState<PlayerYear>('1');
 
   const tier = getYearTier(selectedYear);
 
@@ -61,7 +62,7 @@ export function PlayerForm() {
           <select
             name="year"
             value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value === 'final' ? 'final' : Number(e.target.value))}
+            onChange={(e) => setSelectedYear(e.target.value as PlayerYear)}
             className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
           >
             {YEAR_TIERS.map((yt) => (

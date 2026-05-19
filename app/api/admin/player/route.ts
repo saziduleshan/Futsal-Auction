@@ -4,6 +4,7 @@ import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { slugify } from '@/lib/utils';
 import { getYearTier } from '@/lib/constants';
+import type { PlayerYear } from '@/lib/types';
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -18,8 +19,8 @@ export async function POST(request: Request) {
   const yearRaw = formData.get('year');
   const image = formData.get('image');
 
-  const year = yearRaw === 'final' ? 'final' : Number(yearRaw);
-  const yearTier = getYearTier(year as any);
+  const year = yearRaw as PlayerYear;
+  const yearTier = getYearTier(year);
 
   if (!name || !division || !position || !yearTier) {
     return NextResponse.json({ message: 'Name, division, position, and year are required.' }, { status: 400 });

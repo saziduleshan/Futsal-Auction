@@ -1,6 +1,6 @@
 export type Division = 'men' | 'women';
 export type PlayerCategory = 'defender' | 'midfielder' | 'forward' | 'goalkeeper';
-export type PlayerYear = 1 | 2 | 3 | 4 | 'final';
+export type PlayerYear = '1' | '2' | '3' | '4' | 'final';
 export type AuctionStatus = 'idle' | 'live' | 'sold' | 'unsold';
 export type UserRole = 'admin' | 'team';
 
