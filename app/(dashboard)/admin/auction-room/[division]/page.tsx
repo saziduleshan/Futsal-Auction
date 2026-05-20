@@ -13,7 +13,7 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
 
   const supabase = createServerSupabase();
 
-  const [{ data: room }, { data: players }, { data: teams }] = await Promise.all([
+  const [{ data: room }, { data: availablePlayers }, { data: teams }, { data: soldPlayers }] = await Promise.all([
     supabase.from('auction_rooms').select('*').eq('division', division).single(),
     supabase
       .from('players')
@@ -22,10 +22,17 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
       .eq('status', 'available')
       .order('category')
       .order('name'),
-    supabase.from('teams').select('*').eq('division', division).order('name')
+    supabase.from('teams').select('*').eq('division', division).order('name'),
+    supabase
+      .from('players')
+      .select('*')
+      .eq('division', division)
+      .eq('status', 'sold')
+      .order('sold_to_team_id')
+      .order('name')
   ]);
 
-  if (!room || !players || !teams) notFound();
+  if (!room || !availablePlayers || !teams || !soldPlayers) notFound();
 
   return (
     <>
@@ -34,7 +41,8 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
         <AuctionRoomManager
           division={division}
           room={room}
-          players={players}
+          players={availablePlayers}
+          soldPlayers={soldPlayers}
           teams={teams}
         />
       </div>
