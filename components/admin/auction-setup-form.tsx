@@ -1,38 +1,56 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { ArrowLeft, Gavel, Settings, Swords, Users, Wallet } from 'lucide-react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Gavel, Swords, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
+import type { Team, PlayerCategory } from '@/lib/types';
 
-export function AuctionSetupForm() {
-  const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState<string | null>(null);
+const POSITION_OPTIONS: { value: PlayerCategory | 'all'; label: string }[] = [
+  { value: 'all', label: 'All players' },
+  { value: 'defender', label: 'Defenders only' },
+  { value: 'midfielder', label: 'Midfielders only' },
+  { value: 'forward', label: 'Forwards only' },
+  { value: 'goalkeeper', label: 'Goalkeepers only' }
+];
+
+interface AuctionSetupFormProps {
+  teams: Team[];
+}
+
+export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [division, setDivision] = useState<'men' | 'women'>('men');
   const [teamCount, setTeamCount] = useState(8);
   const [purseSize, setPurseSize] = useState(1500);
+  const [playerSelection, setPlayerSelection] = useState<PlayerCategory | 'all'>('all');
+
+  const divisionTeams = teams.filter((t) => t.division === division);
+  const maxTeams = Math.min(divisionTeams.length, 8);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    setMessage(null);
     setError(null);
-    startTransition(async () => {
-      try {
-        const res = await fetch('/api/admin/auction/setup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ division, teamCount, purseSize })
-        });
-        const payload = await res.json();
-        if (res.ok) {
-          setMessage(payload.message || 'Auction room created!');
-        } else {
-          setError(payload.message || 'Failed to create auction room.');
-        }
-      } catch {
-        setError('Could not connect to server. Please try again.');
+    setIsPending(true);
+    try {
+      const res = await fetch('/api/admin/auction/setup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ division, teamCount, purseSize })
+      });
+      const payload = await res.json();
+      if (res.ok) {
+        router.push(`/admin/auction-room/${division}?teams=${teamCount}&purse=${purseSize}&players=${playerSelection}`);
+      } else {
+        setError(payload.message || 'Failed to create auction room.');
       }
-    });
+    } catch {
+      setError('Could not connect to server. Please try again.');
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
@@ -63,7 +81,8 @@ export function AuctionSetupForm() {
               onChange={(e) => {
                 const val = e.target.value as 'men' | 'women';
                 setDivision(val);
-                setTeamCount(val === 'men' ? 8 : 3);
+                const available = teams.filter((t) => t.division === val).length;
+                setTeamCount(Math.min(8, available));
               }}
               className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             >
@@ -80,11 +99,12 @@ export function AuctionSetupForm() {
             <input
               type="number"
               min={2}
-              max={20}
+              max={maxTeams}
               value={teamCount}
-              onChange={(e) => setTeamCount(Number(e.target.value))}
+              onChange={(e) => setTeamCount(Math.min(Number(e.target.value), maxTeams))}
               className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
             />
+            <p className="text-xs text-gray-400">Max {maxTeams} teams available for {division} division</p>
           </label>
 
           <label className="space-y-2">
@@ -103,20 +123,27 @@ export function AuctionSetupForm() {
             />
           </label>
 
-          <label className="space-y-2">
+          <label className="space-y-2 md:col-span-2">
             <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
-              <Settings className="mr-1.5 inline h-4 w-4" />
-              Starting bid increment ($)
+              <Users className="mr-1.5 inline h-4 w-4" />
+              Players to include
             </span>
-            <input
-              type="number"
-              min={5}
-              max={500}
-              step={5}
-              defaultValue={25}
-              name="bidIncrement"
-              className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
-            />
+            <div className="flex flex-wrap gap-3">
+              {POSITION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setPlayerSelection(opt.value)}
+                  className={`rounded-xl border px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] transition ${
+                    playerSelection === opt.value
+                      ? 'border-gold bg-gold/10 text-gold shadow-sm'
+                      : 'border-white/20 bg-white/70 text-gray-400 hover:border-white/40'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </label>
         </div>
 
@@ -128,9 +155,6 @@ export function AuctionSetupForm() {
           {isPending ? 'Creating...' : 'Create auction room'}
         </button>
 
-        {message && (
-          <p className="mt-4 rounded-2xl bg-lime/10 px-4 py-3 text-sm font-bold text-lime">{message}</p>
-        )}
         {error && (
           <p className="mt-4 rounded-2xl bg-red-500/10 px-4 py-3 text-sm font-bold text-red-600">{error}</p>
         )}
