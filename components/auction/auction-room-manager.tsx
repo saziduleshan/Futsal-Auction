@@ -249,18 +249,19 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
 
       {currentPlayer && !isStarting && (
         <div className="rounded-2xl border-2 border-gray-200 bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-            <div className="flex-shrink-0 lg:w-72">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+            <div className="flex-shrink-0 lg:w-80 animate-slide-from-left">
               {currentPlayer.card_image_url ? (
                 <Image
                   src={currentPlayer.card_image_url}
                   alt={currentPlayer.name}
                   width={360}
                   height={450}
-                  className="aspect-[4/5] w-full rounded-xl object-cover shadow-md"
+                  className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
+                  priority
                 />
               ) : (
-                <div className="flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.35)]">
                   <Shield className="h-16 w-16 text-gray-300" />
                 </div>
               )}

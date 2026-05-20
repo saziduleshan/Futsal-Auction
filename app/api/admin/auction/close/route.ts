@@ -58,7 +58,7 @@ export async function POST(request: Request) {
   if (outcome === 'unsold') {
     const { error: playerError } = await supabase
       .from('players')
-      .update({ status: 'unsold', sold_to_team_id: null, sold_price: null })
+      .update({ status: 'available', sold_to_team_id: null, sold_price: null })
       .eq('id', room.current_player_id);
 
     if (playerError) {
