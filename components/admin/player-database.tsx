@@ -122,7 +122,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
   }, [deletePlayerId, closeDelete]);
 
   const divisionPlayers = useMemo(
-    () => players.filter((p) => p.division === activeDivision && p.status === 'available'),
+    () => players.filter((p) => p.division === activeDivision),
     [players, activeDivision]
   );
 
@@ -135,11 +135,11 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
   }, [divisionPlayers, tierFilter, positionFilter]);
 
   const menCount = useMemo(
-    () => players.filter((p) => p.division === 'men' && p.status === 'available').length,
+    () => players.filter((p) => p.division === 'men').length,
     [players]
   );
   const womenCount = useMemo(
-    () => players.filter((p) => p.division === 'women' && p.status === 'available').length,
+    () => players.filter((p) => p.division === 'women').length,
     [players]
   );
 
@@ -191,8 +191,8 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           </span>
         </button>
         <span className="ml-auto inline-flex items-center gap-2 rounded-2xl border border-white/30 bg-white/90 px-5 py-2.5 shadow-sm backdrop-blur-sm">
-          <span className="text-lg font-black text-gray-900">{players.filter((p) => p.status === 'available').length}</span>
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">total players</span>
+          <span className="text-lg font-black text-gray-900">{players.length}</span>
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">total cards</span>
         </span>
       </div>
 
