@@ -83,7 +83,23 @@ export async function getTeamBundleBySlug(slug: string) {
     .select('id, room_id, player_id, team_id, price, created_at')
     .eq('team_id', team.id);
 
-  if (purchasesError) throw purchasesError;
+  if (purchasesError) {
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+      .eq('sold_to_team_id', team.id)
+      .order('category')
+      .order('name')
+      .returns<Player[]>();
+
+    if (playersError) throw playersError;
+
+    return {
+      team,
+      players: players ?? [],
+      purchases: []
+    };
+  }
 
   const playerIds = (purchases ?? []).map((p) => p.player_id);
 
