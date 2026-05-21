@@ -78,30 +78,28 @@ export async function getTeamBundleBySlug(slug: string) {
 
   if (teamError) throw teamError;
 
-  const { data: purchases, error: purchasesError } = await supabase
+  const { data: purchases } = await supabase
     .from('purchases')
     .select('id, room_id, player_id, team_id, price, created_at')
     .eq('team_id', team.id);
 
-  if (purchasesError) {
-    const { data: players, error: playersError } = await supabase
-      .from('players')
-      .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
-      .eq('sold_to_team_id', team.id)
-      .order('category')
-      .order('name')
-      .returns<Player[]>();
-
-    if (playersError) throw playersError;
-
-    return {
-      team,
-      players: players ?? [],
-      purchases: []
-    };
+  let playerIds: string[] = [];
+  if (purchases && purchases.length > 0) {
+    playerIds = purchases.map((p) => p.player_id);
   }
 
-  const playerIds = (purchases ?? []).map((p) => p.player_id);
+  const { data: legacyPlayers } = await supabase
+    .from('players')
+    .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+    .eq('sold_to_team_id', team.id);
+
+  if (legacyPlayers && legacyPlayers.length > 0) {
+    for (const p of legacyPlayers) {
+      if (!playerIds.includes(p.id)) {
+        playerIds.push(p.id);
+      }
+    }
+  }
 
   let players: Player[] = [];
   if (playerIds.length > 0) {
