@@ -44,6 +44,7 @@ export interface AuctionRoom {
   bid_increment: number;
   status: AuctionStatus;
   nominated_at: string | null;
+  join_code: string | null;
 }
 
 export interface Bid {
@@ -53,6 +54,13 @@ export interface Bid {
   team_id: string;
   amount: number;
   created_at: string;
+}
+
+export interface AuctionParticipant {
+  id: string;
+  room_id: string;
+  team_id: string;
+  joined_at: string;
 }
 
 export interface Purchase {

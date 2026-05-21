@@ -1,5 +1,5 @@
 import { createServerSupabase } from '@/lib/supabase/server';
-import type { AuctionRoom, Bid, Division, Player, Purchase, Team } from '@/lib/types';
+import type { AuctionParticipant, AuctionRoom, Bid, Division, Player, Purchase, Team } from '@/lib/types';
 
 export async function getCurrentUser(userId: string) {
   const supabase = createServerSupabase();
@@ -122,6 +122,27 @@ export async function getTeamBundleBySlug(slug: string) {
     players,
     purchases: purchases ?? []
   };
+}
+
+export async function getTeamJoinedRooms(teamId: string): Promise<string[]> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('auction_participants')
+    .select('room_id')
+    .eq('team_id', teamId);
+
+  return (data ?? []).map((r) => r.room_id);
+}
+
+export async function getRoomJoinCode(division: Division): Promise<string | null> {
+  const supabase = createServerSupabase();
+  const { data } = await supabase
+    .from('auction_rooms')
+    .select('join_code')
+    .eq('division', division)
+    .single<{ join_code: string | null }>();
+
+  return data?.join_code ?? null;
 }
 
 export async function getPlayers() {

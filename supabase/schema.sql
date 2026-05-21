@@ -132,10 +132,25 @@ create policy "Public can read purchases" on purchases for select using (true);
 
 alter publication supabase_realtime add table purchases;
 
+create table if not exists auction_participants (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references auction_rooms(id) on delete cascade,
+  team_id uuid not null references teams(id) on delete cascade,
+  joined_at timestamptz not null default now(),
+  unique(room_id, team_id)
+);
+
+alter table auction_participants enable row level security;
+create policy "Participants can read own" on auction_participants for select using (true);
+create policy "Participants can insert own" on auction_participants for insert with check (true);
+
+alter publication supabase_realtime add table auction_participants;
+
+-- ═══════════════════════════════════════════════
+-- MIGRATION: add join_code column (run if upgrading)
+-- ═══════════════════════════════════════════════
+-- alter table auction_rooms add column join_code text;
+
 -- ═══════════════════════════════════════════════
 -- MIGRATION: add year column (run if upgrading)
 -- ═══════════════════════════════════════════════
--- Run this separately if the players table already exists:
---
---   create type player_year_t as enum ('1', '2', '3', '4', 'final');
---   alter table players add column year player_year_t not null default '1';

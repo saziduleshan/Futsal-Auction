@@ -221,6 +221,12 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               <p className="text-lg font-black text-gray-900">{formatCategory(activeBatch)}</p>
             </div>
           )}
+          {room.join_code ? (
+            <div className="rounded-xl border-2 border-dashed border-cyan/30 bg-cyan/5 px-4 py-2.5 text-center">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-cyan/70">Join code</p>
+              <p className="mt-0.5 text-xl font-black tracking-[0.25em] text-cyan">{room.join_code}</p>
+            </div>
+          ) : null}
           <button
             onClick={endAuction}
             disabled={isEnding}

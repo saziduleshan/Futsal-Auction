@@ -1,6 +1,17 @@
+import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
+
+function generateJoinCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const bytes = randomBytes(6);
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars[bytes[i] % chars.length];
+  }
+  return code;
+}
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -8,7 +19,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { division } = await request.json();
+  const { division, teamCount, purseSize } = await request.json();
   if (!division) {
     return NextResponse.json({ message: 'Division is required.' }, { status: 400 });
   }
@@ -17,7 +28,7 @@ export async function POST(request: Request) {
 
   const { data: room, error } = await supabase
     .from('auction_rooms')
-    .select('id')
+    .select('id, join_code')
     .eq('division', division)
     .single();
 
@@ -25,5 +36,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'No auction room found for this division.' }, { status: 400 });
   }
 
-  return NextResponse.json({ message: 'Room ready.', roomId: room.id });
+  const joinCode = room.join_code || generateJoinCode();
+
+  await supabase.from('auction_rooms').update({ join_code: joinCode }).eq('id', room.id);
+
+  if (teamCount && purseSize) {
+    const { data: teams } = await supabase
+      .from('teams')
+      .select('id')
+      .eq('division', division)
+      .limit(Number(teamCount));
+
+    if (teams) {
+      const teamIds = teams.map((t) => t.id);
+      await supabase.from('teams').update({ purse: Number(purseSize) }).in('id', teamIds);
+    }
+  }
+
+  return NextResponse.json({ message: 'Room ready.', roomId: room.id, joinCode });
 }

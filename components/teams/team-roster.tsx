@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { Coins, Swords } from 'lucide-react';
 import type { Player, Purchase, Team } from '@/lib/types';
 import { currency } from '@/lib/utils';
+import { JoinAuctionForm } from '@/components/teams/join-auction-form';
 
-export function TeamRoster({ team, players, purchases }: { team: Team; players: Player[]; purchases: Purchase[] }) {
+export function TeamRoster({ team, players, purchases, teamId, joinedRoomIds }: { team: Team; players: Player[]; purchases: Purchase[]; teamId: string; joinedRoomIds: string[] }) {
   const totalSpent = purchases.reduce((sum, p) => sum + p.price, 0);
+  const hasJoined = joinedRoomIds.length > 0;
 
   return (
     <div className="space-y-8">
@@ -32,6 +34,24 @@ export function TeamRoster({ team, players, purchases }: { team: Team; players: 
           </div>
         </div>
       </div>
+
+      {!hasJoined ? (
+        <JoinAuctionForm teamId={teamId} />
+      ) : (
+        <Link
+          href="/auction"
+          className="panel flex items-center gap-4 p-8 transition hover:scale-[1.01] hover:shadow-xl"
+        >
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-lime/20 to-cyan/20">
+            <Swords className="size-8 text-lime" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-black uppercase tracking-[0.12em] text-lime">Live Auction</h2>
+            <p className="mt-1 text-sm text-white/50">You have joined. Enter the auction room to start bidding.</p>
+          </div>
+          <span className="ml-auto rounded-full bg-lime px-4 py-2 text-sm font-bold text-black">Enter</span>
+        </Link>
+      )}
 
       <Link
         href={`/teams/${team.slug}/lineup`}
