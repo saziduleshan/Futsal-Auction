@@ -1,6 +1,10 @@
-import { LogIn, Shield, Users } from 'lucide-react';
+'use client';
+
+import { useState } from 'react';
+import { Eye, EyeOff, LogIn, Shield, Users } from 'lucide-react';
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="mx-auto flex min-h-[calc(100vh-88px)] max-w-7xl items-center px-4 py-16 md:px-6">
       <div className="grid w-full gap-8 lg:grid-cols-[0.95fr_1.05fr]">
@@ -42,21 +46,30 @@ export default function LoginPage() {
                     name="username"
                     required
                     className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan"
-                    placeholder="team-men-1 or admin"
+                    placeholder="mteam1 or admin"
                   />
                 </div>
                 <div>
                   <label htmlFor="password" className="mb-2 block text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
                     Password
                   </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-gray-900 outline-none transition focus:border-cyan"
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 pr-12 text-gray-900 outline-none transition focus:border-cyan"
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
                 </div>
                 <button className="w-full rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-3 font-black uppercase tracking-[0.18em] text-white transition hover:from-gray-800 hover:to-gray-800">
                   Login to dashboard

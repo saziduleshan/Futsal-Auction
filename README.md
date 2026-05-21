@@ -57,17 +57,17 @@ openssl rand -base64 32
 The SQL file already creates these accounts:
 
 - `admin` / `admin2026`
-- `team-men-1` / `men12026`
-- `team-men-2` / `men22026`
-- `team-men-3` / `men32026`
-- `team-men-4` / `men42026`
-- `team-men-5` / `men52026`
-- `team-men-6` / `men62026`
-- `team-men-7` / `men72026`
-- `team-men-8` / `men82026`
-- `team-women-1` / `women12026`
-- `team-women-2` / `women22026`
-- `team-women-3` / `women32026`
+- `mteam1` / `mteam12026`
+- `mteam2` / `mteam22026`
+- `mteam3` / `mteam32026`
+- `mteam4` / `mteam42026`
+- `mteam5` / `mteam52026`
+- `mteam6` / `mteam62026`
+- `mteam7` / `mteam72026`
+- `mteam8` / `mteam82026`
+- `fteam1` / `fteam12026`
+- `fteam2` / `fteam22026`
+- `fteam3` / `fteam32026`
 
 Change them immediately after the first setup if you plan to run the site in a real event.
 
