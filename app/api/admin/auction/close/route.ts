@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   const supabase = createServerSupabase();
   const { data: room, error: roomError } = await supabase
     .from('auction_rooms')
-    .select('id, current_player_id, current_highest_team_id, current_bid')
+    .select('id, current_player_id, current_highest_team_id, current_bid, division')
     .eq('id', roomId)
     .single();
 
@@ -29,40 +29,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'There is no highest bidder to sell to.' }, { status: 400 });
     }
 
-    const [{ data: team, error: teamError }, { error: playerError }] = await Promise.all([
-      supabase.from('teams').select('id, purse').eq('id', room.current_highest_team_id).single(),
-      supabase
-        .from('players')
-        .update({
-          status: 'sold',
-          sold_to_team_id: room.current_highest_team_id,
-          sold_price: room.current_bid
-        })
-        .eq('id', room.current_player_id)
-    ]);
+    const { data: team, error: teamError } = await supabase
+      .from('teams')
+      .select('id, purse')
+      .eq('id', room.current_highest_team_id)
+      .single();
 
-    if (teamError || playerError || !team) {
-      return NextResponse.json({ message: 'Unable to finalize the sale.' }, { status: 500 });
+    if (teamError || !team) {
+      return NextResponse.json({ message: 'Unable to load team.' }, { status: 500 });
+    }
+
+    const newPurse = Number(team.purse) - Number(room.current_bid);
+    if (newPurse < 0) {
+      return NextResponse.json({ message: 'Team does not have enough purse.' }, { status: 400 });
+    }
+
+    const { error: purchaseError } = await supabase.from('purchases').insert({
+      room_id: room.id,
+      player_id: room.current_player_id,
+      team_id: room.current_highest_team_id,
+      price: room.current_bid
+    });
+
+    if (purchaseError) {
+      return NextResponse.json({ message: 'Unable to record purchase.' }, { status: 500 });
     }
 
     const { error: teamUpdateError } = await supabase
       .from('teams')
-      .update({ purse: Number(team.purse) - Number(room.current_bid) })
+      .update({ purse: newPurse })
       .eq('id', team.id);
 
     if (teamUpdateError) {
-      return NextResponse.json({ message: 'Sale completed, but team purse update failed.' }, { status: 500 });
-    }
-  }
-
-  if (outcome === 'unsold') {
-    const { error: playerError } = await supabase
-      .from('players')
-      .update({ status: 'available', sold_to_team_id: null, sold_price: null })
-      .eq('id', room.current_player_id);
-
-    if (playerError) {
-      return NextResponse.json({ message: 'Unable to mark player as unsold.' }, { status: 500 });
+      return NextResponse.json({ message: 'Sale recorded, but purse update failed.' }, { status: 500 });
     }
   }
 

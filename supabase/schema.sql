@@ -118,6 +118,20 @@ alter publication supabase_realtime add table players;
 alter publication supabase_realtime add table auction_rooms;
 alter publication supabase_realtime add table bids;
 
+create table if not exists purchases (
+  id uuid primary key default gen_random_uuid(),
+  room_id uuid not null references auction_rooms(id) on delete cascade,
+  player_id uuid not null references players(id) on delete cascade,
+  team_id uuid not null references teams(id) on delete cascade,
+  price integer not null,
+  created_at timestamptz not null default now()
+);
+
+alter table purchases enable row level security;
+create policy "Public can read purchases" on purchases for select using (true);
+
+alter publication supabase_realtime add table purchases;
+
 -- ═══════════════════════════════════════════════
 -- MIGRATION: add year column (run if upgrading)
 -- ═══════════════════════════════════════════════

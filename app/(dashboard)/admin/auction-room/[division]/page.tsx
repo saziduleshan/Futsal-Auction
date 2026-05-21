@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { AuctionRoomManager } from '@/components/auction/auction-room-manager';
-import type { Division } from '@/lib/types';
+import type { Division, Purchase } from '@/lib/types';
 
 export default async function AuctionRoomPage({ params }: { params: Promise<{ division: string }> }) {
   await requireAdmin();
@@ -13,26 +13,26 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
 
   const supabase = createServerSupabase();
 
-  const [{ data: room }, { data: availablePlayers }, { data: teams }, { data: soldPlayers }] = await Promise.all([
-    supabase.from('auction_rooms').select('*').eq('division', division).single(),
+  const roomResult = supabase.from('auction_rooms').select('*').eq('division', division).single();
+
+  const [{ data: room }, { data: availablePlayers }, { data: teams }] = await Promise.all([
+    roomResult,
     supabase
       .from('players')
       .select('*')
       .eq('division', division)
       .eq('status', 'available')
-      .order('category')
       .order('name'),
-    supabase.from('teams').select('*').eq('division', division).order('name'),
-    supabase
-      .from('players')
-      .select('*')
-      .eq('division', division)
-      .eq('status', 'sold')
-      .order('sold_to_team_id')
-      .order('name')
+    supabase.from('teams').select('*').eq('division', division).order('name')
   ]);
 
-  if (!room || !availablePlayers || !teams || !soldPlayers) notFound();
+  if (!room || !availablePlayers || !teams) notFound();
+
+  const { data: purchases } = await supabase
+    .from('purchases')
+    .select('*')
+    .eq('room_id', room.id)
+    .order('created_at');
 
   return (
     <>
@@ -42,7 +42,7 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
           division={division}
           room={room}
           players={availablePlayers}
-          soldPlayers={soldPlayers}
+          purchases={purchases ?? []}
           teams={teams}
         />
       </div>

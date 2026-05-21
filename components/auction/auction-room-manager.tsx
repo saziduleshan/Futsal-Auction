@@ -1,17 +1,17 @@
 'use client';
 
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Play, Loader2, Shield, Sparkles, Target, Trophy,
-  Gavel, X, Check, Users, Banknote, ArrowLeft, Eye, ChevronDown
+  Gavel, X, Check, Users, Banknote, ArrowLeft, Eye, ChevronDown, OctagonX
 } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
 import { getYearTier } from '@/lib/constants';
-import type { AuctionRoom, Player, Team, PlayerCategory, Bid } from '@/lib/types';
+import type { AuctionRoom, Player, Team, PlayerCategory, Purchase } from '@/lib/types';
 
 const POSITIONS: { key: PlayerCategory; label: string; Icon: typeof Shield }[] = [
   { key: 'defender', label: 'Defenders', Icon: Shield },
@@ -24,19 +24,21 @@ interface AuctionRoomManagerProps {
   division: string;
   room: AuctionRoom;
   players: Player[];
-  soldPlayers: Player[];
+  purchases: Purchase[];
   teams: Team[];
 }
 
-export function AuctionRoomManager({ division, room: initialRoom, players, soldPlayers, teams }: AuctionRoomManagerProps) {
+export function AuctionRoomManager({ division, room: initialRoom, players, purchases: initialPurchases, teams }: AuctionRoomManagerProps) {
   const router = useRouter();
 
   const [room, setRoom] = useState(initialRoom);
+  const [purchases, setPurchases] = useState(initialPurchases);
   const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(null);
   const [playerIndex, setPlayerIndex] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [managersOpen, setManagersOpen] = useState(false);
 
@@ -72,11 +74,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
       }, (payload) => {
         const updated = payload.new as AuctionRoom;
         setRoom(updated);
-        if (!updated.current_player_id && currentPlayer) {
-          setCurrentPlayer(null);
-        } else if (updated.current_player_id && !currentPlayer) {
-          setRoom(updated);
-        }
       })
       .subscribe();
 
@@ -110,7 +107,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
       const payload = await res.json();
       if (res.ok) {
         setCurrentPlayer(player);
-        setMessage(null);
       } else {
         setMessage(payload.message || 'Failed to start player.');
       }
@@ -136,6 +132,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
         const nextIndex = playerIndex + 1;
         if (nextIndex < batchPlayers.length) {
           setMessage(`Starting next ${formatCategory(currentPlayer.category)}...`);
+          const cp = currentPlayer;
+          setCurrentPlayer(null);
           await new Promise((r) => setTimeout(r, 1500));
           await startPlayer(batchPlayers[nextIndex]);
           setPlayerIndex(nextIndex);
@@ -144,6 +142,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
           setMessage('Batch complete! All players in this position have been auctioned.');
           setActiveBatch(null);
         }
+        router.refresh();
       } else {
         setMessage(payload.message || 'Failed to close lot.');
       }
@@ -152,11 +151,53 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, room.id, playerIndex, batchPlayers, startPlayer]);
+  }, [currentPlayer, room.id, playerIndex, batchPlayers, startPlayer, router]);
+
+  const endAuction = useCallback(async () => {
+    if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
+    setIsEnding(true);
+    try {
+      const res = await fetch('/api/admin/auction/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ division })
+      });
+      const payload = await res.json();
+      if (res.ok) {
+        setPurchases([]);
+        setCurrentPlayer(null);
+        setActiveBatch(null);
+        setPlayerIndex(0);
+        setMessage(payload.message);
+        router.refresh();
+      } else {
+        setMessage(payload.message || 'Failed to end auction.');
+      }
+    } catch {
+      setMessage('Could not end auction.');
+    } finally {
+      setIsEnding(false);
+    }
+  }, [division, router]);
 
   const inProgress = activeBatch !== null && !isBatchComplete && currentPlayer !== null;
 
   const tierInfo = currentPlayer ? getYearTier(currentPlayer.year) : null;
+
+  const teamPurses = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const team of teams) {
+      const spent = purchases
+        .filter((p) => p.team_id === team.id)
+        .reduce((sum, p) => sum + p.price, 0);
+      map[team.id] = team.purse - spent;
+    }
+    return map;
+  }, [teams, purchases]);
+
+  const getPlayerById = useCallback((id: string) => {
+    return players.find((p) => p.id === id) ?? null;
+  }, [players]);
 
   return (
     <div className="space-y-8">
@@ -173,12 +214,22 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
             {division === 'men' ? 'Male Futsal' : 'Female Futsal'} Auction
           </h1>
         </div>
-        {activeBatch && (
-          <div className="text-right">
-            <p className="text-sm font-bold uppercase tracking-[0.1em] text-gray-400">Active batch</p>
-            <p className="text-lg font-black text-gray-900">{formatCategory(activeBatch)}</p>
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {activeBatch && (
+            <div className="text-right">
+              <p className="text-sm font-bold uppercase tracking-[0.1em] text-gray-400">Active batch</p>
+              <p className="text-lg font-black text-gray-900">{formatCategory(activeBatch)}</p>
+            </div>
+          )}
+          <button
+            onClick={endAuction}
+            disabled={isEnding}
+            className="flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-5 py-2.5 font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-40"
+          >
+            {isEnding ? <Loader2 className="h-4 w-4 animate-spin" /> : <OctagonX className="h-4 w-4" />}
+            End auction
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -325,7 +376,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
         <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 py-16">
           <div className="text-center">
             <Play className="mx-auto h-10 w-10 text-gray-300" />
-            <p className="mt-3 text-lg font-bold text-gray-400">Ready — player at index {playerIndex}</p>
+            <p className="mt-3 text-lg font-bold text-gray-400">Ready to start — player at index {playerIndex}</p>
             <button
               onClick={() => startPlayer(batchPlayers[playerIndex])}
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 font-bold text-white shadow transition hover:bg-gold/90"
@@ -352,7 +403,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
       >
         <Eye className="h-6 w-6 text-gray-400" />
         <span className="text-lg font-bold text-gray-900">Managers</span>
-        <span className="ml-auto text-sm text-gray-400">{teams.length} teams</span>
+        <span className="ml-auto text-sm text-gray-400">{teams.length} teams · {purchases.length} purchases</span>
       </button>
 
       {managersOpen && (
@@ -382,9 +433,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
                 </thead>
                 <tbody>
                   {teams.map((team) => {
-                    const bought = soldPlayers.filter((p) => p.sold_to_team_id === team.id);
-                    const spent = bought.reduce((sum, p) => sum + (p.sold_price ?? 0), 0);
-                    const remaining = team.purse - spent;
+                    const teamPurchases = purchases.filter((p) => p.team_id === team.id);
+                    const remaining = teamPurses[team.id] ?? team.purse;
                     return (
                       <tr key={team.id} className="border-b border-gray-100 last:border-0">
                         <td className="px-5 py-4 font-bold text-gray-900">{team.name}</td>
@@ -394,15 +444,18 @@ export function AuctionRoomManager({ division, room: initialRoom, players, soldP
                           </span>
                         </td>
                         <td className="px-5 py-4">
-                          {bought.length === 0 ? (
+                          {teamPurchases.length === 0 ? (
                             <span className="text-gray-400">None yet</span>
                           ) : (
                             <div className="flex flex-wrap gap-1.5">
-                              {bought.map((p) => (
-                                <span key={p.id} className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2.5 py-0.5 text-xs text-gray-700">
-                                  {p.name}
-                                </span>
-                              ))}
+                              {teamPurchases.map((p) => {
+                                const player = getPlayerById(p.player_id);
+                                return (
+                                  <span key={p.id} className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2.5 py-0.5 text-xs text-gray-700">
+                                    {player?.name ?? 'Unknown'}
+                                  </span>
+                                );
+                              })}
                             </div>
                           )}
                         </td>

@@ -1,5 +1,5 @@
 import { createServerSupabase } from '@/lib/supabase/server';
-import type { AuctionRoom, Bid, Division, Player, Team } from '@/lib/types';
+import type { AuctionRoom, Bid, Division, Player, Purchase, Team } from '@/lib/types';
 
 export async function getCurrentUser(userId: string) {
   const supabase = createServerSupabase();
@@ -78,19 +78,33 @@ export async function getTeamBundleBySlug(slug: string) {
 
   if (teamError) throw teamError;
 
-  const { data: players, error: playersError } = await supabase
-    .from('players')
-    .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
-    .eq('sold_to_team_id', team.id)
-    .order('category')
-    .order('name')
-    .returns<Player[]>();
+  const { data: purchases, error: purchasesError } = await supabase
+    .from('purchases')
+    .select('id, room_id, player_id, team_id, price, created_at')
+    .eq('team_id', team.id);
 
-  if (playersError) throw playersError;
+  if (purchasesError) throw purchasesError;
+
+  const playerIds = (purchases ?? []).map((p) => p.player_id);
+
+  let players: Player[] = [];
+  if (playerIds.length > 0) {
+    const { data, error: playersError } = await supabase
+      .from('players')
+      .select('id, name, division, category, year, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
+      .in('id', playerIds)
+      .order('category')
+      .order('name')
+      .returns<Player[]>();
+
+    if (playersError) throw playersError;
+    players = data ?? [];
+  }
 
   return {
     team,
-    players: players ?? []
+    players,
+    purchases: purchases ?? []
   };
 }
 

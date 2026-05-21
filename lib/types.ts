@@ -55,6 +55,15 @@ export interface Bid {
   created_at: string;
 }
 
+export interface Purchase {
+  id: string;
+  room_id: string;
+  player_id: string;
+  team_id: string;
+  price: number;
+  created_at: string;
+}
+
 export interface SessionPayload {
   userId: string;
   username: string;
