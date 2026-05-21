@@ -4,75 +4,23 @@ import { useState, useCallback } from 'react';
 import Image from 'next/image';
 import type { Player } from '@/lib/types';
 
-interface FormationSlot {
+interface Slot {
   x: number;
   y: number;
   label: string;
 }
 
-interface Formation {
-  name: string;
-  slots: FormationSlot[];
-}
-
-const FORMATIONS: Record<string, Formation> = {
-  '1-2-1': {
-    name: 'Diamond (1-2-1)',
-    slots: [
-      { x: 50, y: 85, label: 'GK' },
-      { x: 30, y: 58, label: 'DEF' },
-      { x: 70, y: 58, label: 'DEF' },
-      { x: 50, y: 28, label: 'FWD' },
-    ],
-  },
-  '2-2': {
-    name: 'Square (2-2)',
-    slots: [
-      { x: 50, y: 85, label: 'GK' },
-      { x: 25, y: 60, label: 'DEF' },
-      { x: 75, y: 60, label: 'DEF' },
-      { x: 30, y: 32, label: 'FWD' },
-      { x: 70, y: 32, label: 'FWD' },
-    ],
-  },
-  '2-1-1': {
-    name: 'Y-Shape (2-1-1)',
-    slots: [
-      { x: 50, y: 85, label: 'GK' },
-      { x: 25, y: 60, label: 'DEF' },
-      { x: 75, y: 60, label: 'DEF' },
-      { x: 50, y: 42, label: 'MID' },
-      { x: 50, y: 20, label: 'FWD' },
-    ],
-  },
-  '1-3': {
-    name: 'Box (1-3)',
-    slots: [
-      { x: 50, y: 85, label: 'GK' },
-      { x: 50, y: 58, label: 'DEF' },
-      { x: 25, y: 34, label: 'FWD' },
-      { x: 50, y: 28, label: 'FWD' },
-      { x: 75, y: 34, label: 'FWD' },
-    ],
-  },
-  '3-1': {
-    name: 'Three Back (3-1)',
-    slots: [
-      { x: 50, y: 85, label: 'GK' },
-      { x: 20, y: 58, label: 'DEF' },
-      { x: 50, y: 55, label: 'DEF' },
-      { x: 80, y: 58, label: 'DEF' },
-      { x: 50, y: 22, label: 'FWD' },
-    ],
-  },
-};
+const SLOTS: Slot[] = [
+  { x: 50, y: 86, label: 'GK' },
+  { x: 25, y: 58, label: 'DEF' },
+  { x: 75, y: 58, label: 'DEF' },
+  { x: 50, y: 40, label: 'MID' },
+  { x: 50, y: 20, label: 'FWD' },
+];
 
 export function FutsalGround({ players }: { players: Player[] }) {
-  const [formationKey, setFormationKey] = useState('1-2-1');
-  const [pitchPlayers, setPitchPlayers] = useState<(Player | null)[]>([]);
+  const [pitchPlayers, setPitchPlayers] = useState<(Player | null)[]>(Array(SLOTS.length).fill(null));
   const [bench, setBench] = useState<Player[]>(players);
-
-  const formation = FORMATIONS[formationKey];
 
   const handleDropOnSlot = useCallback((slotIndex: number, playerId: string) => {
     const player = bench.find((p) => p.id === playerId);
@@ -100,71 +48,17 @@ export function FutsalGround({ players }: { players: Player[] }) {
     });
   }, []);
 
-  const handleAutoArrange = useCallback(() => {
-    const shuffled = [...players].sort(() => Math.random() - 0.5);
-    const newPitch: (Player | null)[] = [];
-    const newBench: Player[] = [];
-    const slotCount = formation.slots.length;
-    const assignCount = Math.min(slotCount, shuffled.length);
-
-    for (let i = 0; i < slotCount; i++) {
-      newPitch[i] = i < assignCount ? shuffled[i] : null;
-    }
-    for (let i = assignCount; i < shuffled.length; i++) {
-      newBench.push(shuffled[i]);
-    }
-
-    setPitchPlayers(newPitch);
-    setBench(newBench);
-  }, [players, formation]);
-
   const handleClear = useCallback(() => {
     const allPlayers = pitchPlayers.filter((p): p is Player => p !== null);
     setBench((prev) => [...prev, ...allPlayers]);
-    setPitchPlayers([]);
-  }, [pitchPlayers]);
-
-  const handleFormationChange = useCallback((key: string) => {
-    setFormationKey(key);
-    const allPlayers = pitchPlayers.filter((p): p is Player => p !== null);
-    setBench((prev) => [...prev, ...allPlayers]);
-    setPitchPlayers([]);
+    setPitchPlayers(Array(SLOTS.length).fill(null));
   }, [pitchPlayers]);
 
   const placedCount = pitchPlayers.filter(Boolean).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={formationKey}
-          onChange={(e) => handleFormationChange(e.target.value)}
-          className="rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 font-bold text-white backdrop-blur-xl"
-        >
-          {Object.entries(FORMATIONS).map(([key, f]) => (
-            <option key={key} value={key}>{f.name}</option>
-          ))}
-        </select>
-        <button
-          onClick={handleAutoArrange}
-          disabled={players.length === 0}
-          className="rounded-xl bg-cyan px-5 py-2.5 font-bold text-black transition hover:bg-cyan/90 disabled:opacity-40"
-        >
-          Auto-arrange
-        </button>
-        <button
-          onClick={handleClear}
-          disabled={placedCount === 0}
-          className="rounded-xl border border-white/20 px-5 py-2.5 font-bold text-white/80 transition hover:bg-white/10 disabled:opacity-40"
-        >
-          Clear
-        </button>
-        <span className="ml-auto text-sm text-white/40">
-          {placedCount} / {formation.slots.length} on pitch
-        </span>
-      </div>
-
-      <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-b from-green-600 to-green-800 shadow-2xl">
+    <div className="space-y-4">
+      <div className="relative mx-auto aspect-[3/4] w-full max-w-xl overflow-hidden rounded-2xl bg-gradient-to-b from-green-600 to-green-800 shadow-2xl">
         <svg className="absolute inset-0 size-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <line x1="50" y1="0" x2="50" y2="100" stroke="white" strokeOpacity="0.2" strokeWidth="0.5" />
           <circle cx="50" cy="50" r="14" fill="none" stroke="white" strokeOpacity="0.2" strokeWidth="0.4" />
@@ -181,7 +75,7 @@ export function FutsalGround({ players }: { players: Player[] }) {
           <path d="M 100 100 Q 96 100 96 96" fill="none" stroke="white" strokeOpacity="0.2" strokeWidth="0.4" />
         </svg>
 
-        {formation.slots.map((slot, index) => {
+        {SLOTS.map((slot, index) => {
           const placed = pitchPlayers[index];
           return (
             <div
@@ -197,8 +91,8 @@ export function FutsalGround({ players }: { players: Player[] }) {
               onClick={() => placed && handleRemoveFromSlot(index)}
             >
               {placed ? (
-                <div className="group relative flex size-14 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-cyan to-purple p-0.5 shadow-lg ring-2 ring-white/60 transition hover:scale-110">
-                  <span className="text-center text-[9px] font-bold leading-tight text-white">
+                <div className="group relative flex size-16 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-cyan to-purple p-0.5 shadow-lg ring-2 ring-white/70 transition hover:scale-110">
+                  <span className="text-center text-[10px] font-bold leading-tight text-white">
                     {placed.name.split(' ').pop()}
                   </span>
                   <div className="absolute -inset-1 hidden items-center justify-center rounded-full bg-black/60 group-hover:flex">
@@ -206,8 +100,8 @@ export function FutsalGround({ players }: { players: Player[] }) {
                   </div>
                 </div>
               ) : (
-                <div className="flex size-12 items-center justify-center rounded-full border-2 border-dashed border-white/25 bg-white/10 backdrop-blur-sm">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/60">{slot.label}</span>
+                <div className="flex size-14 items-center justify-center rounded-full border-2 border-dashed border-white/25 bg-white/10 backdrop-blur-sm">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">{slot.label}</span>
                 </div>
               )}
             </div>
@@ -222,41 +116,47 @@ export function FutsalGround({ players }: { players: Player[] }) {
         </div>
       </div>
 
-      <div>
-        <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.15em] text-white/50">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-white/50">
           Squad{bench.length > 0 && <span className="ml-2 text-white/30">({bench.length} available)</span>}
         </h3>
-        {players.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.03] p-12 text-center">
-            <p className="text-lg font-bold text-white/40">No players available</p>
-            <p className="mt-2 text-sm text-white/20">Purchase players in the auction to build your squad.</p>
-          </div>
-        ) : bench.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-white/10 bg-white/[0.03] p-8 text-center">
-            <p className="font-bold text-white/40">All players are on the pitch</p>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-3">
-            {bench.map((player) => (
-              <div
-                key={player.id}
-                draggable
-                onDragStart={(e) => e.dataTransfer.setData('playerId', player.id)}
-                className="flex cursor-grab items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2 backdrop-blur-xl transition hover:bg-white/[0.12] active:cursor-grabbing"
-              >
-                {player.card_image_url ? (
-                  <Image src={player.card_image_url} alt="" width={32} height={40} className="size-8 rounded-lg object-cover" />
-                ) : (
-                  <div className="size-8 rounded-lg bg-gradient-to-br from-cyan/30 to-purple/30" />
-                )}
-                <div>
-                  <p className="text-sm font-bold text-white">{player.name}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <button
+          onClick={handleClear}
+          disabled={placedCount === 0}
+          className="rounded-lg border border-white/20 px-3 py-1.5 text-xs font-bold text-white/60 transition hover:bg-white/10 disabled:opacity-30"
+        >
+          Clear pitch
+        </button>
       </div>
+
+      {players.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-white/10 bg-white/[0.03] p-8 text-center">
+          <p className="font-bold text-white/40">No players available</p>
+          <p className="mt-1 text-sm text-white/20">Purchase players in the auction to build your squad.</p>
+        </div>
+      ) : bench.length === 0 ? (
+        <div className="rounded-xl border-2 border-dashed border-white/10 bg-white/[0.03] p-6 text-center">
+          <p className="font-bold text-white/40">All 5 players are on the pitch</p>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {bench.map((player) => (
+            <div
+              key={player.id}
+              draggable
+              onDragStart={(e) => e.dataTransfer.setData('playerId', player.id)}
+              className="flex cursor-grab items-center gap-2 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-1.5 backdrop-blur-xl transition hover:bg-white/[0.12] active:cursor-grabbing"
+            >
+              {player.card_image_url ? (
+                <Image src={player.card_image_url} alt="" width={24} height={30} className="size-6 rounded object-cover" />
+              ) : (
+                <div className="size-6 rounded bg-gradient-to-br from-cyan/30 to-purple/30" />
+              )}
+              <span className="text-sm font-bold text-white">{player.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
