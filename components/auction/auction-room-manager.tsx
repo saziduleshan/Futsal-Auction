@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   Play, Loader2, Shield, Sparkles, Target, Trophy,
-  Gavel, X, Check, Users, Banknote, ArrowLeft, Eye, ChevronDown, OctagonX
+  Gavel, X, Check, Users, ArrowLeft, Eye, OctagonX
 } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
-import { getYearTier } from '@/lib/constants';
 import type { AuctionRoom, Player, Team, PlayerCategory, Purchase } from '@/lib/types';
 
 const POSITIONS: { key: PlayerCategory; label: string; Icon: typeof Shield }[] = [
@@ -64,6 +63,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   useEffect(() => {
     const supabase = createBrowserSupabase();
+
     const channel = supabase
       .channel(`auction-room-${room.division}`)
       .on('postgres_changes', {
@@ -77,7 +77,19 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from('auction_rooms')
+        .select('*')
+        .eq('division', room.division)
+        .single();
+      if (data) setRoom(data as AuctionRoom);
+    }, 1500);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, [room.division]);
 
   const runBatch = useCallback(async (position: PlayerCategory) => {
@@ -168,8 +180,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         setCurrentPlayer(null);
         setActiveBatch(null);
         setPlayerIndex(0);
-        setMessage(payload.message);
-        router.refresh();
+        window.location.href = '/admin';
       } else {
         setMessage(payload.message || 'Failed to end auction.');
       }
@@ -182,7 +193,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const inProgress = activeBatch !== null && !isBatchComplete && currentPlayer !== null;
 
-  const tierInfo = currentPlayer ? getYearTier(currentPlayer.year) : null;
+  const [connections, setConnections] = useState<Record<string, boolean>>({});
 
   const teamPurses = useMemo(() => {
     const map: Record<string, number> = {};
@@ -190,55 +201,120 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       const spent = purchases
         .filter((p) => p.team_id === team.id)
         .reduce((sum, p) => sum + p.price, 0);
-      map[team.id] = team.purse - spent;
+      map[team.id] = team.purse;
     }
     return map;
   }, [teams, purchases]);
+
+  const teamSpent = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const team of teams) {
+      map[team.id] = purchases
+        .filter((p) => p.team_id === team.id)
+        .reduce((sum, p) => sum + p.price, 0);
+    }
+    return map;
+  }, [teams, purchases]);
+
+  const teamPurchases = useMemo(() => {
+    const map: Record<string, Purchase[]> = {};
+    for (const team of teams) {
+      map[team.id] = purchases.filter((p) => p.team_id === team.id);
+    }
+    return map;
+  }, [teams, purchases]);
+
+  const maxPurchases = useMemo(() => {
+    return Math.max(14, ...teams.map((t) => teamPurchases[t.id]?.length ?? 0));
+  }, [teams, teamPurchases]);
 
   const getPlayerById = useCallback((id: string) => {
     return players.find((p) => p.id === id) ?? null;
   }, [players]);
 
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+
+    async function fetchConnections() {
+      const { data } = await supabase
+        .from('auction_participants')
+        .select('team_id, connected')
+        .eq('room_id', room.id);
+      if (data) {
+        const map: Record<string, boolean> = {};
+        for (const p of data) map[p.team_id] = p.connected;
+        setConnections(map);
+      }
+    }
+    fetchConnections();
+
+    const channel = supabase
+      .channel(`participants-${room.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'auction_participants',
+        filter: `room_id=eq.${room.id}`
+      }, (payload) => {
+        const row = payload.new as { team_id: string; connected: boolean } | null;
+        if (row) {
+          setConnections((prev) => ({ ...prev, [row.team_id]: row.connected }));
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [room.id]);
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <Link
-            href="/admin/auction-setup"
-            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 hover:text-gray-600"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to setup
-          </Link>
-          <h1 className="text-3xl font-black uppercase tracking-[0.08em] text-gray-900">
-            {division === 'men' ? 'Male Futsal' : 'Female Futsal'} Auction
-          </h1>
-        </div>
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 hover:text-gray-600"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to admin
+        </Link>
+        <Link href="/">
+          <Image
+            src="/Genesislogo.png"
+            alt="The Genesis"
+            width={220}
+            height={60}
+            className="h-14 w-auto"
+            priority
+          />
+        </Link>
         <div className="flex items-center gap-3">
           {activeBatch && (
             <div className="text-right">
-              <p className="text-sm font-bold uppercase tracking-[0.1em] text-gray-400">Active batch</p>
-              <p className="text-lg font-black text-gray-900">{formatCategory(activeBatch)}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Active batch</p>
+              <p className="text-base font-black text-gray-900">{formatCategory(activeBatch)}</p>
             </div>
           )}
           {room.join_code ? (
-            <div className="rounded-xl border-2 border-dashed border-cyan/30 bg-cyan/5 px-4 py-2.5 text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-cyan/70">Join code</p>
-              <p className="mt-0.5 text-xl font-black tracking-[0.25em] text-cyan">{room.join_code}</p>
+            <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">Join code</p>
+              <p className="mt-0.5 text-lg font-black tracking-[0.25em] text-cyan">{room.join_code}</p>
             </div>
           ) : null}
           <button
             onClick={endAuction}
             disabled={isEnding}
-            className="flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-5 py-2.5 font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-40"
+            className="flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-2 font-bold text-red-600 transition hover:bg-red-100 disabled:opacity-40"
           >
             {isEnding ? <Loader2 className="h-4 w-4 animate-spin" /> : <OctagonX className="h-4 w-4" />}
-            End auction
+            End
           </button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <h1 className="text-lg font-black uppercase tracking-[0.08em] text-gray-900">
+        {division === 'men' ? 'Male Futsal' : 'Female Futsal'} Auction
+      </h1>
+
+      <div className="flex flex-wrap items-center gap-2">
         {POSITIONS.map(({ key, label, Icon }) => {
           const count = batchedCounts[key];
           const isActive = activeBatch === key;
@@ -247,30 +323,36 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               key={key}
               onClick={() => { if (!inProgress) runBatch(key); }}
               disabled={inProgress || count === 0}
-              className="group relative flex items-center gap-3 rounded-2xl border-2 px-6 py-4 text-left transition disabled:opacity-40"
+              className="group relative flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-left transition disabled:opacity-40"
               style={{
                 borderColor: isActive ? '#f5c542' : '#e5e7eb',
                 backgroundColor: isActive ? '#fffbeb' : '#ffffff',
                 boxShadow: isActive ? '0 4px 12px rgba(245, 197, 66, 0.2)' : '0 1px 3px rgba(0,0,0,0.05)'
               }}
             >
+              {isActive && !isBatchComplete ? (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-lime" />
+                </span>
+              ) : null}
               <div
-                className="flex h-12 w-12 items-center justify-center rounded-xl transition"
+                className="flex h-9 w-9 items-center justify-center rounded-lg transition"
                 style={{ backgroundColor: isActive ? '#f5c542' : '#f3f4f6' }}
               >
-                <Icon className={`h-6 w-6 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
               </div>
               <div>
-                <p className={`text-sm font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-gray-900'}`}>
+                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-gray-900'}`}>
                   {label}
                 </p>
-                <p className="text-xs text-gray-400">{count} players</p>
+                <p className="text-xs text-gray-900">{count} players</p>
               </div>
 
               {!inProgress && count > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gold px-5 py-2 text-sm font-bold text-white shadow-lg">
-                    <Play className="h-4 w-4" /> Run this batch
+                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
+                  <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-1.5 text-xs font-bold text-white shadow-lg">
+                    <Play className="h-3 w-3" /> Run
                   </span>
                 </div>
               )}
@@ -278,9 +360,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               {isActive && (
                 <div className="ml-auto">
                   {isBatchComplete ? (
-                    <span className="rounded-full bg-lime/20 px-3 py-1 text-xs font-bold text-lime">Done</span>
+                    <span className="rounded-full bg-lime/20 px-2 py-0.5 text-[10px] font-bold text-lime">Done</span>
                   ) : (
-                    <span className="rounded-full bg-gold/20 px-3 py-1 text-xs font-bold text-gold">
+                    <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold text-gold">
                       {Math.min(playerIndex + 1, batchPlayers.length)}/{batchPlayers.length}
                     </span>
                   )}
@@ -289,128 +371,98 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
             </button>
           );
         })}
+        <button
+          onClick={() => setManagersOpen(true)}
+          className="ml-auto flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 shadow-sm transition hover:border-gold hover:shadow-md"
+        >
+          <Eye className="h-4 w-4 text-gray-400" />
+          <span className="text-xs font-bold text-gray-900">Managers</span>
+          <span className="text-xs text-gray-400">{teams.length} teams</span>
+        </button>
       </div>
 
       {message && (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 text-sm font-semibold text-gray-700">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700">
           {message}
         </div>
       )}
 
       {isStarting && (
-        <div className="flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-gray-300 bg-white py-24">
+        <div className="flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-gray-300 bg-white py-16">
           <Loader2 className="h-8 w-8 animate-spin text-gold" />
           <p className="text-lg font-bold text-gray-500">Starting player...</p>
         </div>
       )}
 
       {currentPlayer && !isStarting && (
-        <div className="rounded-2xl border-2 border-gray-200 bg-white p-8 shadow-sm">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-            <div className="flex-shrink-0 lg:w-80 animate-slide-from-left">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-10">
+          <div className="flex items-center gap-20">
+            <div className="w-[30rem] animate-slide-from-left">
               {currentPlayer.card_image_url ? (
                 <Image
                   src={currentPlayer.card_image_url}
                   alt={currentPlayer.name}
-                  width={360}
-                  height={450}
+                  width={600}
+                  height={750}
                   className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
                   priority
                 />
               ) : (
                 <div className="flex aspect-[4/5] w-full items-center justify-center rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.35)]">
-                  <Shield className="h-16 w-16 text-gray-300" />
+                  <Shield className="h-28 w-28 text-gray-300" />
                 </div>
               )}
             </div>
-
-            <div className="flex flex-1 flex-col justify-between gap-6">
-              <div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="rounded-full border border-gray-300 px-3 py-1 text-sm font-bold uppercase tracking-[0.08em] text-gray-600">
-                    {formatCategory(currentPlayer.category)}
-                  </p>
-                  {tierInfo && (
-                    <p className="rounded-full bg-gold/10 px-3 py-1 text-sm font-bold text-gold">
-                      {tierInfo.tier}
-                    </p>
-                  )}
-                </div>
-                <h2 className="mt-4 text-4xl font-black text-gray-900">{currentPlayer.name}</h2>
-              </div>
-
-              <div className="rounded-2xl border-2 border-gray-100 bg-gray-50 p-6">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">Current bid</p>
-                <p id="current-bid-display" className="mt-2 text-5xl font-black text-gold drop-shadow-sm transition-all">
-                  ${currency(room.current_bid)}
-                </p>
-                <div className="mt-2 flex items-center gap-4 text-sm">
-                  <p className="text-gray-500">
-                    Base: <span className="font-bold text-gray-700">${currency(currentPlayer.base_price)}</span>
-                  </p>
-                  {highestBidder && (
-                    <p className="text-gray-500">
-                      Highest: <span className="font-bold text-gray-700">{highestBidder.name}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid gap-3 md:grid-cols-3">
-                <button
-                  disabled={isClosing}
-                  onClick={() => closeLot('unsold')}
-                  className="flex items-center justify-center gap-2 rounded-2xl border-2 border-gray-300 px-5 py-4 font-bold text-gray-600 transition hover:border-red-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
-                >
-                  <X className="h-5 w-5" /> Mark unsold
-                </button>
-                <button
-                  disabled={isClosing || !room.current_highest_team_id}
-                  onClick={() => closeLot('sold')}
-                  className="col-span-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-lime to-cyan px-5 py-4 font-black text-white shadow transition hover:from-gray-800 hover:to-gray-800 disabled:opacity-40"
-                >
-                  {isClosing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
-                  Sell to highest bidder
-                </button>
-              </div>
+            <div className="text-center">
+              <p className="text-lg font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Current price</p>
+              <p id="current-bid-display" className="mt-3 text-7xl font-black drop-shadow-sm transition-all" style={{ color: '#264153' }}>
+                ${currency(room.current_bid || currentPlayer.base_price)}
+              </p>
+              <p className="mt-10 text-4xl font-black" style={{ color: '#b6360b' }}>{currentPlayer.name}</p>
+              <p className="mt-3 text-lg font-bold uppercase tracking-[0.08em]" style={{ color: '#264153' }}>
+                {formatCategory(currentPlayer.category)}
+              </p>
+              <p className="mt-8 text-6xl font-black drop-shadow-sm" style={{ color: '#264153' }}>
+                {highestBidder ? highestBidder.name : 'No bids'}
+              </p>
+              <p className="mt-1 text-base font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Highest bidder</p>
             </div>
+          </div>
+          <div className="flex gap-5">
+            <button
+              disabled={isClosing}
+              onClick={() => closeLot('unsold')}
+              className="flex items-center gap-2 rounded-xl border-2 border-gray-300 px-8 py-3.5 font-bold text-gray-600 transition hover:border-red-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
+            >
+              {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+              Mark Unsold
+            </button>
+            <button
+              disabled={isClosing || !room.current_highest_team_id}
+              onClick={() => closeLot('sold')}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-lime to-cyan px-8 py-3.5 font-black text-white shadow transition hover:from-gray-800 hover:to-gray-800 disabled:opacity-40"
+            >
+              {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              Mark Sold
+            </button>
           </div>
         </div>
       )}
 
       {activeBatch && !currentPlayer && !isStarting && !isBatchComplete && !isClosing && (
-        <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 py-16">
+        <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 py-10">
           <div className="text-center">
-            <Play className="mx-auto h-10 w-10 text-gray-300" />
-            <p className="mt-3 text-lg font-bold text-gray-400">Ready to start — player at index {playerIndex}</p>
+            <Play className="mx-auto h-8 w-8 text-gray-300" />
+            <p className="mt-2 text-base font-bold text-gray-400">Ready to start — player at index {playerIndex}</p>
             <button
               onClick={() => startPlayer(batchPlayers[playerIndex])}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3 font-bold text-white shadow transition hover:bg-gold/90"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 font-bold text-white shadow transition hover:bg-gold/90"
             >
               <Gavel className="h-4 w-4" /> Start this player
             </button>
           </div>
         </div>
       )}
-
-      {isBatchComplete && (
-        <div className="rounded-2xl border-2 border-lime/30 bg-lime/5 py-12 text-center">
-          <Trophy className="mx-auto h-12 w-12 text-lime" />
-          <p className="mt-3 text-2xl font-black text-lime">Batch complete!</p>
-          <p className="mt-1 text-gray-500">
-            All {formatCategory(activeBatch!)} have been auctioned. Run another batch above.
-          </p>
-        </div>
-      )}
-
-      <button
-        onClick={() => setManagersOpen(true)}
-        className="flex items-center gap-3 rounded-2xl border-2 border-gray-200 bg-white px-6 py-4 shadow-sm transition hover:border-gold hover:shadow-md"
-      >
-        <Eye className="h-6 w-6 text-gray-400" />
-        <span className="text-lg font-bold text-gray-900">Managers</span>
-        <span className="ml-auto text-sm text-gray-400">{teams.length} teams · {purchases.length} purchases</span>
-      </button>
 
       {managersOpen && (
         <div className="fixed inset-0 z-50 flex flex-col bg-white">
@@ -419,57 +471,79 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               <Users className="h-6 w-6 text-gray-900" />
               <h2 className="text-2xl font-black uppercase tracking-[0.08em] text-gray-900">Managers</h2>
             </div>
-            <button
-              onClick={() => setManagersOpen(false)}
-              className="flex items-center gap-2 rounded-xl border-2 border-gray-200 px-5 py-2.5 font-bold text-gray-600 transition hover:border-gray-400 hover:text-gray-900"
-            >
-              <ChevronDown className="h-5 w-5" /> Minimize
-            </button>
           </div>
 
           <div className="flex-1 overflow-auto px-6 py-6">
+            <div className="mb-3">
+              <button
+                onClick={() => setManagersOpen(false)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-bold text-red-500 transition hover:border-red-400 hover:bg-red-50"
+              >
+                <X className="size-3.5" /> Close
+              </button>
+            </div>
             <div className="overflow-hidden rounded-2xl border-2 border-gray-200">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b-2 border-gray-200 bg-gray-50">
-                    <th className="px-5 py-4 font-bold uppercase tracking-[0.1em] text-gray-500">Team</th>
-                    <th className="px-5 py-4 font-bold uppercase tracking-[0.1em] text-gray-500">Purse remaining</th>
-                    <th className="px-5 py-4 font-bold uppercase tracking-[0.1em] text-gray-500">Players bought</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teams.map((team) => {
-                    const teamPurchases = purchases.filter((p) => p.team_id === team.id);
-                    const remaining = teamPurses[team.id] ?? team.purse;
-                    return (
-                      <tr key={team.id} className="border-b border-gray-100 last:border-0">
-                        <td className="px-5 py-4 font-bold text-gray-900">{team.name}</td>
-                        <td className="px-5 py-4">
-                          <span className={`font-bold ${remaining > 0 ? 'text-lime' : 'text-red-500'}`}>
-                            ${currency(remaining)}
-                          </span>
+              <div className="w-full overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200 bg-gray-50">
+                      <th className="w-32 px-4 py-3 font-bold uppercase tracking-[0.1em] text-gray-500"></th>
+                      {teams.map((team) => (
+                        <th key={team.id} className="min-w-[140px] px-4 py-3 font-bold uppercase tracking-[0.08em] text-gray-700">
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-block size-2.5 rounded-full ${connections[team.id] ? 'bg-green-500' : 'bg-red-400'}`} />
+                            {team.name}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-b border-gray-100 bg-gray-50/50">
+                      <td className="px-4 py-3 font-bold text-gray-500">Spent</td>
+                      {teams.map((team) => (
+                        <td key={team.id} className="px-4 py-3 font-bold text-orange-600">
+                          ${currency(teamSpent[team.id] ?? 0)}
                         </td>
-                        <td className="px-5 py-4">
-                          {teamPurchases.length === 0 ? (
-                            <span className="text-gray-400">None yet</span>
-                          ) : (
-                            <div className="flex flex-wrap gap-1.5">
-                              {teamPurchases.map((p) => {
-                                const player = getPlayerById(p.player_id);
-                                return (
-                                  <span key={p.id} className="inline-flex items-center gap-1 rounded-full border border-gray-200 px-2.5 py-0.5 text-xs text-gray-700">
-                                    {player?.name ?? 'Unknown'}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          )}
+                      ))}
+                    </tr>
+                    <tr className="border-b-2 border-gray-200 bg-gray-50/50">
+                      <td className="px-4 py-3 font-bold text-gray-500">Remaining</td>
+                      {teams.map((team) => {
+                        const remaining = teamPurses[team.id] ?? team.purse;
+                        return (
+                          <td key={team.id} className="px-4 py-3">
+                            <span className={`font-bold ${remaining > 0 ? 'text-lime-600' : 'text-red-500'}`}>
+                              ${currency(remaining)}
+                            </span>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                    {Array.from({ length: maxPurchases }).map((_, rowIndex) => (
+                      <tr key={rowIndex} className="border-b border-gray-100 last:border-0">
+                        <td className="px-4 py-2.5 text-gray-400">
+                          {rowIndex < Math.max(...teams.map((t) => teamPurchases[t.id]?.length ?? 0)) ? `#${rowIndex + 1}` : ''}
                         </td>
+                        {teams.map((team) => {
+                          const tp = teamPurchases[team.id] ?? [];
+                          const purchase = tp[rowIndex];
+                          if (!purchase) {
+                            return <td key={team.id} className="px-4 py-2.5 text-gray-300">—</td>;
+                          }
+                          const player = getPlayerById(purchase.player_id);
+                          return (
+                            <td key={team.id} className="px-4 py-2.5">
+                              <span className="font-semibold text-gray-800">{player?.name ?? 'Unknown'}</span>
+                              <span className="ml-2 font-bold text-gold">${currency(purchase.price)}</span>
+                            </td>
+                          );
+                        })}
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

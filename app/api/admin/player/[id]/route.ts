@@ -2,9 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
-import { slugify, currency } from '@/lib/utils';
-import { getYearTier } from '@/lib/constants';
-import type { PlayerYear } from '@/lib/types';
+import { slugify } from '@/lib/utils';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -15,14 +13,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const formData = await request.formData();
   const name = String(formData.get('name') ?? '').trim();
-  const yearRaw = formData.get('year');
   const image = formData.get('image');
 
-  const year = yearRaw as PlayerYear;
-  const yearTier = getYearTier(year);
-
-  if (!name || !yearTier) {
-    return NextResponse.json({ message: 'Name and year are required.' }, { status: 400 });
+  if (!name) {
+    return NextResponse.json({ message: 'Name is required.' }, { status: 400 });
   }
 
   const supabase = createServerSupabase();
@@ -46,11 +40,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     cardImageUrl = data.publicUrl;
   }
 
-  const updateData: Record<string, unknown> = {
-    name,
-    year,
-    base_price: yearTier.basePrice
-  };
+  const updateData: Record<string, unknown> = { name };
 
   if (cardImageUrl) {
     updateData.card_image_url = cardImageUrl;

@@ -38,7 +38,18 @@ export async function POST(request: Request) {
 
   const joinCode = room.join_code || generateJoinCode();
 
-  await supabase.from('auction_rooms').update({ join_code: joinCode }).eq('id', room.id);
+  await supabase
+    .from('auction_rooms')
+    .update({
+      join_code: joinCode,
+      ended_at: null,
+      current_player_id: null,
+      current_bid: 0,
+      current_highest_team_id: null,
+      nominated_at: null,
+      status: 'idle'
+    })
+    .eq('id', room.id);
 
   if (teamCount && purseSize) {
     const { data: teams } = await supabase

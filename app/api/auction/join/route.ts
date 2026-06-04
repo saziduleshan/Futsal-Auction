@@ -40,14 +40,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'This code does not match your division.' }, { status: 403 });
   }
 
+  const { data: existing } = await supabase
+    .from('auction_participants')
+    .select('id')
+    .eq('room_id', room.id)
+    .eq('team_id', team.id)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from('auction_participants')
+      .update({ connected: true })
+      .eq('id', existing.id);
+
+    return NextResponse.json({ message: 'Rejoined the auction!' });
+  }
+
   const { error: insertError } = await supabase
     .from('auction_participants')
-    .insert({ room_id: room.id, team_id: team.id });
+    .insert({ room_id: room.id, team_id: team.id, connected: true });
 
   if (insertError) {
-    if (insertError.code === '23505') {
-      return NextResponse.json({ message: 'Already joined this auction.' });
-    }
     return NextResponse.json({ message: 'Unable to join auction.' }, { status: 500 });
   }
 

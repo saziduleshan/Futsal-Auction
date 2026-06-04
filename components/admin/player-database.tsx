@@ -7,9 +7,9 @@ import {
   Shield, Sparkles, Target, Trophy, Users, Eye, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
-import type { Player, Division, PlayerCategory, PlayerYear } from '@/lib/types';
+import type { Player, Division, PlayerCategory } from '@/lib/types';
 import { currency, formatCategory } from '@/lib/utils';
-import { YEAR_TIERS, PLAYER_CATEGORIES, getYearTier } from '@/lib/constants';
+import { PLAYER_CATEGORIES } from '@/lib/constants';
 
 const CATEGORY_ICONS = {
   defender: Shield,
@@ -25,14 +25,12 @@ interface PlayerDatabaseProps {
 export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps) {
   const [players, setPlayers] = useState(initialPlayers);
   const [activeDivision, setActiveDivision] = useState<Division>('men');
-  const [tierFilter, setTierFilter] = useState<PlayerYear | 'all'>('all');
   const [positionFilter, setPositionFilter] = useState<PlayerCategory | 'all'>('all');
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
 
   const [editName, setEditName] = useState('');
-  const [editYear, setEditYear] = useState<PlayerYear>('1');
   const [editImage, setEditImage] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -52,7 +50,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
   const openEdit = useCallback((player: Player) => {
     setEditPlayer(player);
     setEditName(player.name);
-    setEditYear(player.year);
     setEditImage(null);
     setMenuOpenId(null);
   }, []);
@@ -77,23 +74,15 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
     try {
       const fd = new FormData();
       fd.set('name', editName);
-      fd.set('year', editYear);
       if (editImage) fd.set('image', editImage);
 
       const res = await fetch(`/api/admin/player/${editPlayer.id}`, { method: 'PATCH', body: fd });
       if (!res.ok) throw new Error('Failed to update player');
 
-      const updatedTier = getYearTier(editYear);
       setPlayers((prev) =>
         prev.map((p) =>
           p.id === editPlayer.id
-            ? {
-                ...p,
-                name: editName,
-                year: editYear,
-                base_price: updatedTier.basePrice,
-                card_image_url: editImage ? URL.createObjectURL(editImage) : p.card_image_url
-              }
+            ? { ...p, name: editName, card_image_url: editImage ? URL.createObjectURL(editImage) : p.card_image_url }
             : p
         )
       );
@@ -103,7 +92,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
     } finally {
       setSaving(false);
     }
-  }, [editPlayer, editName, editYear, editImage, closeEdit]);
+  }, [editPlayer, editName, editImage, closeEdit]);
 
   const handleDelete = useCallback(async () => {
     if (!deletePlayerId) return;
@@ -128,11 +117,10 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
 
   const filtered = useMemo(() => {
     return divisionPlayers.filter((p) => {
-      if (tierFilter !== 'all' && p.year !== tierFilter) return false;
       if (positionFilter !== 'all' && p.category !== positionFilter) return false;
       return true;
     });
-  }, [divisionPlayers, tierFilter, positionFilter]);
+  }, [divisionPlayers, positionFilter]);
 
   const menCount = useMemo(
     () => players.filter((p) => p.division === 'men').length,
@@ -198,20 +186,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
 
       <div className="flex flex-wrap gap-3">
         <select
-          value={String(tierFilter)}
-          onChange={(e) =>
-            setTierFilter(e.target.value === 'all' ? 'all' : (e.target.value as PlayerYear))
-          }
-          className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
-        >
-          <option value="all">All tiers</option>
-          {YEAR_TIERS.map((yt) => (
-            <option key={String(yt.value)} value={String(yt.value)}>
-              {yt.tier}
-            </option>
-          ))}
-        </select>
-        <select
           value={positionFilter}
           onChange={(e) => setPositionFilter(e.target.value as PlayerCategory | 'all')}
           className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
@@ -223,9 +197,9 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             </option>
           ))}
         </select>
-        {(tierFilter !== 'all' || positionFilter !== 'all') && (
+        {positionFilter !== 'all' && (
           <button
-            onClick={() => { setTierFilter('all'); setPositionFilter('all'); }}
+            onClick={() => setPositionFilter('all')}
             className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-800 backdrop-blur-sm transition hover:border-red-400 hover:text-red-400"
           >
             Clear filters
@@ -247,7 +221,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((player) => {
             const Icon = CATEGORY_ICONS[player.category];
-            const yearTier = getYearTier(player.year);
             return (
               <article
                 key={player.id}
@@ -309,9 +282,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                         <Icon className="h-3.5 w-3.5" />
                         {formatCategory(player.category)}
                       </span>
-                      <span className="rounded-full bg-gold/10 px-2 py-0.5 font-bold text-gold">
-                        {yearTier.tier}
-                      </span>
                     </div>
                     <p className="mt-2 text-xl font-black text-gold drop-shadow-sm">
                       ${currency(player.base_price)}
@@ -344,22 +314,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                   onChange={(e) => setEditName(e.target.value)}
                   className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
                 />
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.14em] text-gray-400">
-                  Year / Tier
-                </label>
-                <select
-                  value={editYear}
-                  onChange={(e) => setEditYear(e.target.value as PlayerYear)}
-                  className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
-                >
-                  {YEAR_TIERS.map((yt) => (
-                    <option key={String(yt.value)} value={String(yt.value)}>
-                      {yt.label} — {yt.tier} (${currency(yt.basePrice)})
-                    </option>
-                  ))}
-                </select>
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.14em] text-gray-400">

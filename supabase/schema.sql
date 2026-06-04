@@ -26,15 +26,12 @@ create table if not exists app_users (
   created_at timestamptz not null default now()
 );
 
-create type player_year_t as enum ('1', '2', '3', '4', 'final');
-
 create table if not exists players (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   division division_t not null,
   category player_category_t not null,
-  year player_year_t not null default '1',
-  base_price integer not null,
+  base_price integer not null default 50,
   status player_status_t not null default 'available',
   card_image_url text,
   sold_price integer,
@@ -143,8 +140,14 @@ create table if not exists auction_participants (
 alter table auction_participants enable row level security;
 create policy "Participants can read own" on auction_participants for select using (true);
 create policy "Participants can insert own" on auction_participants for insert with check (true);
+create policy "Participants can update own" on auction_participants for update using (true);
 
 alter publication supabase_realtime add table auction_participants;
+
+-- ═══════════════════════════════════════════════
+-- MIGRATION: add connected column (run if upgrading)
+-- ═══════════════════════════════════════════════
+-- alter table auction_participants add column connected boolean not null default true;
 
 -- ═══════════════════════════════════════════════
 -- MIGRATION: add join_code column (run if upgrading)
@@ -152,5 +155,10 @@ alter publication supabase_realtime add table auction_participants;
 -- alter table auction_rooms add column join_code text;
 
 -- ═══════════════════════════════════════════════
--- MIGRATION: add year column (run if upgrading)
+-- MIGRATION: add ended_at column (run if upgrading)
 -- ═══════════════════════════════════════════════
+-- alter table auction_rooms add column ended_at timestamptz;
+--
+-- During end auction, set ended_at = now() to mark completion
+-- instead of deleting purchases. Purchases remain visible in
+-- auction history until admin explicitly resets teams.

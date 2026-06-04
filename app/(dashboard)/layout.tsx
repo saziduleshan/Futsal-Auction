@@ -6,7 +6,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const url = headersList.get('x-invoke-path') ||
               headersList.get('x-pathname') ||
               headersList.get('next-url') || '';
-  const bgImage = url.includes('/admin/players') ? '/Player%20Database.jpg' : undefined;
+  const noBg = url.includes('/auction');
 
-  return <SiteShell bgImage={bgImage}>{children}</SiteShell>;
+  return <SiteShell noBg={noBg}>{children}</SiteShell>;
 }

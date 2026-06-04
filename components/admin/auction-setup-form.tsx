@@ -42,7 +42,7 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
       });
       const payload = await res.json();
       if (res.ok) {
-        router.push(`/admin/auction-room/${division}?teams=${teamCount}&purse=${purseSize}&players=${playerSelection}`);
+        router.push('/auction');
       } else {
         setError(payload.message || 'Failed to create auction room.');
       }

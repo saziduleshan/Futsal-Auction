@@ -1,6 +1,5 @@
 export type Division = 'men' | 'women';
 export type PlayerCategory = 'defender' | 'midfielder' | 'forward' | 'goalkeeper';
-export type PlayerYear = '1' | '2' | '3' | '4' | 'final';
 export type AuctionStatus = 'idle' | 'live' | 'sold' | 'unsold';
 export type UserRole = 'admin' | 'team';
 
@@ -26,7 +25,6 @@ export interface Player {
   name: string;
   division: Division;
   category: PlayerCategory;
-  year: PlayerYear;
   base_price: number;
   status: 'available' | 'sold' | 'unsold';
   card_image_url: string | null;
@@ -45,6 +43,7 @@ export interface AuctionRoom {
   status: AuctionStatus;
   nominated_at: string | null;
   join_code: string | null;
+  ended_at: string | null;
 }
 
 export interface Bid {

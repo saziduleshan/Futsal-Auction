@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
-  const { roomId } = await request.json();
+  const { roomId, increment } = await request.json();
   if (!roomId) {
     return NextResponse.json({ message: 'roomId is required' }, { status: 400 });
   }
@@ -35,7 +35,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'You already have the highest bid.' }, { status: 400 });
   }
 
-  const amount = room.current_highest_team_id ? Number(room.current_bid) + Number(room.bid_increment) : Number(room.current_bid);
+  const bidIncrement = increment ?? Number(room.bid_increment);
+  const amount = Number(room.current_bid) + Number(bidIncrement);
   if (team.purse < amount) {
     return NextResponse.json({ message: 'Insufficient purse for this bid.' }, { status: 400 });
   }

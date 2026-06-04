@@ -6,8 +6,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const teko = Teko({ subsets: ['latin'], variable: '--font-teko' });
 
 export const metadata: Metadata = {
-  title: 'Joga Bonito 2026',
-  description: 'A vibrant, real-time auction platform for men and women futsal tournaments — powered by Joga Bonito spirit.'
+  title: 'The Genesis',
+  description: 'The Genesis — real-time futsal auction platform.'
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

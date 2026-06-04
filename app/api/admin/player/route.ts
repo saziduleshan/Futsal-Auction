@@ -3,8 +3,6 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { slugify } from '@/lib/utils';
-import { getYearTier } from '@/lib/constants';
-import type { PlayerYear } from '@/lib/types';
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -16,14 +14,10 @@ export async function POST(request: Request) {
   const name = String(formData.get('name') ?? '').trim();
   const division = String(formData.get('division') ?? '').trim();
   const position = String(formData.get('position') ?? '').trim();
-  const yearRaw = formData.get('year');
   const image = formData.get('image');
 
-  const year = yearRaw as PlayerYear;
-  const yearTier = getYearTier(year);
-
-  if (!name || !division || !position || !yearTier) {
-    return NextResponse.json({ message: 'Name, division, position, and year are required.' }, { status: 400 });
+  if (!name || !division || !position) {
+    return NextResponse.json({ message: 'Name, division, and position are required.' }, { status: 400 });
   }
 
   const supabase = createServerSupabase();
@@ -51,8 +45,7 @@ export async function POST(request: Request) {
     name,
     division,
     category: position,
-    year,
-    base_price: yearTier.basePrice,
+    base_price: 50,
     card_image_url: cardImageUrl,
     created_by: session.userId
   });

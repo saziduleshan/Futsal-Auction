@@ -2,16 +2,10 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { YEAR_TIERS, getYearTier } from '@/lib/constants';
-import type { PlayerYear } from '@/lib/types';
-
 export function PlayerForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
-  const [selectedYear, setSelectedYear] = useState<PlayerYear>('1');
-
-  const tier = getYearTier(selectedYear);
 
   async function onSubmit(formData: FormData) {
     setMessage(null);
@@ -57,31 +51,10 @@ export function PlayerForm() {
             <option value="goalkeeper">Goalkeeper</option>
           </select>
         </label>
-        <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Year</span>
-          <select
-            name="year"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value as PlayerYear)}
-            className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
-          >
-            {YEAR_TIERS.map((yt) => (
-              <option key={String(yt.value)} value={String(yt.value)}>{yt.label}</option>
-            ))}
-          </select>
-        </label>
-        <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Tier</span>
-          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-sm font-bold uppercase tracking-[0.12em] text-gold">
-            {tier.tier}
-          </div>
-        </label>
-        <label className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Base price</span>
-          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-xl font-black text-gold">
-            ${tier.basePrice}
-          </div>
-        </label>
+          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-xl font-black text-gold">$50</div>
+        </div>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Player card image</span>
           <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-black file:mr-3 file:rounded-full file:border-0 file:bg-gray-800 file:px-3 file:py-1 file:text-sm file:text-white backdrop-blur-sm transition hover:border-gold/40" />

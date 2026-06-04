@@ -2,125 +2,95 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { LogIn, Shield, User } from 'lucide-react';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { generatePaperGradients } from '@/lib/paper-texture';
 
-export default function HomePage() {
-  const [mode, setMode] = useState<'admin' | 'manager'>('admin');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const router = useRouter();
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      router.push(data.redirect || '/auction');
-    } else {
-      const data = await res.json();
-      setError(data.message || 'Invalid credentials');
-    }
-  }
+export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const paperGradients = generatePaperGradients();
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-pitch">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url(/joga-bonito-bg.jpg)' }}
+        style={{ backgroundImage: 'url(/Genesisloginbackground.png)' }}
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40" />
 
-      <div className="relative z-10 flex min-h-screen items-center">
-        <div className="flex w-full max-w-3xl flex-col items-start px-8 md:px-16 lg:px-24">
-          <div className="w-full pl-8 md:pl-10">
-            <Image
-              src="/joga-bonito-logo.png"
-              alt="Joga Bonito"
-              width={1100}
-              height={340}
-              className="h-auto w-full"
-              priority
-            />
-          </div>
+      <div className="relative z-10 w-full max-w-2xl px-4">
+        <div className="text-center mb-8">
+          <Image
+            src="/Genesislogo.png"
+            alt="The Genesis"
+            width={700}
+            height={233}
+            className="mx-auto h-auto w-72 md:w-[26rem]"
+            priority
+          />
+        </div>
 
-          <p className="mt-6 whitespace-nowrap pl-8 text-2xl font-black tracking-[0.22em] text-gold drop-shadow-lg md:pl-10 md:text-3xl">
-            PLAY IT. LIVE IT. OWN IT.
-          </p>
-
-          <div className="mt-12 w-full max-w-md self-center rounded-3xl border border-white/20 bg-black/60 p-8 backdrop-blur-2xl md:p-10">
-            <div className="mb-6 flex rounded-2xl border border-white/15 bg-black/30 p-1.5">
-              <button
-                onClick={() => setMode('admin')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition ${
-                  mode === 'admin'
-                    ? 'bg-white text-[#1a1a1a] shadow-lg'
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                <Shield className="h-4 w-4" />
-                Admin
-              </button>
-              <button
-                onClick={() => setMode('manager')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition ${
-                  mode === 'manager'
-                    ? 'bg-white text-[#1a1a1a] shadow-lg'
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                <User className="h-4 w-4" />
-                Manager
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="text-left">
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-white/80">
-                  {mode === 'admin' ? 'Admin Username' : 'Manager Username'}
+        <div className="relative border-2 border-[#A3311C]/40 shadow-lg overflow-hidden bg-[#A3311C]">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: paperGradients,
+              backgroundBlendMode: 'difference'
+            }}
+          />
+          <div
+            className="absolute inset-0 opacity-40"
+            style={{
+              filter: 'invert(1)',
+              background: paperGradients,
+              backgroundBlendMode: 'difference'
+            }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              mixBlendMode: 'overlay',
+              backgroundColor: '#A3311C',
+              opacity: 0.65
+            }}
+          />
+          <div className="relative z-10 p-8 md:p-10">
+            <form action="/api/auth/login" method="post" className="space-y-5">
+              <div>
+                <label htmlFor="username" className="mb-2 block text-sm font-semibold uppercase tracking-[0.18em] text-white/80">
+                  Username
                 </label>
                 <input
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="username"
+                  name="username"
                   required
-                    className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-gold/60 focus:bg-black/50"
-                    placeholder={mode === 'admin' ? 'e.g. admin' : 'e.g. team-men-1'}
+                  className="w-full rounded-xl border border-white/30 bg-white/20 px-4 py-3 text-white outline-none transition placeholder:text-white/50 focus:border-white/60"
+                  placeholder="mteam1 or admin"
                 />
               </div>
-              <div className="text-left">
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-white/80">
+              <div>
+                <label htmlFor="password" className="mb-2 block text-sm font-semibold uppercase tracking-[0.18em] text-white/80">
                   Password
                 </label>
-                <input
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type="password"
-                  required
-                    className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3.5 text-white outline-none transition placeholder:text-white/40 focus:border-gold/60 focus:bg-black/50"
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    className="w-full rounded-xl border border-white/30 bg-white/20 px-4 py-3 pr-12 text-white outline-none transition placeholder:text-white/50 focus:border-white/60"
                     placeholder="••••••••"
-                />
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black/60 hover:text-black/80"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
-
-              {error && (
-                <p className="rounded-xl bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-200">
-                  {error}
-                </p>
-              )}
-
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-5 py-4 font-black uppercase tracking-[0.16em] text-[#1a1a1a] shadow-lg transition hover:bg-white"
-              >
+              <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-3 font-black uppercase tracking-[0.18em] text-white transition hover:bg-orange-600">
                 <LogIn className="h-5 w-5" />
-                Enter the Arena
+                Sign in
               </button>
             </form>
           </div>

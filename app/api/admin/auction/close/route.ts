@@ -63,6 +63,8 @@ export async function POST(request: Request) {
     if (teamUpdateError) {
       return NextResponse.json({ message: 'Sale recorded, but purse update failed.' }, { status: 500 });
     }
+
+    await supabase.from('players').update({ status: 'sold' }).eq('id', room.current_player_id);
   }
 
   const { error: roomResetError } = await supabase

@@ -22,7 +22,7 @@ export default async function LineupPage({ params }: { params: Promise<{ slug: s
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 md:px-6 md:py-12">
+    <div className="mx-auto max-w-7xl px-4 py-10 md:px-6 md:py-12">
       <Link
         href={`/teams/${incoming.slug}`}
         className="mb-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white/50 transition hover:text-white"
@@ -33,8 +33,8 @@ export default async function LineupPage({ params }: { params: Promise<{ slug: s
 
       <div className="mb-8">
         <span className="badge">{bundle.team.division === 'men' ? 'Male Futsal' : 'Female Futsal'}</span>
-        <h1 className="mt-4 text-4xl font-black uppercase tracking-[0.12em] text-gold md:text-5xl">{bundle.team.name}</h1>
-        <p className="mt-2 text-sm text-white/40">Drag and drop players onto the pitch to set your lineup</p>
+        <h1 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold md:text-4xl">{bundle.team.name}</h1>
+        <p className="mt-2 text-sm text-white/40">{bundle.players.length} player{bundle.players.length !== 1 ? 's' : ''} in squad</p>
       </div>
 
       <FutsalGround players={bundle.players} />
