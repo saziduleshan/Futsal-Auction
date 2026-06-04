@@ -176,6 +176,7 @@ export default async function AuctionPage() {
             currentPlayer={bundle.currentPlayer}
             teams={bundle.teams}
             recentBids={bundle.recentBids}
+            teamSlug={teamSlug}
             purchases={purchases}
             teamPurse={teamInfo?.purse ?? 0}
           />

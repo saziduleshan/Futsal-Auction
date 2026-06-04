@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { LayoutDashboard, LogOut, Shield } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 
-export async function SiteShell({ children, bgImage, noBg }: { children: React.ReactNode; bgImage?: string; noBg?: boolean }) {
+export async function SiteShell({ children, bgImage }: { children: React.ReactNode; bgImage?: string }) {
   const session = await getSession();
 
   return (
@@ -52,20 +52,14 @@ export async function SiteShell({ children, bgImage, noBg }: { children: React.R
             </nav>
           </div>
         </header>
-        {noBg ? (
-          <main className="min-h-[calc(100vh-97px)] bg-white">
-            {children}
-          </main>
-        ) : (
-          <main className="relative min-h-[calc(100vh-97px)]">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${bgImage || '/Allpagebackground.png'})` }}
-            />
-            <div className="absolute inset-0 bg-black/30" />
-            <div className="relative z-10">{children}</div>
-          </main>
-        )}
+        <main className="relative min-h-[calc(100vh-97px)]">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${bgImage || '/Allpagebackground.png'})` }}
+          />
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="relative z-10">{children}</div>
+        </main>
       </div>
     </div>
   );

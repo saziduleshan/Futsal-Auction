@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
 import Image from 'next/image';
-import { ChevronDown, ChevronUp, Gavel, Hourglass, Loader2, ShoppingBag } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
 import type { AuctionRoom, Bid, Player, Team, UserRole } from '@/lib/types';
@@ -22,6 +23,7 @@ interface LiveAuctionBoardProps {
   currentPlayer: Player | null;
   teams: Team[];
   recentBids: Bid[];
+  teamSlug?: string;
   purchases?: TeamPurchaseDisplay[];
   teamPurse?: number;
 }
@@ -88,28 +90,53 @@ function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDis
   );
 }
 
-export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room, currentPlayer, teams, recentBids, purchases, teamPurse }: LiveAuctionBoardProps) {
+export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room, currentPlayer, teams, recentBids, teamSlug, purchases, teamPurse }: LiveAuctionBoardProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [ended, setEnded] = useState(false);
 
   const [liveRoom, setLiveRoom] = useState(room);
+  const [livePlayer, setLivePlayer] = useState<Player | null>(currentPlayer);
+
+  const playerRef = useRef(livePlayer);
+  playerRef.current = livePlayer;
 
   useEffect(() => {
     const supabase = createBrowserSupabase();
+    let mounted = true;
+
+    async function fetchPlayer(playerId: string | null) {
+      if (!playerId) {
+        if (mounted) setLivePlayer(null);
+        return;
+      }
+      const { data } = await supabase
+        .from('players')
+        .select('*')
+        .eq('id', playerId)
+        .single();
+      if (data && mounted) setLivePlayer(data as Player);
+    }
 
     const channel = supabase
-      .channel(`team-auction-${room.division}`)
+      .channel(`team-auction-live-${room.division}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${room.division}` }, (payload) => {
         const updated = payload.new as AuctionRoom;
+        if (!mounted) return;
         setLiveRoom(updated);
-        if (updated.current_player_id !== room.current_player_id) {
-          window.location.reload();
+        if (updated.ended_at) setEnded(true);
+        if (updated.current_player_id !== playerRef.current?.id) {
+          fetchPlayer(updated.current_player_id);
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `division=eq.${room.division}` }, () => {
-        window.location.reload();
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `division=eq.${room.division}` }, (payload) => {
+        const updated = payload.new as Player;
+        if (!mounted) return;
+        setLivePlayer((prev) => (prev?.id === updated.id ? updated : prev));
       })
       .subscribe();
+
+    fetchPlayer(room.current_player_id);
 
     const interval = setInterval(async () => {
       const { data } = await supabase
@@ -117,10 +144,18 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         .select('*')
         .eq('division', room.division)
         .single();
-      if (data) setLiveRoom(data as AuctionRoom);
+      if (data && mounted) {
+        const roomData = data as AuctionRoom;
+        setLiveRoom(roomData);
+        if (roomData.ended_at) setEnded(true);
+        if (roomData.current_player_id !== playerRef.current?.id) {
+          fetchPlayer(roomData.current_player_id);
+        }
+      }
     }, 1500);
 
     return () => {
+      mounted = false;
       supabase.removeChannel(channel);
       clearInterval(interval);
     };
@@ -131,7 +166,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     return teams.find((t) => t.id === liveRoom.current_highest_team_id) ?? null;
   }, [liveRoom.current_highest_team_id, teams]);
 
-  const canBid = viewerRole === 'team' && viewerTeamId && liveRoom.status === 'live' && currentPlayer;
+  const canBid = viewerRole === 'team' && viewerTeamId && liveRoom.status === 'live' && livePlayer;
   const isLeading = liveRoom.current_highest_team_id === viewerTeamId;
 
   const spent = useMemo(() => (purchases ?? []).reduce((sum, p) => sum + p.price, 0), [purchases]);
@@ -157,7 +192,26 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     });
   }
 
-  if (!currentPlayer) {
+  if (ended) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-6 py-24">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-12 text-center backdrop-blur-sm">
+          <p className="text-4xl font-black uppercase tracking-[0.12em] text-white">Auction has ended</p>
+          <p className="mt-3 text-sm text-white/40">Thank you for participating in The Genesis auction.</p>
+          {teamSlug ? (
+            <Link
+              href={`/teams/${teamSlug}`}
+              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-cyan px-8 py-3.5 font-bold text-black transition hover:bg-cyan/90"
+            >
+              Return to team home
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (!livePlayer) {
     return (
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-8">
         <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-12 text-center backdrop-blur-sm">
@@ -174,10 +228,10 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     <div className="mx-auto flex max-w-5xl flex-col items-center gap-10">
       <div className="flex items-center gap-20">
         <div className="w-[30rem] animate-slide-from-left">
-          {currentPlayer.card_image_url ? (
+          {livePlayer.card_image_url ? (
             <Image
-              src={currentPlayer.card_image_url}
-              alt={currentPlayer.name}
+              src={livePlayer.card_image_url}
+              alt={livePlayer.name}
               width={600}
               height={750}
               className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
@@ -192,11 +246,11 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         <div className="text-center">
           <p className="text-lg font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Current price</p>
           <p className="mt-3 text-7xl font-black drop-shadow-sm transition-all" style={{ color: '#264153' }}>
-            ${currency(liveRoom.current_bid || currentPlayer.base_price)}
+            ${currency(liveRoom.current_bid || livePlayer.base_price)}
           </p>
-          <p className="mt-10 text-4xl font-black" style={{ color: '#b6360b' }}>{currentPlayer.name}</p>
+          <p className="mt-10 text-4xl font-black" style={{ color: '#b6360b' }}>{livePlayer.name}</p>
           <p className="mt-3 text-lg font-bold uppercase tracking-[0.08em]" style={{ color: '#264153' }}>
-            {formatCategory(currentPlayer.category)}
+            {formatCategory(livePlayer.category)}
           </p>
           <p className="mt-8 text-6xl font-black drop-shadow-sm" style={{ color: '#264153' }}>
             {highestBidder ? highestBidder.name : 'No bids'}
