@@ -3,5 +3,9 @@ node_modules
 tsconfig.tsbuildinfo
 next-env.d.ts
 *.png
+!public/Genesisloginbackground.png
+!public/Genesislogo.png
+!public/Navbarlogo.png
+!public/Allpagebackground.png
 .env.local
 .env*.local
