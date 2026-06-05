@@ -128,6 +128,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, async (payload) => {
           if (!mounted) return;
           const p = payload.new as Purchase;
+          if (p.team_id !== viewerTeamId) return;
           const { data: player } = await supabase.from('players').select('name').eq('id', p.player_id).single<{ name: string }>();
           setLivePurchases((prev) => [...prev, { playerName: player?.name ?? 'Unknown', price: p.price }]);
         })
