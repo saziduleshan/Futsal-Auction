@@ -7,7 +7,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { LiveAuctionBoard } from '@/components/auction/live-auction-board';
 import { TeamAuctionGuard } from '@/components/auction/team-auction-guard';
 import { AuctionRoomManager } from '@/components/auction/auction-room-manager';
-import type { Division, Purchase, Player, Team, AuctionRoom } from '@/lib/types';
+import type { Bid, Division, Purchase, Player, Team, AuctionRoom } from '@/lib/types';
 
 interface TeamPurchaseDisplay {
   playerName: string;
@@ -20,6 +20,7 @@ interface DivisionBundle {
   players: Player[];
   purchases: Purchase[];
   teams: Team[];
+  bids: Bid[];
 }
 
 export default async function AuctionPage() {
@@ -60,19 +61,18 @@ export default async function AuctionPage() {
           supabase.from('teams').select('*').eq('division', division).order('name').returns<Team[]>()
         ]);
 
-        const { data: purchases } = await supabase
-          .from('purchases')
-          .select('*')
-          .eq('room_id', room!.id)
-          .order('created_at')
-          .returns<Purchase[]>();
+        const [purchasesResult, bidsResult] = await Promise.all([
+          supabase.from('purchases').select('*').eq('room_id', room!.id).order('created_at').returns<Purchase[]>(),
+          supabase.from('bids').select('*').eq('room_id', room!.id).order('created_at', { ascending: false }).limit(20).returns<Bid[]>()
+        ]);
 
         return {
           division,
           room: room!,
           players: availablePlayers ?? [],
-          purchases: purchases ?? [],
-          teams: teams ?? []
+          purchases: purchasesResult.data ?? [],
+          teams: teams ?? [],
+          bids: bidsResult.data ?? []
         };
       })
     );
@@ -87,6 +87,7 @@ export default async function AuctionPage() {
             players={bundle.players}
             purchases={bundle.purchases}
             teams={bundle.teams}
+            initialBids={bundle.bids}
           />
         ))}
       </div>

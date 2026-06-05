@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { AuctionRoomManager } from '@/components/auction/auction-room-manager';
-import type { Division, Purchase } from '@/lib/types';
+import type { Bid, Division, Purchase } from '@/lib/types';
 
 export default async function AuctionRoomPage({ params }: { params: Promise<{ division: string }> }) {
   await requireAdmin();
@@ -34,6 +34,13 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
     .eq('room_id', room.id)
     .order('created_at');
 
+  const { data: bids } = await supabase
+    .from('bids')
+    .select('*')
+    .eq('room_id', room.id)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
   return (
     <>
       <div className="fixed inset-0 z-[-1] bg-white" />
@@ -44,6 +51,7 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
           players={availablePlayers}
           purchases={purchases ?? []}
           teams={teams}
+          initialBids={bids as Bid[] ?? []}
         />
       </div>
     </>

@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
-import type { AuctionRoom, Player, Team, PlayerCategory, Purchase } from '@/lib/types';
+import type { AuctionRoom, Bid, Player, Team, PlayerCategory, Purchase } from '@/lib/types';
 
 const POSITIONS: { key: PlayerCategory; label: string; Icon: typeof Shield }[] = [
   { key: 'defender', label: 'Defenders', Icon: Shield },
@@ -25,9 +25,10 @@ interface AuctionRoomManagerProps {
   players: Player[];
   purchases: Purchase[];
   teams: Team[];
+  initialBids?: Bid[];
 }
 
-export function AuctionRoomManager({ division, room: initialRoom, players, purchases: initialPurchases, teams }: AuctionRoomManagerProps) {
+export function AuctionRoomManager({ division, room: initialRoom, players, purchases: initialPurchases, teams, initialBids = [] }: AuctionRoomManagerProps) {
   const router = useRouter();
 
   const [room, setRoom] = useState(initialRoom);
@@ -41,6 +42,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [isEnding, setIsEnding] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [managersOpen, setManagersOpen] = useState(false);
+  const [bids, setBids] = useState<Bid[]>(initialBids);
   const [notification, setNotification] = useState<{
     type: 'sold' | 'unsold';
     playerName: string;
@@ -81,6 +83,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const bidCount = room.current_bid || (currentPlayer?.base_price ?? 0);
 
+  const roomPlayerRef = useRef(initialRoom.current_player_id);
+  roomPlayerRef.current = room.current_player_id;
+
   useEffect(() => {
     const supabase = createBrowserSupabase();
     const channel = supabase
@@ -88,6 +93,11 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${room.division}` }, (payload) => {
         const updated = payload.new as AuctionRoom;
         setRoom(updated);
+        if (updated.current_player_id && updated.current_player_id !== roomPlayerRef.current) {
+          setBids([]);
+          setNotification(null);
+          setMessage(null);
+        }
       })
       .subscribe();
 
@@ -110,6 +120,26 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
     return () => { supabase.removeChannel(channel); };
   }, [division, initialRoom.id]);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+    const channel = supabase
+      .channel(`bids-${initialRoom.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bids', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        const newBid = payload.new as Bid;
+        setBids((prev) => {
+          if (prev.some((b) => b.id === newBid.id)) return prev;
+          return [newBid, ...prev];
+        });
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'bids', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        const deleted = payload.old as Bid;
+        setBids((prev) => prev.filter((b) => b.id !== deleted.id));
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [initialRoom.id]);
 
   const broadcastOutcome = useCallback(async (outcome: 'sold' | 'unsold', playerName: string, teamName?: string, price?: number) => {
     const supabase = createBrowserSupabase();
@@ -498,6 +528,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               Mark Sold
             </button>
           </div>
+          <BidHistoryPanel
+            bids={bids}
+            teams={liveTeams}
+            room={room}
+            currentPlayer={currentPlayer}
+            initialRoomId={initialRoom.id}
+          />
         </div>
       )}
 
@@ -597,6 +634,95 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function BidHistoryPanel({
+  bids, teams, room, currentPlayer, initialRoomId
+}: {
+  bids: Bid[];
+  teams: Team[];
+  room: AuctionRoom;
+  currentPlayer: Player | null;
+  initialRoomId: string;
+}) {
+  const [isResetting, setIsResetting] = useState(false);
+
+  const playerBids = useMemo(() => {
+    if (!room.current_player_id) return [];
+    return bids.filter((b) => b.player_id === room.current_player_id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [bids, room.current_player_id]);
+
+  async function handleResetBid() {
+    if (!confirm('Reset the most recent bid? This will remove the latest bid and restore the previous state.')) return;
+    setIsResetting(true);
+    try {
+      const res = await fetch('/api/admin/auction/reset-bid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomId: initialRoomId })
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        alert(payload.message ?? 'Failed to reset bid.');
+      }
+    } catch {
+      alert('Could not reset bid.');
+    } finally {
+      setIsResetting(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto mt-8 w-full max-w-2xl">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-gray-500">Bid History</h3>
+        {playerBids.length > 0 && (
+          <button
+            onClick={handleResetBid}
+            disabled={isResetting}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 px-3 py-1.5 text-xs font-bold text-orange-600 transition hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40"
+          >
+            {isResetting ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
+            Reset Recent Bid
+          </button>
+        )}
+      </div>
+      <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
+        {playerBids.length === 0 ? (
+          <div className="px-4 py-3 text-sm text-gray-400">No bids yet for this lot.</div>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="px-4 py-2.5 font-bold text-gray-500">Team</th>
+                <th className="px-4 py-2.5 text-right font-bold text-gray-500">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {playerBids.slice(0, 10).map((bid) => {
+                const team = teams.find((t) => t.id === bid.team_id);
+                const isHighest = bid.team_id === room.current_highest_team_id;
+                return (
+                  <tr key={bid.id} className="border-b border-gray-100 last:border-0">
+                    <td className={`px-4 py-2.5 ${isHighest ? 'font-bold text-amber' : 'text-gray-700'}`}>
+                      {team?.name ?? 'Unknown'}
+                      {isHighest ? ' (highest)' : ''}
+                    </td>
+                    <td className={`px-4 py-2.5 text-right font-bold ${isHighest ? 'text-lime' : 'text-gray-800'}`}>
+                      ${currency(bid.amount)}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+      {!room.current_player_id && (
+        <p className="mt-2 text-xs text-gray-400">Waiting for a player to be nominated...</p>
       )}
     </div>
   );

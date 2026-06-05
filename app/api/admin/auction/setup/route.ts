@@ -51,6 +51,11 @@ export async function POST(request: Request) {
     })
     .eq('id', room.id);
 
+  await supabase
+    .from('players')
+    .update({ status: 'available', sold_price: null, sold_to_team_id: null })
+    .eq('division', division);
+
   if (teamCount && purseSize) {
     const { data: teams } = await supabase
       .from('teams')

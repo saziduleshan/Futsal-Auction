@@ -95,6 +95,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [ended, setEnded] = useState(false);
+  const [selectedIncrement, setSelectedIncrement] = useState<number | null>(null);
 
   const [liveRoom, setLiveRoom] = useState(room);
   const [livePlayer, setLivePlayer] = useState<Player | null>(currentPlayer);
@@ -213,6 +214,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   async function placeBid(increment: number) {
     if (!canBid) return;
     setMessage(null);
+    setSelectedIncrement(null);
 
     const newBid = Number(liveRoom.current_bid) + increment;
     const prevRoom = liveRoom;
@@ -244,6 +246,11 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         }
       }
     });
+  }
+
+  function handlePlaceBid() {
+    if (selectedIncrement === null) return;
+    placeBid(selectedIncrement);
   }
 
   if (ended) {
@@ -332,15 +339,23 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
 
       <div className="flex flex-wrap items-center justify-center gap-3">
         {INCREMENTS.map((inc) => {
-          const disabled = !canBid || isPending || isLeading;
+          const isSelected = selectedIncrement === inc;
+          const isDisabled = !canBid || isPending || isLeading;
           const bidAmount = Number(liveRoom.current_bid) + inc;
           const exceedsPurse = bidAmount > remaining;
           return (
             <button
               key={inc}
-              onClick={() => placeBid(inc)}
-              disabled={disabled || exceedsPurse}
-              className="flex items-center gap-2 rounded-xl border-2 border-white/20 bg-white/10 px-8 py-3.5 font-black text-white shadow-sm backdrop-blur-sm transition hover:border-cyan hover:bg-cyan/20 disabled:cursor-not-allowed disabled:opacity-30"
+              onClick={() => {
+                if (isDisabled || exceedsPurse) return;
+                setSelectedIncrement(isSelected ? null : inc);
+              }}
+              disabled={isDisabled || exceedsPurse}
+              className={`flex items-center gap-2 rounded-xl border-2 px-8 py-3.5 font-black text-white shadow-sm backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-30 ${
+                isSelected
+                  ? 'border-amber bg-amber hover:bg-amber/90'
+                  : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/20'
+              }`}
             >
               +${inc}
             </button>
@@ -348,32 +363,27 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         })}
       </div>
 
-      {message ? <p className="text-sm font-semibold text-white/70">{message}</p> : null}
-
       {isLeading ? (
         <p className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-5 py-2 text-sm font-bold text-amber">
           <Gavel className="h-4 w-4" /> You are the highest bidder
         </p>
+      ) : selectedIncrement !== null && !isPending ? (
+        <button
+          onClick={handlePlaceBid}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80"
+        >
+          <Gavel className="h-5 w-5" />
+          {liveRoom.current_highest_team_id ? 'Place Bid' : 'Place First Bid'}
+        </button>
       ) : null}
 
-      <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
+      {isPending && (
+        <p className="text-sm font-semibold text-white/70">Placing bid...</p>
+      )}
 
-      <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
-        <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.1em] text-white/50">Recent bids</h3>
-        <div className="space-y-2">
-          {recentBids.length ? recentBids.slice(0, 5).map((bid) => {
-            const team = teams.find((item) => item.id === bid.team_id);
-            return (
-              <div key={bid.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm">
-                <span className={team?.id === liveRoom.current_highest_team_id ? 'font-semibold text-amber' : 'text-white/70'}>
-                  {team?.name ?? 'Unknown'}
-                </span>
-                <span className="font-bold text-lime">${currency(bid.amount)}</span>
-              </div>
-            );
-          }) : <p className="text-sm text-white/40">No bids yet for this lot.</p>}
-        </div>
-      </div>
+      {message ? <p className="text-sm font-semibold text-white/70">{message}</p> : null}
+
+      <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
     </div>
   );
 }
