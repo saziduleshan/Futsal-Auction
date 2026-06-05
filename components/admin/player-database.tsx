@@ -95,7 +95,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
     } finally {
       setSaving(false);
     }
-  }, [editPlayer, editName, editImage, closeEdit]);
+  }, [editPlayer, editName, editBasePrice, editImage, closeEdit]);
 
   const handleDelete = useCallback(async () => {
     if (!deletePlayerId) return;
