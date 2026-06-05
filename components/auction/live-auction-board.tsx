@@ -13,7 +13,7 @@ interface TeamPurchaseDisplay {
   price: number;
 }
 
-const INCREMENTS = [50, 100, 500, 1000];
+const INCREMENTS = [10, 20, 50, 100, 500, 1000];
 
 interface LiveAuctionBoardProps {
   divisionLabel: string;
@@ -337,45 +337,58 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        {INCREMENTS.map((inc) => {
-          const isSelected = selectedIncrement === inc;
-          const isDisabled = !canBid || isPending || isLeading;
-          const bidAmount = Number(liveRoom.current_bid) + inc;
-          const exceedsPurse = bidAmount > remaining;
-          return (
-            <button
-              key={inc}
-              onClick={() => {
-                if (isDisabled || exceedsPurse) return;
-                setSelectedIncrement(isSelected ? null : inc);
-              }}
-              disabled={isDisabled || exceedsPurse}
-              className={`flex items-center gap-2 rounded-xl border-2 px-8 py-3.5 font-black text-white shadow-sm backdrop-blur-sm transition disabled:cursor-not-allowed disabled:opacity-30 ${
-                isSelected
-                  ? 'border-amber bg-amber hover:bg-amber/90'
-                  : 'border-white/20 bg-white/10 hover:border-white/40 hover:bg-white/20'
-              }`}
-            >
-              +${inc}
-            </button>
-          );
-        })}
-      </div>
-
-      {isLeading ? (
-        <p className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-5 py-2 text-sm font-bold text-amber">
-          <Gavel className="h-4 w-4" /> You are the highest bidder
-        </p>
-      ) : selectedIncrement !== null && !isPending ? (
+      {!liveRoom.current_highest_team_id ? (
         <button
-          onClick={handlePlaceBid}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80"
+          onClick={() => placeBid(0)}
+          disabled={!canBid || isPending}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Gavel className="h-5 w-5" />
-          {liveRoom.current_highest_team_id ? 'Place Bid' : 'Place First Bid'}
+          Place First Bid
         </button>
-      ) : null}
+      ) : (
+        <>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {INCREMENTS.map((inc) => {
+              const isSelected = selectedIncrement === inc;
+              const isDisabled = !canBid || isPending || isLeading;
+              const bidAmount = Number(liveRoom.current_bid) + inc;
+              const exceedsPurse = bidAmount > remaining;
+              return (
+                <button
+                  key={inc}
+                  onClick={() => {
+                    if (isDisabled || exceedsPurse) return;
+                    setSelectedIncrement(isSelected ? null : inc);
+                  }}
+                  disabled={isDisabled || exceedsPurse}
+                  className={`flex items-center gap-2 rounded-xl border-2 px-6 py-3 font-black text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-30 ${
+                    isSelected
+                      ? 'border-amber bg-amber hover:bg-amber/90'
+                      : 'border-gray-600 bg-gray-800 hover:border-gray-500 hover:bg-gray-700'
+                  }`}
+                >
+                  +${inc}
+                </button>
+              );
+            })}
+          </div>
+
+          {isLeading ? (
+            <p className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-5 py-2 text-sm font-bold text-amber">
+              <Gavel className="h-4 w-4" /> You are the highest bidder
+            </p>
+          ) : selectedIncrement !== null && !isPending ? (
+            <button
+              onClick={handlePlaceBid}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80"
+            >
+              <Gavel className="h-5 w-5" />
+              Place Bid
+            </button>
+          ) : null}
+        </>
+      )}
 
       {isPending && (
         <p className="text-sm font-semibold text-white/70">Placing bid...</p>

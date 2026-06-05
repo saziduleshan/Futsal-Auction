@@ -25,10 +25,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'No active player in this room.' }, { status: 400 });
   }
 
-  if (!room.current_highest_team_id) {
-    return NextResponse.json({ message: 'No bids to reset.' }, { status: 400 });
-  }
-
   const { data: latestBid } = await supabase
     .from('bids')
     .select('id, team_id, amount')
@@ -36,7 +32,7 @@ export async function POST(request: Request) {
     .eq('player_id', room.current_player_id)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (!latestBid) {
     return NextResponse.json({ message: 'No bid found to reset.' }, { status: 400 });
@@ -72,25 +68,27 @@ export async function POST(request: Request) {
     if (updateError) {
       return NextResponse.json({ message: 'Bid deleted but room state update failed.' }, { status: 500 });
     }
-  } else {
-    const { data: player } = await supabase
-      .from('players')
-      .select('base_price')
-      .eq('id', room.current_player_id)
-      .single();
 
-    const { error: updateError } = await supabase
-      .from('auction_rooms')
-      .update({
-        current_bid: player?.base_price ?? 0,
-        current_highest_team_id: null
-      })
-      .eq('id', roomId);
-
-    if (updateError) {
-      return NextResponse.json({ message: 'Bid deleted but room state update failed.' }, { status: 500 });
-    }
+    return NextResponse.json({ message: 'Most recent bid has been reset.' });
   }
 
-  return NextResponse.json({ message: 'Most recent bid has been reset.' });
+  const { data: player } = await supabase
+    .from('players')
+    .select('base_price')
+    .eq('id', room.current_player_id)
+    .single();
+
+  const { error: updateError } = await supabase
+    .from('auction_rooms')
+    .update({
+      current_bid: player?.base_price ?? 0,
+      current_highest_team_id: null
+    })
+    .eq('id', roomId);
+
+  if (updateError) {
+    return NextResponse.json({ message: 'Bid deleted but room state update failed.' }, { status: 500 });
+  }
+
+  return NextResponse.json({ message: 'Bid reset to base price.' });
 }

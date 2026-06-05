@@ -52,8 +52,8 @@ export function PlayerForm() {
           </select>
         </label>
         <div className="space-y-2 md:col-span-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Base price</span>
-          <div className="flex h-[46px] items-center rounded-2xl border border-gold/20 bg-gold/5 px-4 text-xl font-black text-gold">$50</div>
+          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Base price ($)</span>
+          <input name="base_price" type="number" min={10} step={10} defaultValue={50} className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30" />
         </div>
         <label className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Player card image</span>

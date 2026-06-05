@@ -31,6 +31,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
 
   const [editName, setEditName] = useState('');
+  const [editBasePrice, setEditBasePrice] = useState(0);
   const [editImage, setEditImage] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -50,6 +51,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
   const openEdit = useCallback((player: Player) => {
     setEditPlayer(player);
     setEditName(player.name);
+    setEditBasePrice(player.base_price);
     setEditImage(null);
     setMenuOpenId(null);
   }, []);
@@ -74,6 +76,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
     try {
       const fd = new FormData();
       fd.set('name', editName);
+      fd.set('base_price', String(editBasePrice));
       if (editImage) fd.set('image', editImage);
 
       const res = await fetch(`/api/admin/player/${editPlayer.id}`, { method: 'PATCH', body: fd });
@@ -82,7 +85,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
       setPlayers((prev) =>
         prev.map((p) =>
           p.id === editPlayer.id
-            ? { ...p, name: editName, card_image_url: editImage ? URL.createObjectURL(editImage) : p.card_image_url }
+            ? { ...p, name: editName, base_price: editBasePrice, card_image_url: editImage ? URL.createObjectURL(editImage) : p.card_image_url }
             : p
         )
       );
@@ -312,6 +315,19 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
+                  className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-[0.14em] text-gray-400">
+                  Base price ($)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={10}
+                  value={editBasePrice}
+                  onChange={(e) => setEditBasePrice(parseInt(e.target.value, 10) || 0)}
                   className="w-full rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-gold focus:ring-1 focus:ring-gold/30"
                 />
               </div>

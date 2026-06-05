@@ -14,6 +14,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const formData = await request.formData();
   const name = String(formData.get('name') ?? '').trim();
   const image = formData.get('image');
+  const rawBasePrice = formData.get('base_price');
 
   if (!name) {
     return NextResponse.json({ message: 'Name is required.' }, { status: 400 });
@@ -44,6 +45,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   if (cardImageUrl) {
     updateData.card_image_url = cardImageUrl;
+  }
+
+  if (rawBasePrice) {
+    const parsed = parseInt(String(rawBasePrice), 10);
+    if (!isNaN(parsed) && parsed >= 0) {
+      updateData.base_price = parsed;
+    }
   }
 
   const { error } = await supabase.from('players').update(updateData).eq('id', id);
