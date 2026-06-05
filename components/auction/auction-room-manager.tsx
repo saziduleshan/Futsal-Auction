@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -35,18 +35,36 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(null);
   const [playerIndex, setPlayerIndex] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+  const [batchQueue, setBatchQueue] = useState<Player[]>([]);
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [managersOpen, setManagersOpen] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: 'sold' | 'unsold';
+    playerName: string;
+    teamName?: string;
+    price?: number;
+  } | null>(null);
 
-  const batchPlayers = useMemo(() => {
-    if (!activeBatch) return [];
-    return players.filter((p) => p.category === activeBatch);
-  }, [players, activeBatch]);
+  const advanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const notificationChannelRef = useRef<ReturnType<ReturnType<typeof createBrowserSupabase>['channel']> | null>(null);
+  const playerIndexRef = useRef(playerIndex);
+  playerIndexRef.current = playerIndex;
+  const batchQueueRef = useRef(batchQueue);
+  batchQueueRef.current = batchQueue;
 
-  const isBatchComplete = activeBatch !== null && playerIndex >= batchPlayers.length;
+  useEffect(() => {
+    return () => {
+      if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
+    };
+  }, []);
+
+  const isBatchComplete = useMemo(() => {
+    if (activeBatch === null) return false;
+    return playerIndex >= batchQueue.length && batchQueue.length > 0;
+  }, [activeBatch, playerIndex, batchQueue]);
 
   const batchedCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -61,42 +79,59 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     return teams.find((t) => t.id === room.current_highest_team_id) ?? null;
   }, [room.current_highest_team_id, teams]);
 
+  const bidCount = room.current_bid || (currentPlayer?.base_price ?? 0);
+
   useEffect(() => {
     const supabase = createBrowserSupabase();
-
     const channel = supabase
       .channel(`auction-room-${room.division}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'auction_rooms',
-        filter: `division=eq.${room.division}`
-      }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${room.division}` }, (payload) => {
         const updated = payload.new as AuctionRoom;
         setRoom(updated);
       })
       .subscribe();
 
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('auction_rooms')
-        .select('*')
-        .eq('division', room.division)
-        .single();
-      if (data) setRoom(data as AuctionRoom);
-    }, 1500);
-
     return () => {
       supabase.removeChannel(channel);
-      clearInterval(interval);
     };
   }, [room.division]);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+    const channel = supabase
+      .channel(`purchases-${division}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        const newPurchase = payload.new as Purchase;
+        if (payload.eventType === 'INSERT') {
+          setPurchases((prev) => [...prev, newPurchase]);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [division, initialRoom.id]);
+
+  const broadcastOutcome = useCallback(async (outcome: 'sold' | 'unsold', playerName: string, teamName?: string, price?: number) => {
+    const supabase = createBrowserSupabase();
+    const ch = supabase.channel(`broadcast-${division}`);
+    notificationChannelRef.current = ch;
+    ch.subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        ch.send({
+          type: 'broadcast',
+          event: 'close-outcome',
+          payload: { type: outcome, playerName, teamName, price }
+        });
+      }
+    });
+  }, [division]);
 
   const runBatch = useCallback(async (position: PlayerCategory) => {
     setActiveBatch(position);
     setPlayerIndex(0);
     setCurrentPlayer(null);
     setMessage(null);
+    setNotification(null);
 
     const positionPlayers = players.filter((p) => p.category === position);
     if (positionPlayers.length === 0) {
@@ -104,6 +139,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       return;
     }
 
+    setBatchQueue(positionPlayers);
     await startPlayer(positionPlayers[0]);
   }, [players]);
 
@@ -114,20 +150,37 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       const res = await fetch('/api/admin/auction/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room.id, playerId: player.id })
+        body: JSON.stringify({ roomId: initialRoom.id, playerId: player.id })
       });
       const payload = await res.json();
       if (res.ok) {
         setCurrentPlayer(player);
       } else {
-        setMessage(payload.message || 'Failed to start player.');
+        if (payload.message?.toLowerCase().includes('not available')) {
+          setMessage(`${player.name} is no longer available. Skipping...`);
+          await new Promise((r) => setTimeout(r, 1500));
+          const q = batchQueueRef.current;
+          const idx = playerIndexRef.current;
+          const nextIndex = idx + 1;
+          if (nextIndex < q.length) {
+            setPlayerIndex(nextIndex);
+            await startPlayer(q[nextIndex]);
+          } else {
+            setActiveBatch(null);
+            setPlayerIndex(0);
+            setBatchQueue([]);
+            setMessage('All remaining players in this batch were already taken. Batch complete.');
+          }
+        } else {
+          setMessage(payload.message || 'Failed to start player.');
+        }
       }
     } catch {
       setMessage('Could not start the auction lot.');
     } finally {
       setIsStarting(false);
     }
-  }, [room.id]);
+  }, [initialRoom.id]);
 
   const closeLot = useCallback(async (outcome: 'sold' | 'unsold') => {
     if (!currentPlayer) return;
@@ -137,24 +190,33 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       const res = await fetch('/api/admin/auction/close', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: room.id, outcome })
+        body: JSON.stringify({ roomId: initialRoom.id, outcome })
       });
       const payload = await res.json();
       if (res.ok) {
-        const nextIndex = playerIndex + 1;
-        if (nextIndex < batchPlayers.length) {
-          setMessage(`Starting next ${formatCategory(currentPlayer.category)}...`);
-          const cp = currentPlayer;
-          setCurrentPlayer(null);
-          await new Promise((r) => setTimeout(r, 1500));
-          await startPlayer(batchPlayers[nextIndex]);
-          setPlayerIndex(nextIndex);
-        } else {
-          setCurrentPlayer(null);
-          setMessage('Batch complete! All players in this position have been auctioned.');
-          setActiveBatch(null);
-        }
-        router.refresh();
+        const playerName = currentPlayer.name;
+        const teamName = outcome === 'sold' ? highestBidder?.name : undefined;
+        const price = outcome === 'sold' ? room.current_bid : undefined;
+
+        setNotification({ type: outcome, playerName, teamName, price });
+        setCurrentPlayer(null);
+        broadcastOutcome(outcome, playerName, teamName, price);
+
+        if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
+        advanceTimeoutRef.current = setTimeout(async () => {
+          setNotification(null);
+          const q = batchQueueRef.current;
+          const idx = playerIndexRef.current;
+          const nextIndex = idx + 1;
+          if (nextIndex < q.length) {
+            setPlayerIndex(nextIndex);
+            await startPlayer(q[nextIndex]);
+          } else {
+            setActiveBatch(null);
+            setPlayerIndex(0);
+            setBatchQueue([]);
+          }
+        }, 7000);
       } else {
         setMessage(payload.message || 'Failed to close lot.');
       }
@@ -163,7 +225,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, room.id, playerIndex, batchPlayers, startPlayer, router]);
+  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer]);
 
   const endAuction = useCallback(async () => {
     if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
@@ -197,36 +259,27 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const teamPurses = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const team of teams) {
-      const spent = purchases
-        .filter((p) => p.team_id === team.id)
-        .reduce((sum, p) => sum + p.price, 0);
-      map[team.id] = team.purse;
-    }
+    for (const team of teams) map[team.id] = team.purse;
     return map;
   }, [teams, purchases]);
 
   const teamSpent = useMemo(() => {
     const map: Record<string, number> = {};
     for (const team of teams) {
-      map[team.id] = purchases
-        .filter((p) => p.team_id === team.id)
-        .reduce((sum, p) => sum + p.price, 0);
+      map[team.id] = purchases.filter((p) => p.team_id === team.id).reduce((sum, p) => sum + p.price, 0);
     }
     return map;
   }, [teams, purchases]);
 
-  const teamPurchases = useMemo(() => {
+  const teamPurchasesMap = useMemo(() => {
     const map: Record<string, Purchase[]> = {};
-    for (const team of teams) {
-      map[team.id] = purchases.filter((p) => p.team_id === team.id);
-    }
+    for (const team of teams) map[team.id] = purchases.filter((p) => p.team_id === team.id);
     return map;
   }, [teams, purchases]);
 
   const maxPurchases = useMemo(() => {
-    return Math.max(14, ...teams.map((t) => teamPurchases[t.id]?.length ?? 0));
-  }, [teams, teamPurchases]);
+    return Math.max(14, ...teams.map((t) => teamPurchasesMap[t.id]?.length ?? 0));
+  }, [teams, teamPurchasesMap]);
 
   const getPlayerById = useCallback((id: string) => {
     return players.find((p) => p.id === id) ?? null;
@@ -236,10 +289,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     const supabase = createBrowserSupabase();
 
     async function fetchConnections() {
-      const { data } = await supabase
-        .from('auction_participants')
-        .select('team_id, connected')
-        .eq('room_id', room.id);
+      const { data } = await supabase.from('auction_participants').select('team_id, connected').eq('room_id', initialRoom.id);
       if (data) {
         const map: Record<string, boolean> = {};
         for (const p of data) map[p.team_id] = p.connected;
@@ -249,42 +299,27 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     fetchConnections();
 
     const channel = supabase
-      .channel(`participants-${room.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'auction_participants',
-        filter: `room_id=eq.${room.id}`
-      }, (payload) => {
+      .channel(`participants-${initialRoom.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_participants', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
         const row = payload.new as { team_id: string; connected: boolean } | null;
-        if (row) {
-          setConnections((prev) => ({ ...prev, [row.team_id]: row.connected }));
-        }
+        if (row) setConnections((prev) => ({ ...prev, [row.team_id]: row.connected }));
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [room.id]);
+  }, [initialRoom.id]);
+
+  const displayBid = room.current_bid || (currentPlayer?.base_price ?? 0);
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Link
-          href="/admin"
-          className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 hover:text-gray-600"
-        >
+        <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 hover:text-gray-600">
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to admin
         </Link>
         <Link href="/">
-          <Image
-            src="/Genesislogo.png"
-            alt="The Genesis"
-            width={220}
-            height={60}
-            className="h-14 w-auto"
-            priority
-          />
+          <Image src="/Genesislogo.png" alt="The Genesis" width={220} height={60} className="h-14 w-auto" priority />
         </Link>
         <div className="flex items-center gap-3">
           {activeBatch && (
@@ -330,25 +365,19 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 boxShadow: isActive ? '0 4px 12px rgba(245, 197, 66, 0.2)' : '0 1px 3px rgba(0,0,0,0.05)'
               }}
             >
-              {isActive && !isBatchComplete ? (
+              {isActive && !isBatchComplete && currentPlayer ? (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
                   <span className="relative inline-flex h-3 w-3 rounded-full bg-lime" />
                 </span>
               ) : null}
-              <div
-                className="flex h-9 w-9 items-center justify-center rounded-lg transition"
-                style={{ backgroundColor: isActive ? '#f5c542' : '#f3f4f6' }}
-              >
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg transition" style={{ backgroundColor: isActive ? '#f5c542' : '#f3f4f6' }}>
                 <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
               </div>
               <div>
-                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-gray-900'}`}>
-                  {label}
-                </p>
+                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-gray-900'}`}>{label}</p>
                 <p className="text-xs text-gray-900">{count} players</p>
               </div>
-
               {!inProgress && count > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
                   <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-1.5 text-xs font-bold text-white shadow-lg">
@@ -356,14 +385,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                   </span>
                 </div>
               )}
-
               {isActive && (
                 <div className="ml-auto">
                   {isBatchComplete ? (
                     <span className="rounded-full bg-lime/20 px-2 py-0.5 text-[10px] font-bold text-lime">Done</span>
                   ) : (
                     <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold text-gold">
-                      {Math.min(playerIndex + 1, batchPlayers.length)}/{batchPlayers.length}
+                      {Math.min(playerIndex + 1, batchQueue.length)}/{batchQueue.length}
                     </span>
                   )}
                 </div>
@@ -382,19 +410,29 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       </div>
 
       {message && (
-        <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700">
-          {message}
-        </div>
+        <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-semibold text-gray-700">{message}</div>
       )}
 
-      {isStarting && (
+      {notification ? (
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 py-20">
+          <div className={`rounded-2xl border-2 p-10 text-center shadow-lg ${notification.type === 'sold' ? 'border-lime bg-lime/5' : 'border-orange bg-orange/5'}`}>
+            <p className="text-3xl font-black uppercase tracking-[0.08em] text-gray-900">{notification.playerName}</p>
+            <p className="mt-4 text-xl font-bold text-gray-600">
+              {notification.type === 'sold' ? (
+                <><span className="text-gray-900">is sold to </span><span className="text-lime">{notification.teamName}</span><span className="text-gray-900"> for </span><span className="text-gold">${currency(notification.price!)}</span></>
+              ) : (
+                <span className="text-orange">is unsold</span>
+              )}
+            </p>
+            <p className="mt-6 text-sm text-gray-400">Next player starting soon...</p>
+          </div>
+        </div>
+      ) : isStarting ? (
         <div className="flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-gray-300 bg-white py-16">
           <Loader2 className="h-8 w-8 animate-spin text-gold" />
           <p className="text-lg font-bold text-gray-500">Starting player...</p>
         </div>
-      )}
-
-      {currentPlayer && !isStarting && (
+      ) : currentPlayer && (
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-10">
           <div className="flex items-center gap-20">
             <div className="w-[30rem] animate-slide-from-left">
@@ -449,13 +487,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         </div>
       )}
 
-      {activeBatch && !currentPlayer && !isStarting && !isBatchComplete && !isClosing && (
+      {activeBatch && !currentPlayer && !isStarting && !isBatchComplete && !notification && (
         <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 py-10">
           <div className="text-center">
             <Play className="mx-auto h-8 w-8 text-gray-300" />
-            <p className="mt-2 text-base font-bold text-gray-400">Ready to start — player at index {playerIndex}</p>
+            <p className="mt-2 text-base font-bold text-gray-400">Ready to start</p>
             <button
-              onClick={() => startPlayer(batchPlayers[playerIndex])}
+              onClick={() => startPlayer(batchQueue[playerIndex])}
               className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 font-bold text-white shadow transition hover:bg-gold/90"
             >
               <Gavel className="h-4 w-4" /> Start this player
@@ -523,14 +561,12 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                     {Array.from({ length: maxPurchases }).map((_, rowIndex) => (
                       <tr key={rowIndex} className="border-b border-gray-100 last:border-0">
                         <td className="px-4 py-2.5 text-gray-400">
-                          {rowIndex < Math.max(...teams.map((t) => teamPurchases[t.id]?.length ?? 0)) ? `#${rowIndex + 1}` : ''}
+                          {rowIndex < Math.max(...teams.map((t) => teamPurchasesMap[t.id]?.length ?? 0)) ? `#${rowIndex + 1}` : ''}
                         </td>
                         {teams.map((team) => {
-                          const tp = teamPurchases[team.id] ?? [];
+                          const tp = teamPurchasesMap[team.id] ?? [];
                           const purchase = tp[rowIndex];
-                          if (!purchase) {
-                            return <td key={team.id} className="px-4 py-2.5 text-gray-300">—</td>;
-                          }
+                          if (!purchase) return <td key={team.id} className="px-4 py-2.5 text-gray-300">—</td>;
                           const player = getPlayerById(purchase.player_id);
                           return (
                             <td key={team.id} className="px-4 py-2.5">

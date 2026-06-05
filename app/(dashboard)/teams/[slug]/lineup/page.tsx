@@ -37,7 +37,7 @@ export default async function LineupPage({ params }: { params: Promise<{ slug: s
         <p className="mt-2 text-sm text-white/40">{bundle.players.length} player{bundle.players.length !== 1 ? 's' : ''} in squad</p>
       </div>
 
-      <FutsalGround players={bundle.players} />
+      <FutsalGround players={bundle.players} purchases={bundle.purchases} />
     </div>
   );
 }

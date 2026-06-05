@@ -179,6 +179,7 @@ export default async function AuctionPage() {
             teamSlug={teamSlug}
             purchases={purchases}
             teamPurse={teamInfo?.purse ?? 0}
+            roomId={bundle.room.id}
           />
         </TeamAuctionGuard>
       ))}

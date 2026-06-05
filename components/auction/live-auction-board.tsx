@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag } from 'lucide-react';
+import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag, Loader2 } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
-import type { AuctionRoom, Bid, Player, Team, UserRole } from '@/lib/types';
+import type { AuctionRoom, Bid, Player, Team, UserRole, Purchase } from '@/lib/types';
 
 interface TeamPurchaseDisplay {
   playerName: string;
@@ -26,6 +26,7 @@ interface LiveAuctionBoardProps {
   teamSlug?: string;
   purchases?: TeamPurchaseDisplay[];
   teamPurse?: number;
+  roomId?: string;
 }
 
 function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDisplay[]; teamPurse?: number }) {
@@ -90,16 +91,64 @@ function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDis
   );
 }
 
-export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room, currentPlayer, teams, recentBids, teamSlug, purchases, teamPurse }: LiveAuctionBoardProps) {
+export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room, currentPlayer, teams, recentBids, teamSlug, purchases: initialPurchases, teamPurse, roomId }: LiveAuctionBoardProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [ended, setEnded] = useState(false);
 
   const [liveRoom, setLiveRoom] = useState(room);
   const [livePlayer, setLivePlayer] = useState<Player | null>(currentPlayer);
+  const [livePurchases, setLivePurchases] = useState<TeamPurchaseDisplay[]>(initialPurchases ?? []);
+  const [livePurse, setLivePurse] = useState(teamPurse ?? 0);
+  const [notification, setNotification] = useState<{
+    type: 'sold' | 'unsold';
+    playerName: string;
+    teamName?: string;
+    price?: number;
+  } | null>(null);
 
   const playerRef = useRef(livePlayer);
   playerRef.current = livePlayer;
+
+  useEffect(() => {
+    setLivePurchases(initialPurchases ?? []);
+  }, [initialPurchases]);
+
+  useEffect(() => {
+    setLivePurse(teamPurse ?? 0);
+  }, [teamPurse]);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+    let mounted = true;
+
+    if (roomId) {
+      const purchasesChannel = supabase
+        .channel(`team-purchases-${roomId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, async (payload) => {
+          if (!mounted) return;
+          const p = payload.new as Purchase;
+          const { data: player } = await supabase.from('players').select('name').eq('id', p.player_id).single<{ name: string }>();
+          setLivePurchases((prev) => [...prev, { playerName: player?.name ?? 'Unknown', price: p.price }]);
+        })
+        .subscribe();
+
+      const teamChannel = supabase
+        .channel(`team-purse-${roomId}`)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `id=eq.${viewerTeamId}` }, (payload) => {
+          if (!mounted) return;
+          const updated = payload.new as Team;
+          setLivePurse(updated.purse);
+        })
+        .subscribe();
+
+      return () => {
+        mounted = false;
+        supabase.removeChannel(purchasesChannel);
+        supabase.removeChannel(teamChannel);
+      };
+    }
+  }, [roomId, viewerTeamId]);
 
   useEffect(() => {
     const supabase = createBrowserSupabase();
@@ -110,11 +159,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (mounted) setLivePlayer(null);
         return;
       }
-      const { data } = await supabase
-        .from('players')
-        .select('*')
-        .eq('id', playerId)
-        .single();
+      const { data } = await supabase.from('players').select('*').eq('id', playerId).single();
       if (data && mounted) setLivePlayer(data as Player);
     }
 
@@ -125,8 +170,11 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (!mounted) return;
         setLiveRoom(updated);
         if (updated.ended_at) setEnded(true);
-        if (updated.current_player_id !== playerRef.current?.id) {
+        if (updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
+          setNotification(null);
           fetchPlayer(updated.current_player_id);
+        } else if (!updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
+          fetchPlayer(null);
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `division=eq.${room.division}` }, (payload) => {
@@ -136,28 +184,20 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
       })
       .subscribe();
 
-    fetchPlayer(room.current_player_id);
+    const broadcastChannel = supabase
+      .channel(`broadcast-${room.division}`)
+      .on('broadcast', { event: 'close-outcome' }, (payload) => {
+        if (!mounted) return;
+        setNotification(payload.payload);
+      })
+      .subscribe();
 
-    const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('auction_rooms')
-        .select('*')
-        .eq('division', room.division)
-        .single();
-      if (data && mounted) {
-        const roomData = data as AuctionRoom;
-        setLiveRoom(roomData);
-        if (roomData.ended_at) setEnded(true);
-        if (roomData.current_player_id !== playerRef.current?.id) {
-          fetchPlayer(roomData.current_player_id);
-        }
-      }
-    }, 1500);
+    fetchPlayer(room.current_player_id);
 
     return () => {
       mounted = false;
       supabase.removeChannel(channel);
-      clearInterval(interval);
+      supabase.removeChannel(broadcastChannel);
     };
   }, [room.division, room.current_player_id]);
 
@@ -169,8 +209,8 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   const canBid = viewerRole === 'team' && viewerTeamId && liveRoom.status === 'live' && livePlayer;
   const isLeading = liveRoom.current_highest_team_id === viewerTeamId;
 
-  const spent = useMemo(() => (purchases ?? []).reduce((sum, p) => sum + p.price, 0), [purchases]);
-  const remaining = teamPurse ?? 0;
+  const remaining = livePurse;
+  const spent = useMemo(() => livePurchases.reduce((sum, p) => sum + p.price, 0), [livePurchases]);
 
   async function placeBid(increment: number) {
     if (!canBid) return;
@@ -199,14 +239,30 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           <p className="text-4xl font-black uppercase tracking-[0.12em] text-white">Auction has ended</p>
           <p className="mt-3 text-sm text-white/40">Thank you for participating in The Genesis auction.</p>
           {teamSlug ? (
-            <Link
-              href={`/teams/${teamSlug}`}
-              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-cyan px-8 py-3.5 font-bold text-black transition hover:bg-cyan/90"
-            >
+            <Link href={`/teams/${teamSlug}`} className="mt-8 inline-flex items-center gap-2 rounded-xl bg-cyan px-8 py-3.5 font-bold text-black transition hover:bg-cyan/90">
               Return to team home
             </Link>
           ) : null}
         </div>
+      </div>
+    );
+  }
+
+  if (notification) {
+    return (
+      <div className="flex flex-col items-center gap-8 py-20">
+        <div className={`w-full max-w-2xl rounded-2xl border-2 p-10 text-center backdrop-blur-sm ${notification.type === 'sold' ? 'border-lime/30 bg-lime/[0.04]' : 'border-orange/30 bg-orange/[0.04]'}`}>
+          <p className="text-4xl font-black uppercase tracking-[0.08em] text-white">{notification.playerName}</p>
+          <p className="mt-4 text-2xl font-bold text-white/70">
+            {notification.type === 'sold' ? (
+              <><span className="text-white/90">is sold to </span><span className="text-lime">{notification.teamName}</span><span className="text-white/90"> for </span><span className="text-gold">${currency(notification.price!)}</span></>
+            ) : (
+              <span className="text-orange">is unsold</span>
+            )}
+          </p>
+          <p className="mt-6 text-sm text-white/40">Next player starting soon...</p>
+        </div>
+        <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
       </div>
     );
   }
@@ -219,7 +275,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           <p className="mt-6 text-2xl font-black uppercase tracking-[0.12em] text-white">Auction will start soon</p>
           <p className="mt-2 text-sm text-white/40">Wait for the auctioneer to begin.</p>
         </div>
-        {purchases ? <PurchasesSection purchases={purchases} teamPurse={teamPurse} /> : null}
+        <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
       </div>
     );
   }
@@ -263,7 +319,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         {INCREMENTS.map((inc) => {
           const disabled = !canBid || isPending || isLeading;
           const bidAmount = Number(liveRoom.current_bid) + inc;
-          const exceedsPurse = bidAmount > (teamPurse ?? 0) - spent;
+          const exceedsPurse = bidAmount > remaining;
           return (
             <button
               key={inc}
@@ -277,9 +333,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         })}
       </div>
 
-      {message ? (
-        <p className="text-sm font-semibold text-white/70">{message}</p>
-      ) : null}
+      {message ? <p className="text-sm font-semibold text-white/70">{message}</p> : null}
 
       {isLeading ? (
         <p className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-5 py-2 text-sm font-bold text-amber">
@@ -287,7 +341,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         </p>
       ) : null}
 
-      {purchases ? <PurchasesSection purchases={purchases} teamPurse={teamPurse} /> : null}
+      <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
 
       <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
         <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.1em] text-white/50">Recent bids</h3>

@@ -64,7 +64,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Sale recorded, but purse update failed.' }, { status: 500 });
     }
 
-    await supabase.from('players').update({ status: 'sold' }).eq('id', room.current_player_id);
+    await supabase.from('players').update({
+      status: 'sold',
+      sold_price: room.current_bid,
+      sold_to_team_id: room.current_highest_team_id
+    }).eq('id', room.current_player_id);
+  } else {
+    await supabase.from('players').update({
+      status: 'unsold',
+      sold_price: null,
+      sold_to_team_id: null
+    }).eq('id', room.current_player_id);
   }
 
   const { error: roomResetError } = await supabase

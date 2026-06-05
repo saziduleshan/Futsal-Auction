@@ -41,16 +41,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Insufficient purse for this bid.' }, { status: 400 });
   }
 
-  const { error: roomUpdateError } = await supabase
+  const { data: updatedRoom, error: roomUpdateError } = await supabase
     .from('auction_rooms')
     .update({
       current_bid: amount,
       current_highest_team_id: team.id
     })
-    .eq('id', room.id);
+    .eq('id', room.id)
+    .eq('current_bid', room.current_bid)
+    .eq('current_highest_team_id', room.current_highest_team_id)
+    .select('id')
+    .single();
 
-  if (roomUpdateError) {
-    return NextResponse.json({ message: 'Could not update highest bid.' }, { status: 500 });
+  if (roomUpdateError || !updatedRoom) {
+    return NextResponse.json({ message: 'Bid was overtaken by another team. Please try again.' }, { status: 409 });
   }
 
   const { error: bidError } = await supabase.from('bids').insert({

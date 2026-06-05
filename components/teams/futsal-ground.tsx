@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Shield, Sparkles, Target, Trophy } from 'lucide-react';
 import { currency, formatCategory } from '@/lib/utils';
-import type { Player } from '@/lib/types';
+import type { Player, Purchase } from '@/lib/types';
 
 const CATEGORY_ICONS = {
   defender: Shield,
@@ -12,7 +12,17 @@ const CATEGORY_ICONS = {
   goalkeeper: Trophy,
 };
 
-export function FutsalGround({ players }: { players: Player[] }) {
+export function FutsalGround({ players, purchases }: { players: Player[]; purchases?: Purchase[] }) {
+  const priceMap = new Map<string, number>();
+  if (purchases) {
+    for (const p of purchases) {
+      const existing = priceMap.get(p.player_id);
+      if (!existing || p.price > existing) {
+        priceMap.set(p.player_id, p.price);
+      }
+    }
+  }
+
   if (players.length === 0) {
     return (
       <div className="rounded-xl border-2 border-dashed border-white/10 bg-white/[0.03] p-8 text-center">
@@ -26,6 +36,7 @@ export function FutsalGround({ players }: { players: Player[] }) {
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {players.map((player) => {
         const Icon = CATEGORY_ICONS[player.category] || Shield;
+        const purchasePrice = priceMap.get(player.id) ?? player.sold_price ?? player.base_price;
         return (
           <div
             key={player.id}
@@ -59,7 +70,7 @@ export function FutsalGround({ players }: { players: Player[] }) {
                   <Icon className="size-2.5 text-gold" />
                   <span className="text-[10px] font-bold text-gold/90">{formatCategory(player.category)}</span>
                 </div>
-                <p className="mt-1 text-sm font-black text-gold drop-shadow-sm">${currency(player.base_price)}</p>
+                <p className="mt-1 text-sm font-black text-gold drop-shadow-sm">${currency(purchasePrice)}</p>
               </div>
             </div>
           </div>
