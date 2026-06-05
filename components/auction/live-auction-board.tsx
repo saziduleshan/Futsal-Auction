@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
 import { currency, formatCategory } from '@/lib/utils';
 import type { AuctionRoom, Bid, Player, Team, UserRole, Purchase } from '@/lib/types';
@@ -123,8 +123,8 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     let mounted = true;
 
     if (roomId) {
-      const purchasesChannel = supabase
-        .channel(`team-purchases-${roomId}`)
+      const channel = supabase
+        .channel(`team-data-${roomId}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, async (payload) => {
           if (!mounted) return;
           const p = payload.new as Purchase;
@@ -132,10 +132,6 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           const { data: player } = await supabase.from('players').select('name').eq('id', p.player_id).single<{ name: string }>();
           setLivePurchases((prev) => [...prev, { playerName: player?.name ?? 'Unknown', price: p.price }]);
         })
-        .subscribe();
-
-      const teamChannel = supabase
-        .channel(`team-purse-${roomId}`)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `id=eq.${viewerTeamId}` }, (payload) => {
           if (!mounted) return;
           const updated = payload.new as Team;
@@ -145,8 +141,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
 
       return () => {
         mounted = false;
-        supabase.removeChannel(purchasesChannel);
-        supabase.removeChannel(teamChannel);
+        supabase.removeChannel(channel);
       };
     }
   }, [roomId, viewerTeamId]);
@@ -224,14 +219,30 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     setLiveRoom({ ...liveRoom, current_bid: newBid, current_highest_team_id: viewerTeamId! });
 
     startTransition(async () => {
-      const response = await fetch('/api/bid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomId: liveRoom.id, increment })
-      });
-      const payload = await response.json();
-      if (!response.ok) setLiveRoom(prevRoom);
-      setMessage(payload.message ?? (response.ok ? 'Bid placed.' : 'Unable to place bid.'));
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, 400));
+        try {
+          const response = await fetch('/api/bid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ roomId: liveRoom.id, increment })
+          });
+          const payload = await response.json();
+          if (response.ok) {
+            setMessage(payload.message);
+            return;
+          }
+          if (response.status === 409 && attempt < 2) continue;
+          setLiveRoom(prevRoom);
+          setMessage(payload.message ?? 'Unable to place bid.');
+          return;
+        } catch {
+          if (attempt < 2) continue;
+          setLiveRoom(prevRoom);
+          setMessage('Unable to place bid.');
+          return;
+        }
+      }
     });
   }
 
@@ -293,6 +304,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
               alt={livePlayer.name}
               width={600}
               height={750}
+              sizes="(max-width: 768px) 100vw, 30rem"
               className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
               priority
             />

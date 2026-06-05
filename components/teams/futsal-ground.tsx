@@ -49,6 +49,7 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
                   alt={player.name}
                   width={240}
                   height={320}
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (

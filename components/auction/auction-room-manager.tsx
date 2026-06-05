@@ -455,6 +455,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                   alt={currentPlayer.name}
                   width={600}
                   height={750}
+                  sizes="(max-width: 768px) 100vw, 30rem"
                   className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
                   priority
                 />

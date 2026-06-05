@@ -162,3 +162,14 @@ alter publication supabase_realtime add table auction_participants;
 -- During end auction, set ended_at = now() to mark completion
 -- instead of deleting purchases. Purchases remain visible in
 -- auction history until admin explicitly resets teams.
+
+-- ═══════════════════════════════════════════════
+-- PERFORMANCE INDEXES
+-- ═══════════════════════════════════════════════
+create index if not exists idx_bids_room_id on bids(room_id);
+create index if not exists idx_bids_player_id on bids(player_id);
+create index if not exists idx_bids_created_at on bids(created_at desc);
+create index if not exists idx_purchases_room_id on purchases(room_id);
+create index if not exists idx_purchases_team_id on purchases(team_id);
+create index if not exists idx_players_division_status on players(division, status);
+create index if not exists idx_participants_room_team on auction_participants(room_id, team_id);

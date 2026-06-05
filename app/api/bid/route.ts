@@ -41,6 +41,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Insufficient purse for this bid.' }, { status: 400 });
   }
 
+  const { error: bidError } = await supabase.from('bids').insert({
+    room_id: room.id,
+    player_id: room.current_player_id,
+    team_id: team.id,
+    amount
+  });
+
+  if (bidError) {
+    return NextResponse.json({ message: 'Could not record bid.' }, { status: 500 });
+  }
+
   let bidQuery = supabase
     .from('auction_rooms')
     .update({
@@ -61,18 +72,8 @@ export async function POST(request: Request) {
     .single();
 
   if (roomUpdateError || !updatedRoom) {
+    await supabase.from('bids').delete().eq('room_id', room.id).eq('team_id', team.id).eq('amount', amount);
     return NextResponse.json({ message: 'Bid was overtaken by another team. Please try again.' }, { status: 409 });
-  }
-
-  const { error: bidError } = await supabase.from('bids').insert({
-    room_id: room.id,
-    player_id: room.current_player_id,
-    team_id: team.id,
-    amount
-  });
-
-  if (bidError) {
-    return NextResponse.json({ message: 'Bid update succeeded but history could not be saved.' }, { status: 500 });
   }
 
   return NextResponse.json({ message: `Bid placed for ${amount}.` });
