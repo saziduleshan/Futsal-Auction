@@ -173,6 +173,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (updated.ended_at) setEnded(true);
         if (updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
           setNotification(null);
+          setMessage(null);
           fetchPlayer(updated.current_player_id);
         } else if (!updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
           fetchPlayer(null);
@@ -190,6 +191,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
       .on('broadcast', { event: 'close-outcome' }, (payload) => {
         if (!mounted) return;
         setNotification(payload.payload);
+        setMessage(null);
       })
       .subscribe();
 

@@ -256,30 +256,43 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const inProgress = activeBatch !== null && !isBatchComplete && currentPlayer !== null;
 
   const [connections, setConnections] = useState<Record<string, boolean>>({});
+  const [liveTeams, setLiveTeams] = useState(teams);
+
+  useEffect(() => {
+    const supabase = createBrowserSupabase();
+    const channel = supabase
+      .channel(`admin-teams-${division}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `division=eq.${division}` }, (payload) => {
+        const updated = payload.new as Team;
+        setLiveTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [division]);
 
   const teamPurses = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const team of teams) map[team.id] = team.purse;
+    for (const team of liveTeams) map[team.id] = team.purse;
     return map;
-  }, [teams, purchases]);
+  }, [liveTeams]);
 
   const teamSpent = useMemo(() => {
     const map: Record<string, number> = {};
-    for (const team of teams) {
+    for (const team of liveTeams) {
       map[team.id] = purchases.filter((p) => p.team_id === team.id).reduce((sum, p) => sum + p.price, 0);
     }
     return map;
-  }, [teams, purchases]);
+  }, [liveTeams, purchases]);
 
   const teamPurchasesMap = useMemo(() => {
     const map: Record<string, Purchase[]> = {};
-    for (const team of teams) map[team.id] = purchases.filter((p) => p.team_id === team.id);
+    for (const team of liveTeams) map[team.id] = purchases.filter((p) => p.team_id === team.id);
     return map;
-  }, [teams, purchases]);
+  }, [liveTeams, purchases]);
 
   const maxPurchases = useMemo(() => {
-    return Math.max(14, ...teams.map((t) => teamPurchasesMap[t.id]?.length ?? 0));
-  }, [teams, teamPurchasesMap]);
+    return Math.max(14, ...liveTeams.map((t) => teamPurchasesMap[t.id]?.length ?? 0));
+  }, [liveTeams, teamPurchasesMap]);
 
   const getPlayerById = useCallback((id: string) => {
     return players.find((p) => p.id === id) ?? null;
@@ -526,7 +539,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                   <thead>
                     <tr className="border-b-2 border-gray-200 bg-gray-50">
                       <th className="w-32 px-4 py-3 font-bold uppercase tracking-[0.1em] text-gray-500"></th>
-                      {teams.map((team) => (
+                      {liveTeams.map((team) => (
                         <th key={team.id} className="min-w-[140px] px-4 py-3 font-bold uppercase tracking-[0.08em] text-gray-700">
                           <div className="flex items-center gap-2">
                             <span className={`inline-block size-2.5 rounded-full ${connections[team.id] ? 'bg-green-500' : 'bg-red-400'}`} />
@@ -539,7 +552,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                   <tbody>
                     <tr className="border-b border-gray-100 bg-gray-50/50">
                       <td className="px-4 py-3 font-bold text-gray-500">Spent</td>
-                      {teams.map((team) => (
+                      {liveTeams.map((team) => (
                         <td key={team.id} className="px-4 py-3 font-bold text-orange-600">
                           ${currency(teamSpent[team.id] ?? 0)}
                         </td>
@@ -547,7 +560,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                     </tr>
                     <tr className="border-b-2 border-gray-200 bg-gray-50/50">
                       <td className="px-4 py-3 font-bold text-gray-500">Remaining</td>
-                      {teams.map((team) => {
+                      {liveTeams.map((team) => {
                         const remaining = teamPurses[team.id] ?? team.purse;
                         return (
                           <td key={team.id} className="px-4 py-3">
@@ -561,9 +574,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                     {Array.from({ length: maxPurchases }).map((_, rowIndex) => (
                       <tr key={rowIndex} className="border-b border-gray-100 last:border-0">
                         <td className="px-4 py-2.5 text-gray-400">
-                          {rowIndex < Math.max(...teams.map((t) => teamPurchasesMap[t.id]?.length ?? 0)) ? `#${rowIndex + 1}` : ''}
+                          {rowIndex < Math.max(...liveTeams.map((t) => teamPurchasesMap[t.id]?.length ?? 0)) ? `#${rowIndex + 1}` : ''}
                         </td>
-                        {teams.map((team) => {
+                        {liveTeams.map((team) => {
                           const tp = teamPurchasesMap[team.id] ?? [];
                           const purchase = tp[rowIndex];
                           if (!purchase) return <td key={team.id} className="px-4 py-2.5 text-gray-300">—</td>;
