@@ -25,7 +25,7 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
 
   if (players.length === 0) {
     return (
-      <div className="rounded-xl border-2 border-dashed border-white/10 bg-white/[0.03] p-8 text-center">
+      <div className="rounded-xl border-2 border-dashed border-white/20 bg-black/60 p-8 text-center">
         <p className="font-bold text-white/40">No players yet</p>
         <p className="mt-1 text-sm text-white/20">Players purchased in the auction will appear here.</p>
       </div>
@@ -40,7 +40,7 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
         return (
           <div
             key={player.id}
-            className="group relative overflow-hidden rounded-xl border border-white/15 bg-gradient-to-b from-white/[0.08] to-white/[0.03] shadow-lg backdrop-blur-sm transition hover:scale-[1.02] hover:border-gold/30 hover:shadow-xl"
+            className="group relative overflow-hidden rounded-xl border border-white/20 bg-black/60 shadow-lg backdrop-blur-sm transition hover:scale-[1.02] hover:border-gold/30 hover:shadow-xl"
           >
             <div className="relative aspect-[3/4]">
               {player.card_image_url ? (
