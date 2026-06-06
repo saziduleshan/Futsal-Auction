@@ -60,7 +60,7 @@ export function PlayerForm() {
           <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-black file:mr-3 file:rounded-full file:border-0 file:bg-gray-800 file:px-3 file:py-1 file:text-sm file:text-white backdrop-blur-sm transition hover:border-gold/40" />
         </label>
       </div>
-      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-[#1D3C50] px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:bg-[#1D3C50]/80 disabled:bg-gray-600 disabled:text-gray-400">
+      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-[#1D3C50] px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:bg-[#0F2838] disabled:bg-gray-600 disabled:text-gray-400">
         {isPending ? 'Uploading…' : 'Create player'}
       </button>
       {message ? <p className="mt-4 text-sm text-gray-200">{message}</p> : null}

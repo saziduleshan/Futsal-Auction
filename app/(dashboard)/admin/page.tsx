@@ -115,7 +115,7 @@ export default async function AdminPage() {
               <p className="mt-4 text-base leading-relaxed text-white/70">
                 Browse the full player catalog with division tabs and position filters. Scroll through card views and inspect player details.
               </p>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#1D3C50]/80">
+              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#0F2838]">
                 Browse players <Swords className="h-4 w-4" />
               </div>
             </Link>
@@ -132,7 +132,7 @@ export default async function AdminPage() {
               <p className="mt-4 text-base leading-relaxed text-white/70">
                 Configure division, teams, purse size, and bid settings. Then manage the live auction — nominate players, track bids, and close lots.
               </p>
-              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#1D3C50]/80">
+              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#0F2838]">
                 Open setup <Swords className="h-4 w-4" />
               </div>
             </Link>
