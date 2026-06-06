@@ -31,11 +31,11 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return null;
   });
-  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players]);
+  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => players.filter((p) => p.status === 'available'));
   const [queueIndex, setQueueIndex] = useState(() => {
     if (initialRoom.current_player_id) {
-      const allPlayers = players;
-      return Math.max(0, allPlayers.findIndex((p) => p.id === initialRoom.current_player_id));
+      const available = players.filter((p) => p.status === 'available');
+      return Math.max(0, available.findIndex((p) => p.id === initialRoom.current_player_id));
     }
     return 0;
   });
@@ -318,12 +318,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
           <Image src="/Genesislogo.png" alt="The Genesis" width={220} height={60} className="h-14 w-auto" priority />
         </Link>
         <div className="flex items-center gap-3">
-          {currentPlayer && (
-            <div className="text-right">
-              <p className="text-xs font-bold uppercase tracking-[0.1em] text-white">Player</p>
-              <p className="text-base font-black text-white">{queueIndex + 1}/{playerQueue.length}</p>
-            </div>
-          )}
           {room.join_code ? (
             <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
               <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-900">Join code</p>
