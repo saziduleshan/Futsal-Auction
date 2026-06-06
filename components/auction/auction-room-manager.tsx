@@ -584,9 +584,9 @@ function BidHistoryPanel({
 
   const dbBids = useMemo(() => {
     if (!room.current_player_id) return [];
-    return bids.filter((b) => b.player_id === room.current_player_id)
+    return bids.filter((b) => b.player_id === room.current_player_id && !resetIds.has(b.id))
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  }, [bids, room.current_player_id]);
+  }, [bids, room.current_player_id, resetIds]);
 
   const displayBids = useMemo(() => {
     const entries: Array<{
