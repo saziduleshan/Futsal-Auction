@@ -356,7 +356,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         <div className="rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl">
           <span className="text-xs font-bold text-white">Players Left</span>
           <span className="ml-2 text-xs text-white/60">
-            {playerQueue.length - queueIndex - (currentPlayer ? 1 : 0)}
+            {players.length - purchases.length - (currentPlayer ? 1 : 0)}
           </span>
         </div>
         <button
