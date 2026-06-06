@@ -45,6 +45,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const playerQueueRef = useRef(playerQueue);
   playerQueueRef.current = playerQueue;
 
+  const [bids, setBids] = useState<Bid[]>(initialBids);
+  const [notification, setNotification] = useState<{ type: 'sold' | 'unsold'; playerName: string; teamName?: string; price?: number } | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  const [managersOpen, setManagersOpen] = useState(false);
+
   useEffect(() => {
     return () => {
       if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
