@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
   const { data: room } = await supabase
     .from('auction_rooms')
-    .select('id, current_player_id, current_bid, current_highest_team_id')
+    .select('id, current_player_id, current_bid, current_highest_team_id, nominated_at')
     .eq('id', roomId)
     .single();
 
@@ -25,11 +25,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'No active player in this room.' }, { status: 400 });
   }
 
+  const sessionStart = room.nominated_at ?? new Date(0).toISOString();
+
   const { data: latestBid } = await supabase
     .from('bids')
     .select('id, team_id, amount')
     .eq('room_id', roomId)
     .eq('player_id', room.current_player_id)
+    .gte('created_at', sessionStart)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -52,6 +55,7 @@ export async function POST(request: Request) {
     .select('team_id, amount')
     .eq('room_id', roomId)
     .eq('player_id', room.current_player_id)
+    .gte('created_at', sessionStart)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
