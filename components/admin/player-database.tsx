@@ -144,7 +144,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           <ArrowLeft className="h-4 w-4" />
           Back to admin
         </Link>
-        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-[#A3311C]">
+        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-[#A3311C] drop-shadow-lg [-webkit-text-stroke:1px_black]">
           Available players
         </h2>
       </div>
