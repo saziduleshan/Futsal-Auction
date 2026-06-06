@@ -24,6 +24,8 @@ export async function POST(request: Request) {
 
   await supabase.from('auction_participants').delete().in('room_id', roomIds);
 
+  await supabase.from('bids').delete().in('room_id', roomIds);
+
   await supabase
     .from('auction_rooms')
     .update({

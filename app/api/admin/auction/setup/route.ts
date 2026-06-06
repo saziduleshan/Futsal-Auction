@@ -52,6 +52,11 @@ export async function POST(request: Request) {
     .eq('id', room.id);
 
   await supabase
+    .from('bids')
+    .delete()
+    .eq('room_id', room.id);
+
+  await supabase
     .from('players')
     .update({ status: 'available', sold_price: null, sold_to_team_id: null })
     .eq('division', division);
