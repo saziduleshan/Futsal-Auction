@@ -136,16 +136,16 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
+        <div className="p-8">
           <Link
             href="/admin"
-            className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gold hover:text-gold/80"
+            className="mb-4 inline-flex items-center gap-2 rounded-xl bg-[#0F2838] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.16em] text-white transition hover:bg-[#0F2838]/80"
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
+            <ArrowLeft className="h-4 w-4" />
             Back to admin
           </Link>
-          <p className="badge border-gold/30 text-gold">Player database</p>
+          <p className="badge border-gold/30 text-gold text-sm">Player database</p>
           <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">
             Available players
           </h2>
@@ -157,7 +157,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           onClick={() => setActiveDivision('men')}
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'men'
-              ? 'bg-gradient-to-r from-brazil-green to-brazil-yellow text-white shadow-lg'
+              ? 'bg-[#A3311C] text-white shadow-lg ring-2 ring-gold/60'
               : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
@@ -171,7 +171,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           onClick={() => setActiveDivision('women')}
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'women'
-              ? 'bg-gradient-to-r from-magenta to-purple text-white shadow-lg'
+              ? 'bg-[#1D3C50] text-white shadow-lg ring-2 ring-gold/60'
               : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
@@ -181,9 +181,9 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             {womenCount}
           </span>
         </button>
-        <span className="ml-auto inline-flex items-center gap-2 rounded-2xl border border-white/30 bg-white/90 px-5 py-2.5 shadow-sm backdrop-blur-sm">
-          <span className="text-lg font-black text-gray-900">{players.length}</span>
-          <span className="text-xs font-bold uppercase tracking-[0.12em] text-gray-500">total cards</span>
+        <span className="ml-auto inline-flex items-center gap-2 rounded-2xl bg-[#F4C542] px-5 py-2.5 shadow-sm">
+          <span className="text-lg font-black text-white">{players.length}</span>
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-white">total cards</span>
         </span>
       </div>
 
@@ -227,7 +227,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
             return (
               <article
                 key={player.id}
-                className="group relative overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
+                className="group relative overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5"
               >
                 <div className="absolute left-3 top-3 z-10" ref={menuOpenId === player.id ? menuRef : undefined}>
                   <button
