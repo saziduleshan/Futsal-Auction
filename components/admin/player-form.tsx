@@ -23,7 +23,7 @@ export function PlayerForm() {
   }
 
   return (
-    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 p-8 shadow-lg backdrop-blur-xl">
+    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="badge border-gold/30 text-gold">Player management</p>
@@ -60,7 +60,7 @@ export function PlayerForm() {
           <input name="image" type="file" accept="image/*" className="block w-full rounded-2xl border border-dashed border-white/30 bg-white/50 px-4 py-4 text-sm text-black file:mr-3 file:rounded-full file:border-0 file:bg-gray-800 file:px-3 file:py-1 file:text-sm file:text-white backdrop-blur-sm transition hover:border-gold/40" />
         </label>
       </div>
-      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-gradient-to-r from-gold to-orange px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400">
+      <button disabled={isPending} className="mt-8 w-full rounded-2xl bg-[#1D3C50] px-5 py-3 font-black uppercase tracking-[0.16em] text-white transition hover:bg-[#1D3C50]/80 disabled:bg-gray-600 disabled:text-gray-400">
         {isPending ? 'Uploading…' : 'Create player'}
       </button>
       {message ? <p className="mt-4 text-sm text-gray-200">{message}</p> : null}

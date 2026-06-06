@@ -3,7 +3,7 @@ import { createServerSupabase } from '@/lib/supabase/server';
 import { PlayerForm } from '@/components/admin/player-form';
 import { ResetTeamsButton } from '@/components/admin/reset-teams-button';
 import Link from 'next/link';
-import { Eye, Gavel, History, Radio, Swords } from 'lucide-react';
+import { Eye, History, Radio, Swords } from 'lucide-react';
 
 export default async function AdminPage() {
   await requireAdmin();
@@ -28,7 +28,7 @@ export default async function AdminPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-10 md:px-6 md:py-12">
       {hasActive ? (
-        <div className="rounded-2xl border-2 border-lime/30 bg-gradient-to-br from-lime/[0.08] to-transparent p-6 backdrop-blur-sm">
+        <div className="rounded-2xl border-2 border-lime/30 bg-gradient-to-br from-lime/20 to-black/60 p-6 backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="flex size-12 items-center justify-center rounded-xl bg-lime/20">
@@ -57,90 +57,82 @@ export default async function AdminPage() {
         </div>
       ) : null}
 
-      {latestEnded ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
+        {latestEnded ? (
+          <div className="p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex size-12 items-center justify-center rounded-xl bg-white/10">
+                  <History className="size-6 text-white/60" />
+                </div>
+                <div>
+                  <p className="text-lg font-black uppercase tracking-[0.1em] text-white">Auction history</p>
+                  <p className="text-sm text-white/40">
+                    {latestEnded.division === 'men' ? 'Male Futsal' : 'Female Futsal'} — ended{' '}
+                    {new Date(latestEnded.ended_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Link
+                  href={`/admin/auction-history/${latestEnded.id}`}
+                  className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20"
+                >
+                  <Eye className="size-4" />
+                  Show details
+                </Link>
+                <ResetTeamsButton roomId={latestEnded.id} />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-8">
             <div className="flex items-center gap-4">
               <div className="flex size-12 items-center justify-center rounded-xl bg-white/10">
-                <History className="size-6 text-white/60" />
+                <History className="size-6 text-white/30" />
               </div>
               <div>
-                <p className="text-lg font-black uppercase tracking-[0.1em] text-white">Auction history</p>
-                <p className="text-sm text-white/40">
-                  {latestEnded.division === 'men' ? 'Male Futsal' : 'Female Futsal'} — ended{' '}
-                  {new Date(latestEnded.ended_at).toLocaleDateString()}
-                </p>
+                <p className="text-lg font-black uppercase tracking-[0.1em] text-white/60">Auction history</p>
+                <p className="text-sm text-white/30">No auction to show.</p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Link
-                href={`/admin/auction-history/${latestEnded.id}`}
-                className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/20"
-              >
-                <Eye className="size-4" />
-                Show details
-              </Link>
-              <ResetTeamsButton roomId={latestEnded.id} />
-            </div>
           </div>
-        </div>
-      ) : (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-white/10">
-              <History className="size-6 text-white/20" />
-            </div>
-            <div>
-              <p className="text-lg font-black uppercase tracking-[0.1em] text-white/30">Auction history</p>
-              <p className="text-sm text-white/20">No auction to show.</p>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
         <PlayerForm />
 
         <div className="flex flex-col gap-6">
-          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
             <Link href="/admin/players" className="flex h-full flex-col justify-center p-8">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-gold to-orange shadow-lg">
-                  <Eye className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <p className="badge border-gold/30 text-gold">Player database</p>
-                  <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.12em] text-gold">
-                    View all players
-                  </h3>
-                </div>
+              <div>
+                <p className="badge border-gold/30 text-gold text-sm">Player database</p>
+                <h3 className="mt-3 text-3xl font-black uppercase tracking-[0.12em] text-gold">
+                  View all players
+                </h3>
               </div>
               <p className="mt-4 text-base leading-relaxed text-white/70">
                 Browse the full player catalog with division tabs and position filters. Scroll through card views and inspect player details.
               </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.14em] text-gold">
+              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#1D3C50]/80">
                 Browse players <Swords className="h-4 w-4" />
               </div>
             </Link>
           </div>
 
-          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
+          <div className="group flex-1 overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl transition hover:shadow-xl hover:-translate-y-0.5">
             <Link href="/admin/auction-setup" className="flex h-full flex-col justify-center p-8">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan to-purple shadow-lg">
-                  <Gavel className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <p className="badge border-gold/30 text-gold">Run auction</p>
-                  <h3 className="mt-2 text-2xl font-black uppercase tracking-[0.12em] text-gold">
-                    Create auction room
-                  </h3>
-                </div>
+              <div>
+                <p className="badge border-gold/30 text-gold text-sm">Run auction</p>
+                <h3 className="mt-3 text-3xl font-black uppercase tracking-[0.12em] text-gold">
+                  Create auction room
+                </h3>
               </div>
               <p className="mt-4 text-base leading-relaxed text-white/70">
                 Configure division, teams, purse size, and bid settings. Then manage the live auction — nominate players, track bids, and close lots.
               </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.14em] text-cyan">
+              <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1D3C50] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#1D3C50]/80">
                 Open setup <Swords className="h-4 w-4" />
               </div>
             </Link>
