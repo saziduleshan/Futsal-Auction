@@ -519,7 +519,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
             <button
               disabled={isClosing}
               onClick={() => closeLot('unsold')}
-              className="flex items-center gap-2 rounded-xl border-2 border-gray-300 px-8 py-3.5 font-bold text-gray-600 transition hover:border-red-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl bg-[#1D3C50] px-8 py-3.5 font-bold text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
             >
               {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
               Mark Unsold
@@ -527,7 +527,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
             <button
               disabled={isClosing || !room.current_highest_team_id}
               onClick={() => closeLot('sold')}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-lime to-cyan px-8 py-3.5 font-black text-white shadow transition hover:from-gray-800 hover:to-gray-800 disabled:opacity-40"
+              className="flex items-center gap-2 rounded-xl bg-[#BF2816] px-8 py-3.5 font-black text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
             >
               {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               Mark Sold
@@ -683,27 +683,27 @@ function BidHistoryPanel({
   return (
     <div className="mx-auto mt-8 w-full max-w-2xl">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-gray-500">Bid History</h3>
+        <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-white">Bid History</h3>
         {playerBids.length > 0 && (
           <button
             onClick={handleResetBid}
             disabled={isResetting}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 px-3 py-1.5 text-xs font-bold text-orange-600 transition hover:border-orange-400 hover:bg-orange-50 disabled:opacity-40"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#1D3C50] px-3 py-1.5 text-xs font-bold text-white transition hover:ring-2 hover:ring-gold disabled:opacity-40"
           >
             {isResetting ? <Loader2 className="h-3 w-3 animate-spin" /> : <X className="h-3 w-3" />}
             Reset Recent Bid
           </button>
         )}
       </div>
-      <div className="mt-3 overflow-hidden rounded-xl border border-gray-200">
+      <div className="mt-3 overflow-hidden rounded-xl border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
         {playerBids.length === 0 ? (
-          <div className="px-4 py-3 text-sm text-gray-400">No bids yet for this lot.</div>
+          <div className="px-4 py-3 text-sm text-white/60">No bids yet for this lot.</div>
         ) : (
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50">
-                <th className="px-4 py-2.5 font-bold text-gray-500">Team</th>
-                <th className="px-4 py-2.5 text-right font-bold text-gray-500">Amount</th>
+              <tr className="border-b border-white/10 bg-black/40">
+                <th className="px-4 py-2.5 font-bold text-white">Team</th>
+                <th className="px-4 py-2.5 text-right font-bold text-white">Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -711,12 +711,12 @@ function BidHistoryPanel({
                 const team = teams.find((t) => t.id === bid.team_id);
                 const isHighest = bid.team_id === room.current_highest_team_id;
                 return (
-                  <tr key={bid.id} className="border-b border-gray-100 last:border-0">
-                    <td className={`px-4 py-2.5 ${isHighest ? 'font-bold text-amber' : 'text-gray-700'}`}>
+                  <tr key={bid.id} className="border-b border-white/10 last:border-0">
+                    <td className={`px-4 py-2.5 ${isHighest ? 'font-bold text-gold' : 'text-white'}`}>
                       {team?.name ?? 'Unknown'}
                       {isHighest ? ' (highest)' : ''}
                     </td>
-                    <td className={`px-4 py-2.5 text-right font-bold ${isHighest ? 'text-lime' : 'text-gray-800'}`}>
+                    <td className={`px-4 py-2.5 text-right font-bold ${isHighest ? 'text-gold' : 'text-white'}`}>
                       ${currency(bid.amount)}
                     </td>
                   </tr>
@@ -727,7 +727,7 @@ function BidHistoryPanel({
         )}
       </div>
       {!room.current_player_id && (
-        <p className="mt-2 text-xs text-gray-400">Waiting for a player to be nominated...</p>
+        <p className="mt-2 text-xs text-white/60">Waiting for a player to be nominated...</p>
       )}
     </div>
   );

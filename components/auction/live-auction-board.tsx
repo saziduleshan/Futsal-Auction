@@ -322,18 +322,14 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           )}
         </div>
         <div className="text-center">
-          <p className="text-lg font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Current price</p>
-          <p className="mt-3 text-7xl font-black drop-shadow-sm transition-all" style={{ color: '#264153' }}>
+          <p className="text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
+          <p className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
             ${currency(liveRoom.current_bid || livePlayer.base_price)}
           </p>
-          <p className="mt-10 text-4xl font-black" style={{ color: '#b6360b' }}>{livePlayer.name}</p>
-          <p className="mt-3 text-lg font-bold uppercase tracking-[0.08em]" style={{ color: '#264153' }}>
-            {formatCategory(livePlayer.category)}
-          </p>
-          <p className="mt-8 text-6xl font-black drop-shadow-sm" style={{ color: '#264153' }}>
+          <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
             {highestBidder ? highestBidder.name : 'No bids'}
           </p>
-          <p className="mt-1 text-base font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Highest bidder</p>
+          <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
         </div>
       </div>
 
@@ -341,7 +337,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         <button
           onClick={() => placeBid(0)}
           disabled={!canBid || isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#BF2816] px-10 py-4 font-black text-white shadow-lg transition hover:ring-2 hover:ring-gold disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Gavel className="h-5 w-5" />
           Place First Bid
@@ -381,7 +377,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           ) : selectedIncrement !== null && !isPending ? (
             <button
               onClick={handlePlaceBid}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber to-orange-500 px-10 py-4 font-black text-white shadow-lg transition hover:from-amber/80 hover:to-orange-500/80"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#BF2816] px-10 py-4 font-black text-white shadow-lg transition hover:ring-2 hover:ring-gold"
             >
               <Gavel className="h-5 w-5" />
               Place Bid
