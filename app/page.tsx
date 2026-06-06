@@ -24,19 +24,19 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-md px-4">
+          <div className="text-center mb-6">
+            <Image
+              src="/Genesislogo.png"
+              alt="The Genesis"
+              width={240}
+              height={80}
+              className="mx-auto h-auto w-48 md:w-60"
+              priority
+            />
+          </div>
           <div className="relative overflow-hidden rounded-2xl shadow-2xl">
             <div className="absolute inset-0" style={{ backgroundColor: '#A3311C', filter: 'url(#roughpaper)' }} />
             <div className="relative rounded-xl bg-black/50 m-2 p-8 backdrop-blur-sm">
-              <div className="text-center">
-                <Image
-                  src="/Genesislogo.png"
-                  alt="The Genesis"
-                  width={240}
-                  height={80}
-                  className="mx-auto h-auto w-48 md:w-60"
-                  priority
-                />
-              </div>
 
               <form action="/api/auth/login" method="post" className="mt-8 space-y-5">
                 <div>
