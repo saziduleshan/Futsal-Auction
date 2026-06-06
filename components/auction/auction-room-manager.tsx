@@ -571,12 +571,18 @@ function BidHistoryPanel({
 }) {
   const [isResetting, setIsResetting] = useState(false);
   const [resetBid, setResetBid] = useState<{ teamName: string; amount: number; createdAt: string } | null>(null);
+  const [deletedBidIds, setDeletedBidIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setDeletedBidIds(new Set());
+    setResetBid(null);
+  }, [room.current_player_id]);
 
   const dbBids = useMemo(() => {
     if (!room.current_player_id) return [];
-    return bids.filter((b) => b.player_id === room.current_player_id)
+    return bids.filter((b) => b.player_id === room.current_player_id && !deletedBidIds.has(b.id))
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  }, [bids, room.current_player_id]);
+  }, [bids, room.current_player_id, deletedBidIds]);
 
   const displayBids = useMemo(() => {
     const entries: Array<{
@@ -622,6 +628,7 @@ function BidHistoryPanel({
     const topBid = dbBids[dbBids.length - 1];
     if (topBid) {
       const team = teams.find((t) => t.id === topBid.team_id);
+      setDeletedBidIds((prev) => new Set(prev).add(topBid.id));
       setResetBid({ teamName: team?.name ?? 'Unknown', amount: topBid.amount, createdAt: topBid.created_at });
     }
     try {
