@@ -33,7 +33,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const [room, setRoom] = useState(initialRoom);
   const [purchases, setPurchases] = useState(initialPurchases);
-  const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(null);
+  const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(() => {
+    if (initialRoom.current_player_id) {
+      const player = players.find((p) => p.id === initialRoom.current_player_id);
+      return player?.category ?? null;
+    }
+    return null;
+  });
   const [playerIndex, setPlayerIndex] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
     if (initialRoom.current_player_id) {
@@ -41,7 +47,17 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return null;
   });
-  const [batchQueue, setBatchQueue] = useState<Player[]>([]);
+  const [batchQueue, setBatchQueue] = useState<Player[]>(() => {
+    if (initialRoom.current_player_id) {
+      const player = players.find((p) => p.id === initialRoom.current_player_id);
+      if (player) {
+        const categoryPlayers = players.filter((p) => p.category === player.category);
+        const currentIdx = categoryPlayers.findIndex((p) => p.id === player.id);
+        if (currentIdx >= 0) return categoryPlayers.slice(currentIdx);
+      }
+    }
+    return [];
+  });
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
@@ -398,7 +414,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       </h1>
 
       <div className="flex flex-wrap items-center gap-2">
-        {POSITIONS.map(({ key, label, Icon }) => {
+        {POSITIONS.map(({ key, label }) => {
           const count = batchedCounts[key];
           const isActive = activeBatch === key;
           return (
@@ -406,12 +422,11 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               key={key}
               onClick={() => { if (!inProgress) runBatch(key); }}
               disabled={inProgress || count === 0}
-              className="group relative flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-left transition disabled:opacity-40"
-              style={{
-                borderColor: isActive ? '#f5c542' : '#e5e7eb',
-                backgroundColor: isActive ? '#fffbeb' : '#ffffff',
-                boxShadow: isActive ? '0 4px 12px rgba(245, 197, 66, 0.2)' : '0 1px 3px rgba(0,0,0,0.05)'
-              }}
+              className={`group flex items-center gap-2 rounded-xl border px-4 py-2 shadow-lg backdrop-blur-xl transition disabled:opacity-40 ${
+                isActive
+                  ? 'border-[#f5c542] bg-black/60'
+                  : 'border-white/20 bg-black/60 hover:border-white/40'
+              }`}
             >
               {isActive && !isBatchComplete && currentPlayer ? (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -419,12 +434,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                   <span className="relative inline-flex h-3 w-3 rounded-full bg-lime" />
                 </span>
               ) : null}
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg transition" style={{ backgroundColor: isActive ? '#f5c542' : '#f3f4f6' }}>
-                <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
-              </div>
               <div>
-                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-gray-900'}`}>{label}</p>
-                <p className="text-xs text-gray-900">{count} players</p>
+                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-white'}`}>{label}</p>
+                <p className={`text-xs ${isActive ? 'text-white/70' : 'text-white/60'}`}>{count} players</p>
               </div>
               {!inProgress && count > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
@@ -449,11 +461,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         })}
         <button
           onClick={() => setManagersOpen(true)}
-          className="ml-auto flex items-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2 shadow-sm transition hover:border-gold hover:shadow-md"
+          className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl transition hover:border-white/40"
         >
-          <Eye className="h-4 w-4 text-gray-400" />
-          <span className="text-xs font-bold text-gray-900">Managers</span>
-          <span className="text-xs text-gray-400">{teams.length} teams</span>
+          <span className="text-xs font-bold text-white">Managers</span>
+          <span className="text-xs text-white/60">{teams.length} teams</span>
         </button>
       </div>
 
@@ -501,18 +512,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               )}
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Current price</p>
-              <p id="current-bid-display" className="mt-3 text-7xl font-black drop-shadow-sm transition-all" style={{ color: '#264153' }}>
+              <p className="text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
+              <p id="current-bid-display" className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
                 ${currency(room.current_bid || currentPlayer.base_price)}
               </p>
-              <p className="mt-10 text-4xl font-black" style={{ color: '#b6360b' }}>{currentPlayer.name}</p>
-              <p className="mt-3 text-lg font-bold uppercase tracking-[0.08em]" style={{ color: '#264153' }}>
-                {formatCategory(currentPlayer.category)}
-              </p>
-              <p className="mt-8 text-6xl font-black drop-shadow-sm" style={{ color: '#264153' }}>
+              <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
-              <p className="mt-1 text-base font-bold uppercase tracking-[0.2em]" style={{ color: '#264153' }}>Highest bidder</p>
+              <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
             </div>
           </div>
           <div className="flex gap-5">
@@ -654,6 +661,7 @@ function BidHistoryPanel({
   initialRoomId: string;
 }) {
   const [isResetting, setIsResetting] = useState(false);
+  const [resetBid, setResetBid] = useState<{ teamName: string; amount: number } | null>(null);
 
   const playerBids = useMemo(() => {
     if (!room.current_player_id) return [];
@@ -663,6 +671,11 @@ function BidHistoryPanel({
   async function handleResetBid() {
     if (!confirm('Reset the most recent bid? This will remove the latest bid and restore the previous state.')) return;
     setIsResetting(true);
+    const topBid = playerBids[0];
+    if (topBid) {
+      const team = teams.find((t) => t.id === topBid.team_id);
+      setResetBid({ teamName: team?.name ?? 'Unknown', amount: topBid.amount });
+    }
     try {
       const res = await fetch('/api/admin/auction/reset-bid', {
         method: 'POST',
@@ -672,9 +685,11 @@ function BidHistoryPanel({
       const payload = await res.json();
       if (!res.ok) {
         alert(payload.message ?? 'Failed to reset bid.');
+        setResetBid(null);
       }
     } catch {
       alert('Could not reset bid.');
+      setResetBid(null);
     } finally {
       setIsResetting(false);
     }
@@ -722,6 +737,16 @@ function BidHistoryPanel({
                   </tr>
                 );
               })}
+              {resetBid && (
+                <tr className="border-b border-white/10 bg-red-900/20">
+                  <td className="px-4 py-2.5 font-bold text-red-400">
+                    {resetBid.teamName} (Reset)
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-bold text-red-400">
+                    ${currency(resetBid.amount)}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}
