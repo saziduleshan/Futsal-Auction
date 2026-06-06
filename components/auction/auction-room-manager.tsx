@@ -374,23 +374,17 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
       {notification ? (
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 py-24">
-          <div className={`w-full rounded-3xl border-4 p-14 text-center shadow-2xl ${notification.type === 'sold' ? 'border-lime bg-black/70' : 'border-orange bg-black/70'}`}>
+          <div className={`w-full rounded-3xl border-4 p-14 text-center shadow-2xl bg-black/70`} style={{ borderColor: '#F4C542' }}>
             {notification.type === 'sold' ? (
               <>
-                <p className="text-6xl font-black uppercase tracking-[0.06em] text-white">{notification.playerName}</p>
+                <p className="text-6xl font-black uppercase tracking-[0.06em]" style={{ color: '#F4C542' }}>{notification.playerName}</p>
                 <p className="mt-6 text-3xl font-bold tracking-[0.04em] text-white/90">
                   is sold to{' '}
-                  <span
-                    className="font-black"
-                    style={{ color: liveTeams.find((t) => t.name === notification.teamName)?.accent_color ?? '#F4C542' }}
-                  >
+                  <span className="font-black" style={{ color: '#F4C542' }}>
                     {notification.teamName}
                   </span>{' '}
                   for{' '}
-                  <span
-                    className="font-black"
-                    style={{ color: liveTeams.find((t) => t.name === notification.teamName)?.accent_color ?? '#F4C542' }}
-                  >
+                  <span className="font-black" style={{ color: '#F4C542' }}>
                     ${currency(notification.price!)}
                   </span>
                 </p>
@@ -439,10 +433,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               <p id="current-bid-display" className="mt-3 text-9xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
                 ${currency(room.current_bid || currentPlayer.base_price)}
               </p>
-              <p className="mt-12 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
+              <p className="mt-12 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
-              <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
+              <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>Highest bidder</p>
               <div className="mt-16 flex justify-center gap-5">
                 <button
                   disabled={isClosing}
@@ -621,7 +615,12 @@ function BidHistoryPanel({
         isHighest: false,
         isReset: true,
       });
-      entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+
+    entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    if (entries.length > 1 && entries[0].isReset) {
+      [entries[0], entries[1]] = [entries[1], entries[0]];
     }
 
     return entries;

@@ -326,10 +326,10 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           <p className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
             ${currency(liveRoom.current_bid || livePlayer.base_price)}
           </p>
-          <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
+          <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>
             {highestBidder ? highestBidder.name : 'No bids'}
           </p>
-          <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
+          <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>Highest bidder</p>
         </div>
       </div>
 
