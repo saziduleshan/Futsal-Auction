@@ -63,7 +63,7 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
           <ArrowLeft className="h-4 w-4" />
           Back to admin
         </Link>
-        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg">
+        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg">
           Create auction room
         </h2>
       </div>
