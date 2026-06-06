@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <>
+      <style>{`input::-ms-reveal,input::-ms-clear{display:none}input::-webkit-credentials-auto-fill-button{display:none!important;visibility:hidden;pointer-events:none;width:0;height:0}`}</style>
       <svg className="absolute size-0" aria-hidden>
         <filter id="roughpaper">
           <feTurbulence type="fractalNoise" baseFrequency="0.04" result="noise" numOctaves="5" />
