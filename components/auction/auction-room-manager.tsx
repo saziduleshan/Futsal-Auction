@@ -35,7 +35,12 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [purchases, setPurchases] = useState(initialPurchases);
   const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(null);
   const [playerIndex, setPlayerIndex] = useState(0);
-  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(null);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
+    if (initialRoom.current_player_id) {
+      return players.find((p) => p.id === initialRoom.current_player_id) ?? null;
+    }
+    return null;
+  });
   const [batchQueue, setBatchQueue] = useState<Player[]>([]);
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);

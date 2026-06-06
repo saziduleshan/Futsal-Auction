@@ -49,11 +49,11 @@ function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDis
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-xs text-white/60">Spent</p>
-            <p className="font-bold text-orange-400">${currency(spent)}</p>
+            <p className="text-xs text-white">Spent</p>
+            <p className="font-bold text-white">${currency(spent)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-white/60">Remaining</p>
+            <p className="text-xs text-white">Remaining</p>
             <p className={`font-bold ${remaining > 0 ? 'text-gold' : 'text-red-400'}`}>${currency(remaining)}</p>
           </div>
           {open ? <ChevronUp className="h-5 w-5 text-white/40" /> : <ChevronDown className="h-5 w-5 text-white/40" />}
