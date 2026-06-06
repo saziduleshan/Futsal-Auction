@@ -149,6 +149,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       });
       const payload = await res.json();
       if (res.ok) {
+        const idx = playerQueueRef.current.findIndex((p) => p.id === player.id);
+        if (idx !== -1) setQueueIndex(idx);
         setCurrentPlayer(player);
       } else {
           if (payload.message?.toLowerCase().includes('not available')) {
@@ -188,7 +190,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         const teamName = outcome === 'sold' ? highestBidder?.name : undefined;
         const price = outcome === 'sold' ? room.current_bid : undefined;
 
-        if (outcome === 'unsold') {
+        if (outcome === 'sold') {
+          setPlayerQueue((prev) => prev.filter((p) => p.id !== currentPlayer.id));
+        } else {
           setPlayerQueue((prev) => [...prev, currentPlayer]);
         }
         setNotification({ type: outcome, playerName, teamName, price });
