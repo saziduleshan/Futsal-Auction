@@ -4,15 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Gavel, Swords, Users, Wallet } from 'lucide-react';
 import Link from 'next/link';
-import type { Team, PlayerCategory } from '@/lib/types';
-
-const POSITION_OPTIONS: { value: PlayerCategory | 'all'; label: string }[] = [
-  { value: 'all', label: 'All players' },
-  { value: 'defender', label: 'Defenders only' },
-  { value: 'midfielder', label: 'Midfielders only' },
-  { value: 'forward', label: 'Forwards only' },
-  { value: 'goalkeeper', label: 'Goalkeepers only' }
-];
+import type { Team } from '@/lib/types';
 
 interface AuctionSetupFormProps {
   teams: Team[];
@@ -25,8 +17,6 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
   const [division, setDivision] = useState<'men' | 'women'>('men');
   const [teamCount, setTeamCount] = useState(8);
   const [purseSize, setPurseSize] = useState(1500);
-  const [playerSelection, setPlayerSelection] = useState<PlayerCategory | 'all'>('all');
-
   const divisionTeams = teams.filter((t) => t.division === division);
   const maxTeams = Math.min(divisionTeams.length, 8);
 
@@ -122,28 +112,6 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
             />
           </label>
 
-          <label className="space-y-2 md:col-span-2">
-            <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
-              <Users className="mr-1.5 inline h-4 w-4" />
-              Players to include
-            </span>
-            <div className="flex flex-wrap gap-3">
-              {POSITION_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setPlayerSelection(opt.value)}
-                  className={`rounded-xl border px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] transition ${
-                    playerSelection === opt.value
-                      ? 'border border-gold bg-[#1D3C50] text-white shadow-sm ring-2 ring-gold/60'
-                      : 'border border-white/20 bg-black/60 text-gold/80 shadow-lg backdrop-blur-sm hover:border-white/40 hover:bg-black/70 hover:text-gold'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </label>
         </div>
 
         <button

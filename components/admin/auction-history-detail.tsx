@@ -2,16 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import Image from 'next/image';
-import { Shield, Sparkles, Target, Trophy, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import type { AuctionRoom, Team, Purchase, Player } from '@/lib/types';
-import { currency, formatCategory } from '@/lib/utils';
-
-const CATEGORY_ICONS: Record<string, typeof Shield> = {
-  defender: Shield,
-  midfielder: Sparkles,
-  forward: Target,
-  goalkeeper: Trophy
-};
+import { currency } from '@/lib/utils';
 
 interface AuctionHistoryDetailProps {
   room: AuctionRoom;
@@ -102,7 +95,6 @@ export function AuctionHistoryDetail({ room, teams, purchases, playerMap }: Auct
           const player = playerMap[purchase.player_id];
           const team = teams.find((t) => t.id === purchase.team_id);
           if (!player) return null;
-          const Icon = CATEGORY_ICONS[player.category] ?? Shield;
           return (
             <div
               key={purchase.id}
@@ -118,17 +110,12 @@ export function AuctionHistoryDetail({ room, teams, purchases, playerMap }: Auct
                     className="h-full w-full object-cover transition group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-white/5 to-white/10">
-                    <Icon className="h-16 w-16 text-white/20" />
-                  </div>
+                  <div className="flex h-full items-center justify-center bg-gradient-to-br from-white/5 to-white/10" />
                 )}
               </div>
               <div className="space-y-1.5 p-3">
                 <p className="truncate text-sm font-bold text-white">{player.name}</p>
-                <div className="flex items-center gap-1.5">
-                  <Icon className="size-3 text-gold" />
-                  <p className="text-xs text-white/40">{formatCategory(player.category)}</p>
-                </div>
+
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-white/30">{team?.name ?? 'Unknown'}</span>
                   <span className="text-sm font-black text-gold">${currency(purchase.price)}</span>

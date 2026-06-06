@@ -13,12 +13,11 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const name = String(formData.get('name') ?? '').trim();
   const division = String(formData.get('division') ?? '').trim();
-  const position = String(formData.get('position') ?? '').trim();
   const image = formData.get('image');
   const basePrice = parseInt(String(formData.get('base_price') ?? ''), 10) || 50;
 
-  if (!name || !division || !position) {
-    return NextResponse.json({ message: 'Name, division, and position are required.' }, { status: 400 });
+  if (!name || !division) {
+    return NextResponse.json({ message: 'Name and division are required.' }, { status: 400 });
   }
 
   const supabase = createServerSupabase();
@@ -45,7 +44,6 @@ export async function POST(request: Request) {
   const { error } = await supabase.from('players').insert({
     name,
     division,
-    category: position,
     base_price: basePrice,
     card_image_url: cardImageUrl,
     created_by: session.userId

@@ -1,16 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { Shield, Sparkles, Target, Trophy } from 'lucide-react';
-import { currency, formatCategory } from '@/lib/utils';
+import { Shield } from 'lucide-react';
+import { currency } from '@/lib/utils';
 import type { Player, Purchase } from '@/lib/types';
-
-const CATEGORY_ICONS = {
-  defender: Shield,
-  midfielder: Sparkles,
-  forward: Target,
-  goalkeeper: Trophy,
-};
 
 export function FutsalGround({ players, purchases }: { players: Player[]; purchases?: Purchase[] }) {
   const priceMap = new Map<string, number>();
@@ -35,7 +28,6 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {players.map((player) => {
-        const Icon = CATEGORY_ICONS[player.category] || Shield;
         const purchasePrice = priceMap.get(player.id) ?? player.sold_price ?? player.base_price;
         return (
           <div
@@ -55,7 +47,6 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gold/10 via-amber-900/10 to-orange/10">
                   <div className="text-center">
-                    <Icon className="mx-auto h-6 w-6 text-gold/40" />
                     <p className="mt-2 px-2 text-sm font-black uppercase tracking-[0.08em] text-gray-500">
                       {player.name}
                     </p>
@@ -67,10 +58,7 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
                 <p className="truncate text-xs font-black uppercase tracking-[0.04em] text-white drop-shadow-sm">
                   {player.name}
                 </p>
-                <div className="mt-0.5 flex items-center gap-1">
-                  <Icon className="size-2.5 text-gold" />
-                  <span className="text-[10px] font-bold text-gold/90">{formatCategory(player.category)}</span>
-                </div>
+
                 <p className="mt-1 text-sm font-black text-gold drop-shadow-sm">${currency(purchasePrice)}</p>
               </div>
             </div>

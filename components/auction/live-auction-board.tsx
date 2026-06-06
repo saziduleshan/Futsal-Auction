@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, ChevronUp, Gavel, Hourglass, ShoppingBag } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
-import { currency, formatCategory } from '@/lib/utils';
+import { currency } from '@/lib/utils';
 import type { AuctionRoom, Bid, Player, Team, UserRole, Purchase } from '@/lib/types';
 
 interface TeamPurchaseDisplay {

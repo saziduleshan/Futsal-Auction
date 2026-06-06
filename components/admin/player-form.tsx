@@ -42,15 +42,6 @@ export function PlayerForm() {
             <option value="women">Female Futsal</option>
           </select>
         </label>
-        <label className="space-y-2">
-          <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Position</span>
-          <select name="position" defaultValue="defender" className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
-            <option value="defender">Defender</option>
-            <option value="midfielder">Midfielder</option>
-            <option value="forward">Forward</option>
-            <option value="goalkeeper">Goalkeeper</option>
-          </select>
-        </label>
         <div className="space-y-2 md:col-span-2">
           <span className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-300">Base price ($)</span>
           <input name="base_price" type="number" min={10} step={10} defaultValue={50} className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30" />

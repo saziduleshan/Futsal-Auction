@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import type { AuctionRoom, Player, Team } from '@/lib/types';
-import { currency, formatCategory } from '@/lib/utils';
+import { currency } from '@/lib/utils';
 
 export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoom[]; players: Player[]; teams: Team[] }) {
   const router = useRouter();
@@ -77,7 +77,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                   <select id={`player-${room.id}`} className="w-full rounded-2xl border border-white/30 bg-white/70 px-4 py-3 text-gray-900 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30">
                     <option value="">Select a player</option>
                     {availableByDivision[room.division].map((player) => (
-                      <option key={player.id} value={player.id}>{player.name} · {formatCategory(player.category)} · {currency(player.base_price)}</option>
+                      <option key={player.id} value={player.id}>{player.name} · {currency(player.base_price)}</option>
                     ))}
                   </select>
                 </label>
@@ -119,7 +119,7 @@ export function AdminAuctionPanel({ rooms, players, teams }: { rooms: AuctionRoo
                   ? 'border-gold/20 bg-gold/[0.04] text-gold/80'
                   : 'border-white/20 bg-white/50 text-gray-400'
               }`}>
-                <p><span className="font-semibold text-gray-100">Current player:</span> {currentPlayer ? `${currentPlayer.name} · ${formatCategory(currentPlayer.category)}` : 'None'}</p>
+                <p><span className="font-semibold text-gray-100">Current player:</span> {currentPlayer ? currentPlayer.name : 'None'}</p>
                 <p className="mt-2"><span className="font-semibold text-gray-100">Highest bidder:</span> {winningTeam?.name ?? 'None yet'}</p>
               </div>
             </div>

@@ -1,5 +1,4 @@
 export type Division = 'men' | 'women';
-export type PlayerCategory = 'defender' | 'midfielder' | 'forward' | 'goalkeeper';
 export type AuctionStatus = 'idle' | 'live' | 'sold' | 'unsold';
 export type UserRole = 'admin' | 'team';
 
@@ -24,7 +23,6 @@ export interface Player {
   id: string;
   name: string;
   division: Division;
-  category: PlayerCategory;
   base_price: number;
   status: 'available' | 'sold' | 'unsold';
   card_image_url: string | null;

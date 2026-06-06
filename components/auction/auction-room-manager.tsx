@@ -38,20 +38,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return 0;
   });
-  const [isPaused, setIsPaused] = useState(false);
-  const [isStarting, setIsStarting] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [managersOpen, setManagersOpen] = useState(false);
-  const [bids, setBids] = useState<Bid[]>(initialBids);
-  const [notification, setNotification] = useState<{
-    type: 'sold' | 'unsold';
-    playerName: string;
-    teamName?: string;
-    price?: number;
-  } | null>(null);
-
   const advanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notificationChannelRef = useRef<ReturnType<ReturnType<typeof createBrowserSupabase>['channel']> | null>(null);
   const queueIndexRef = useRef(queueIndex);
@@ -196,20 +182,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         setNotification({ type: outcome, playerName, teamName, price });
         setCurrentPlayer(null);
         broadcastOutcome(outcome, playerName, teamName, price);
-
-        if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
-        if (!isPaused) {
-          advanceTimeoutRef.current = setTimeout(async () => {
-            setNotification(null);
-            const nextIndex = queueIndexRef.current + 1;
-            if (nextIndex < playerQueueRef.current.length) {
-              setQueueIndex(nextIndex);
-              await startPlayer(playerQueueRef.current[nextIndex]);
-            } else {
-              setMessage('All players have been auctioned.');
-            }
-          }, 7000);
-        }
       } else {
         setMessage(payload.message || 'Failed to close lot.');
       }
@@ -218,7 +190,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer, isPaused]);
+  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer]);
 
   const endAuction = useCallback(async () => {
     if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
@@ -243,6 +215,18 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       setIsEnding(false);
     }
   }, [division, router]);
+
+  const handleNextPlayer = useCallback(async () => {
+    setNotification(null);
+    setMessage(null);
+    const nextIndex = queueIndexRef.current + 1;
+    if (nextIndex < playerQueueRef.current.length) {
+      setQueueIndex(nextIndex);
+      await startPlayer(playerQueueRef.current[nextIndex]);
+    } else {
+      setMessage('All players have been auctioned.');
+    }
+  }, [startPlayer]);
 
   const [connections, setConnections] = useState<Record<string, boolean>>({});
   const [liveTeams, setLiveTeams] = useState(teams);
@@ -347,27 +331,15 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
 
       <div className="flex flex-wrap items-center gap-2">
-        {!currentPlayer && !isStarting && queueIndex < playerQueue.length && (
+        {!currentPlayer && !isStarting && !notification && queueIndex < playerQueue.length && (
           <button
             onClick={async () => {
-              setNotification(null);
               await startPlayer(playerQueue[queueIndex]);
             }}
             className="flex items-center gap-2 rounded-xl bg-gold px-6 py-3 font-bold text-white shadow-lg transition hover:bg-gold/90"
           >
             <Play className="h-4 w-4" />
             {queueIndex === 0 ? 'Start Auction' : 'Next Player'}
-          </button>
-        )}
-        {currentPlayer && (
-          <button
-            onClick={() => setIsPaused(!isPaused)}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-white shadow-lg transition ${
-              isPaused ? 'bg-gold hover:bg-gold/90' : 'bg-gray-600 hover:bg-gray-500'
-            }`}
-          >
-            {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-            {isPaused ? 'Resume' : 'Pause'}
           </button>
         )}
         <div className="rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl">
@@ -400,8 +372,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 <span className="text-orange">is unsold</span>
               )}
             </p>
-            <p className="mt-6 text-sm text-gray-400">{isPaused ? 'Auction paused. Click Next Player to continue.' : 'Next player starting soon...'}</p>
           </div>
+          <button
+            onClick={handleNextPlayer}
+            className="inline-flex items-center gap-2 rounded-xl bg-gold px-8 py-3.5 font-bold text-white shadow-lg transition hover:bg-gold/90"
+          >
+            <Play className="h-4 w-4" /> Next Player
+          </button>
         </div>
       ) : isStarting ? (
         <div className="flex items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-gray-300 bg-white py-16">

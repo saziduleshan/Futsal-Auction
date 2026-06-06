@@ -1,7 +1,6 @@
 create extension if not exists pgcrypto;
 
 create type division_t as enum ('men', 'women');
-create type player_category_t as enum ('defender', 'midfielder', 'forward', 'goalkeeper');
 create type player_status_t as enum ('available', 'sold', 'unsold');
 create type auction_status_t as enum ('idle', 'live', 'sold', 'unsold');
 create type user_role_t as enum ('admin', 'team');
@@ -30,7 +29,6 @@ create table if not exists players (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   division division_t not null,
-  category player_category_t not null,
   base_price integer not null default 50,
   status player_status_t not null default 'available',
   card_image_url text,
@@ -173,3 +171,9 @@ create index if not exists idx_purchases_room_id on purchases(room_id);
 create index if not exists idx_purchases_team_id on purchases(team_id);
 create index if not exists idx_players_division_status on players(division, status);
 create index if not exists idx_participants_room_team on auction_participants(room_id, team_id);
+
+-- ═══════════════════════════════════════════════
+-- MIGRATION: remove category column (run if upgrading)
+-- ═══════════════════════════════════════════════
+-- alter table players drop column category;
+-- drop type if exists player_category_t;

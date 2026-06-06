@@ -4,19 +4,11 @@ import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import {
   MoreVertical, Pencil, Trash2, X, Upload, Loader2,
-  Shield, Sparkles, Target, Trophy, Users, Eye, ArrowLeft
+  Users, Eye, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
-import type { Player, Division, PlayerCategory } from '@/lib/types';
-import { currency, formatCategory } from '@/lib/utils';
-import { PLAYER_CATEGORIES } from '@/lib/constants';
-
-const CATEGORY_ICONS = {
-  defender: Shield,
-  midfielder: Sparkles,
-  forward: Target,
-  goalkeeper: Trophy
-};
+import type { Player, Division } from '@/lib/types';
+import { currency } from '@/lib/utils';
 
 interface PlayerDatabaseProps {
   players: Player[];
@@ -25,7 +17,6 @@ interface PlayerDatabaseProps {
 export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps) {
   const [players, setPlayers] = useState(initialPlayers);
   const [activeDivision, setActiveDivision] = useState<Division>('men');
-  const [positionFilter, setPositionFilter] = useState<PlayerCategory | 'all'>('all');
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
@@ -113,17 +104,10 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
     }
   }, [deletePlayerId, closeDelete]);
 
-  const divisionPlayers = useMemo(
+  const filtered = useMemo(
     () => players.filter((p) => p.division === activeDivision),
     [players, activeDivision]
   );
-
-  const filtered = useMemo(() => {
-    return divisionPlayers.filter((p) => {
-      if (positionFilter !== 'all' && p.category !== positionFilter) return false;
-      return true;
-    });
-  }, [divisionPlayers, positionFilter]);
 
   const menCount = useMemo(
     () => players.filter((p) => p.division === 'men').length,
@@ -184,29 +168,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
         </span>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <select
-          value={positionFilter}
-          onChange={(e) => setPositionFilter(e.target.value as PlayerCategory | 'all')}
-          className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm text-gray-800 outline-none backdrop-blur-sm transition focus:border-gold focus:ring-1 focus:ring-gold/30"
-        >
-          <option value="all">All positions</option>
-          {PLAYER_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {formatCategory(cat)}
-            </option>
-          ))}
-        </select>
-        {positionFilter !== 'all' && (
-          <button
-            onClick={() => setPositionFilter('all')}
-            className="rounded-xl border border-white/20 bg-white/80 px-4 py-3 text-sm font-semibold text-gray-800 backdrop-blur-sm transition hover:border-red-400 hover:text-red-400"
-          >
-            Clear filters
-          </button>
-        )}
-      </div>
-
       {filtered.length === 0 ? (
         <div className="rounded-3xl border border-dashed border-white/20 bg-white/40 p-16 text-center backdrop-blur-sm">
           <Eye className="mx-auto h-10 w-10 text-white/40" />
@@ -220,7 +181,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((player) => {
-            const Icon = CATEGORY_ICONS[player.category];
             return (
               <article
                 key={player.id}
@@ -265,7 +225,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gold/10 via-brazil-yellow/5 to-orange/10">
                       <div className="text-center">
-                        <Icon className="mx-auto h-10 w-10 text-gold/40" />
                         <p className="mt-3 px-4 text-2xl font-black uppercase tracking-[0.1em] text-gray-700">
                           {player.name}
                         </p>
@@ -277,12 +236,6 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
                     <p className="text-lg font-black uppercase tracking-[0.08em] text-white drop-shadow-sm">
                       {player.name}
                     </p>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-                      <span className="inline-flex items-center gap-1 text-gold">
-                        <Icon className="h-3.5 w-3.5" />
-                        {formatCategory(player.category)}
-                      </span>
-                    </div>
                     <p className="mt-2 text-xl font-black text-gold drop-shadow-sm">
                       ${currency(player.base_price)}
                     </p>
