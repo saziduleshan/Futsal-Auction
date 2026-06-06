@@ -517,7 +517,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
               <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
-              <div className="mt-8 flex justify-center gap-5">
+              <div className="mt-16 flex justify-center gap-5">
                 <button
                   disabled={isClosing}
                   onClick={() => closeLot('unsold')}

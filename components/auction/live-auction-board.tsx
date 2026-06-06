@@ -304,14 +304,14 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   return (
     <div className="mx-auto flex max-w-5xl flex-col items-center gap-10">
       <div className="flex items-center gap-20">
-        <div className="w-[30rem] animate-slide-from-left">
+        <div className="w-[24rem] animate-slide-from-left">
           {livePlayer.card_image_url ? (
             <Image
               src={livePlayer.card_image_url}
               alt={livePlayer.name}
               width={600}
               height={750}
-              sizes="(max-width: 768px) 100vw, 30rem"
+              sizes="(max-width: 768px) 100vw, 24rem"
               className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
               priority
             />
@@ -360,7 +360,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
                   disabled={isDisabled || exceedsPurse}
                   className={`flex items-center gap-2 rounded-xl border-2 px-6 py-3 font-black text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-30 ${
                     isSelected
-                      ? 'border-amber bg-amber hover:bg-amber/90'
+                      ? 'border-gold bg-blue-600 hover:bg-blue-700'
                       : 'border-gray-600 bg-gray-800 hover:border-gray-500 hover:bg-gray-700'
                   }`}
                 >
@@ -371,8 +371,8 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           </div>
 
           {isLeading ? (
-            <p className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-5 py-2 text-sm font-bold text-amber">
-              <Gavel className="h-4 w-4" /> You are the highest bidder
+            <p className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-5 py-2 text-sm font-bold text-white shadow-lg backdrop-blur-xl">
+              <Gavel className="h-4 w-4 text-gold" /> You are the highest bidder
             </p>
           ) : selectedIncrement !== null && !isPending ? (
             <button
@@ -390,7 +390,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         <p className="text-sm font-semibold text-white/70">Placing bid...</p>
       )}
 
-      {message ? <p className="text-sm font-semibold text-white/70">{message}</p> : null}
+      
 
       <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
     </div>
