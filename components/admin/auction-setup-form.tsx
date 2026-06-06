@@ -55,21 +55,20 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="flex flex-col items-start gap-3">
         <Link
           href="/admin"
-          className="mb-3 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gold hover:text-gold/80"
+          className="inline-flex items-center gap-2 text-base font-bold uppercase tracking-[0.18em] text-[#0F2838] transition hover:text-[#0F2838]/70"
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft className="h-4 w-4" />
           Back to admin
         </Link>
-        <p className="badge border-gold/30 text-gold">Auction setup</p>
-        <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">
+        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-gold">
           Create auction room
         </h2>
       </div>
 
-      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-gray-400/40 p-8 shadow-lg backdrop-blur-xl">
+      <form onSubmit={handleCreate} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
         <div className="grid gap-6 md:grid-cols-2">
           <label className="space-y-2">
             <span className="text-sm font-bold uppercase tracking-[0.18em] text-gray-300">
@@ -136,8 +135,8 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
                   onClick={() => setPlayerSelection(opt.value)}
                   className={`rounded-xl border px-5 py-3 text-sm font-bold uppercase tracking-[0.1em] transition ${
                     playerSelection === opt.value
-                      ? 'border-gold bg-gold/10 text-gold shadow-sm'
-                      : 'border-white/20 bg-white/70 text-gray-400 hover:border-white/40'
+                      ? 'border border-gold bg-[#1D3C50] text-white shadow-sm ring-2 ring-gold/60'
+                      : 'border border-white/20 bg-black/60 text-gold/80 shadow-lg backdrop-blur-sm hover:border-white/40 hover:bg-black/70 hover:text-gold'
                   }`}
                 >
                   {opt.label}
@@ -149,7 +148,7 @@ export function AuctionSetupForm({ teams }: AuctionSetupFormProps) {
 
         <button
           disabled={isPending}
-          className="mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-gold to-orange px-6 py-4 font-black uppercase tracking-[0.16em] text-white shadow-lg transition hover:from-gray-800 hover:to-gray-800 disabled:from-gray-200 disabled:to-gray-200 disabled:text-gray-400"
+          className="mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#1D3C50] px-6 py-4 font-black uppercase tracking-[0.16em] text-white shadow-lg transition hover:bg-[#0F2838] disabled:bg-gray-600 disabled:text-gray-400"
         >
           <Gavel className="h-5 w-5" />
           {isPending ? 'Creating...' : 'Create auction room'}
