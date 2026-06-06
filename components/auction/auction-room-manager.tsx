@@ -378,7 +378,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-gray-400 hover:text-gray-600">
+        <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-[#0F2838] hover:text-black">
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to admin
         </Link>
@@ -388,14 +388,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         <div className="flex items-center gap-3">
           {activeBatch && (
             <div className="text-right">
-              <p className="text-xs font-bold uppercase tracking-[0.1em] text-gray-400">Active batch</p>
-              <p className="text-base font-black text-gray-900">{formatCategory(activeBatch)}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-white">Active batch</p>
+              <p className="text-base font-black text-white">{formatCategory(activeBatch)}</p>
             </div>
           )}
           {room.join_code ? (
             <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400">Join code</p>
-              <p className="mt-0.5 text-lg font-black tracking-[0.25em] text-cyan">{room.join_code}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-900">Join code</p>
+              <p className="mt-0.5 text-lg font-black tracking-[0.25em] text-[#1D3C50]">{room.join_code}</p>
             </div>
           ) : null}
           <button
@@ -409,9 +409,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         </div>
       </div>
 
-      <h1 className="text-lg font-black uppercase tracking-[0.08em] text-gray-900">
-        {division === 'men' ? 'Male Futsal' : 'Female Futsal'} Auction
-      </h1>
 
       <div className="flex flex-wrap items-center gap-2">
         {POSITIONS.map(({ key, label }) => {
@@ -422,7 +419,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               key={key}
               onClick={() => { if (!inProgress) runBatch(key); }}
               disabled={inProgress || count === 0}
-              className={`group flex items-center gap-2 rounded-xl border px-4 py-2 shadow-lg backdrop-blur-xl transition disabled:opacity-40 ${
+              className={`group relative flex items-center gap-1.5 rounded-xl border px-3 py-1.5 shadow-lg backdrop-blur-xl transition disabled:opacity-40 ${
                 isActive
                   ? 'border-[#f5c542] bg-black/60'
                   : 'border-white/20 bg-black/60 hover:border-white/40'
@@ -435,13 +432,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 </span>
               ) : null}
               <div>
-                <p className={`text-xs font-bold uppercase tracking-[0.08em] ${isActive ? 'text-gold' : 'text-white'}`}>{label}</p>
-                <p className={`text-xs ${isActive ? 'text-white/70' : 'text-white/60'}`}>{count} players</p>
+                <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${isActive ? 'text-gold' : 'text-white'}`}>{label}</p>
+                <p className={`text-[10px] ${isActive ? 'text-white/70' : 'text-white/60'}`}>{count} players</p>
               </div>
               {!inProgress && count > 0 && (
                 <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-gold px-4 py-1.5 text-xs font-bold text-white shadow-lg">
-                    <Play className="h-3 w-3" /> Run
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gold px-3 py-1 text-[10px] font-bold text-white shadow-lg">
+                    <Play className="h-2.5 w-2.5" /> Run
                   </span>
                 </div>
               )}
@@ -494,14 +491,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       ) : currentPlayer && (
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-10">
           <div className="flex items-center gap-20">
-            <div className="w-[30rem] animate-slide-from-left">
+            <div className="w-[36rem] animate-slide-from-left">
               {currentPlayer.card_image_url ? (
                 <Image
                   src={currentPlayer.card_image_url}
                   alt={currentPlayer.name}
                   width={600}
                   height={750}
-                  sizes="(max-width: 768px) 100vw, 30rem"
+                  sizes="(max-width: 768px) 100vw, 36rem"
                   className="aspect-[4/5] w-full rounded-xl object-cover shadow-[0_8px_30px_rgb(0,0,0,0.35)]"
                   priority
                 />
@@ -512,14 +509,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               )}
             </div>
             <div className="text-center">
-              <p className="text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
-              <p id="current-bid-display" className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
+              <p className="text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
+              <p id="current-bid-display" className="mt-3 text-9xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
                 ${currency(room.current_bid || currentPlayer.base_price)}
               </p>
-              <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
+              <p className="mt-12 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
-              <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
+              <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
             </div>
           </div>
           <div className="flex gap-5">
@@ -661,20 +658,65 @@ function BidHistoryPanel({
   initialRoomId: string;
 }) {
   const [isResetting, setIsResetting] = useState(false);
-  const [resetBid, setResetBid] = useState<{ teamName: string; amount: number } | null>(null);
+  const [resetBid, setResetBid] = useState<{ teamName: string; amount: number; createdAt: string } | null>(null);
 
-  const playerBids = useMemo(() => {
+  const dbBids = useMemo(() => {
     if (!room.current_player_id) return [];
-    return bids.filter((b) => b.player_id === room.current_player_id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return bids.filter((b) => b.player_id === room.current_player_id)
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   }, [bids, room.current_player_id]);
+
+  const latestHighestIndex = useMemo(() => {
+    if (!room.current_highest_team_id) return -1;
+    let idx = -1;
+    for (let i = 0; i < dbBids.length; i++) {
+      if (dbBids[i].team_id === room.current_highest_team_id) idx = i;
+    }
+    return idx;
+  }, [dbBids, room.current_highest_team_id]);
+
+  const displayBids = useMemo(() => {
+    const entries: Array<{
+      id: string;
+      teamName: string;
+      amount: number;
+      createdAt: string;
+      isHighest: boolean;
+      isReset: boolean;
+    }> = dbBids.map((bid, idx) => {
+      const team = teams.find((t) => t.id === bid.team_id);
+      return {
+        id: bid.id,
+        teamName: team?.name ?? 'Unknown',
+        amount: bid.amount,
+        createdAt: bid.created_at,
+        isHighest: idx === latestHighestIndex,
+        isReset: false,
+      };
+    });
+
+    if (resetBid) {
+      entries.push({
+        id: 'reset',
+        teamName: resetBid.teamName,
+        amount: resetBid.amount,
+        createdAt: resetBid.createdAt,
+        isHighest: false,
+        isReset: true,
+      });
+      entries.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+
+    return entries;
+  }, [dbBids, teams, latestHighestIndex, resetBid]);
 
   async function handleResetBid() {
     if (!confirm('Reset the most recent bid? This will remove the latest bid and restore the previous state.')) return;
     setIsResetting(true);
-    const topBid = playerBids[0];
+    const topBid = dbBids[dbBids.length - 1];
     if (topBid) {
       const team = teams.find((t) => t.id === topBid.team_id);
-      setResetBid({ teamName: team?.name ?? 'Unknown', amount: topBid.amount });
+      setResetBid({ teamName: team?.name ?? 'Unknown', amount: topBid.amount, createdAt: topBid.created_at });
     }
     try {
       const res = await fetch('/api/admin/auction/reset-bid', {
@@ -699,7 +741,7 @@ function BidHistoryPanel({
     <div className="mx-auto mt-8 w-full max-w-2xl">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold uppercase tracking-[0.1em] text-white">Bid History</h3>
-        {playerBids.length > 0 && (
+        {dbBids.length > 0 && (
           <button
             onClick={handleResetBid}
             disabled={isResetting}
@@ -711,7 +753,7 @@ function BidHistoryPanel({
         )}
       </div>
       <div className="mt-3 overflow-hidden rounded-xl border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
-        {playerBids.length === 0 ? (
+        {displayBids.length === 0 ? (
           <div className="px-4 py-3 text-sm text-white/60">No bids yet for this lot.</div>
         ) : (
           <table className="w-full text-left text-sm">
@@ -722,31 +764,20 @@ function BidHistoryPanel({
               </tr>
             </thead>
             <tbody>
-              {playerBids.slice(0, 10).map((bid) => {
-                const team = teams.find((t) => t.id === bid.team_id);
-                const isHighest = bid.team_id === room.current_highest_team_id;
-                return (
-                  <tr key={bid.id} className="border-b border-white/10 last:border-0">
-                    <td className={`px-4 py-2.5 ${isHighest ? 'font-bold text-gold' : 'text-white'}`}>
-                      {team?.name ?? 'Unknown'}
-                      {isHighest ? ' (highest)' : ''}
-                    </td>
-                    <td className={`px-4 py-2.5 text-right font-bold ${isHighest ? 'text-gold' : 'text-white'}`}>
-                      ${currency(bid.amount)}
-                    </td>
-                  </tr>
-                );
-              })}
-              {resetBid && (
-                <tr className="border-b border-white/10 bg-red-900/20">
-                  <td className="px-4 py-2.5 font-bold text-red-400">
-                    {resetBid.teamName} (Reset)
+              {displayBids.map((entry) => (
+                <tr
+                  key={entry.id}
+                  className={`border-b border-white/10 last:border-0 ${entry.isReset ? 'bg-red-900/20' : ''}`}
+                >
+                  <td className={`px-4 py-2.5 ${entry.isReset ? 'font-bold text-red-400' : entry.isHighest ? 'font-bold text-gold' : 'text-white'}`}>
+                    {entry.teamName}
+                    {entry.isReset ? ' (Reset)' : entry.isHighest ? ' (highest)' : ''}
                   </td>
-                  <td className="px-4 py-2.5 text-right font-bold text-red-400">
-                    ${currency(resetBid.amount)}
+                  <td className={`px-4 py-2.5 text-right font-bold ${entry.isReset ? 'text-red-400' : entry.isHighest ? 'text-gold' : 'text-white'}`}>
+                    ${currency(entry.amount)}
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         )}
