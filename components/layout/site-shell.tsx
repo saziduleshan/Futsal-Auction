@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { LayoutDashboard, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Shield, ArrowRightFromLine } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 
 export async function SiteShell({ children, bgImage }: { children: React.ReactNode; bgImage?: string }) {
@@ -33,15 +33,10 @@ export async function SiteShell({ children, bgImage }: { children: React.ReactNo
                     </Link>
                   </>
                 ) : null}
-                {session?.teamId ? (
-                  <Link href="/teams/me" className="rounded-full border border-white/15 px-5 py-2.5 transition hover:border-gold hover:text-gold">
-                    <span className="inline-flex items-center gap-2"><LayoutDashboard className="h-4 w-4" />My Team</span>
-                  </Link>
-                ) : null}
                 {session ? (
                   <form action="/api/auth/logout" method="post">
-                    <button className="rounded-full bg-white/10 px-5 py-2.5 font-bold text-white transition hover:bg-white/20">
-                      <span className="inline-flex items-center gap-2"><LogOut className="h-4 w-4" />Logout</span>
+                    <button className="rounded-full border border-white/15 px-5 py-2.5 font-bold text-white transition hover:border-gold hover:text-gold">
+                      <span className="inline-flex items-center gap-2"><ArrowRightFromLine className="h-4 w-4" />Logout</span>
                     </button>
                   </form>
                 ) : (

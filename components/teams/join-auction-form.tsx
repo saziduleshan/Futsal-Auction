@@ -37,7 +37,7 @@ export function JoinAuctionForm({ teamId }: { teamId: string }) {
   return (
     <form onSubmit={handleJoin} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
       <div>
-        <p className="text-2xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg">Join auction</p>
+        <p className="text-2xl font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg">Join auction</p>
         <p className="mt-1 text-sm text-white">Enter the 6-character code from the admin.</p>
       </div>
       <div className="mt-6 flex gap-3">
