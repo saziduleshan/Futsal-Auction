@@ -570,19 +570,19 @@ function BidHistoryPanel({
   initialRoomId: string;
 }) {
   const [isResetting, setIsResetting] = useState(false);
-  const [resetBid, setResetBid] = useState<{ teamName: string; amount: number; createdAt: string } | null>(null);
-  const [deletedBidIds, setDeletedBidIds] = useState<Set<string>>(new Set());
+  const [resetBids, setResetBids] = useState<Array<{ id: string; teamName: string; amount: number; createdAt: string }>>([]);
 
   useEffect(() => {
-    setDeletedBidIds(new Set());
-    setResetBid(null);
+    setResetBids([]);
   }, [room.current_player_id]);
+
+  const resetIds = useMemo(() => new Set(resetBids.map((r) => r.id)), [resetBids]);
 
   const dbBids = useMemo(() => {
     if (!room.current_player_id) return [];
-    return bids.filter((b) => b.player_id === room.current_player_id && !deletedBidIds.has(b.id))
+    return bids.filter((b) => b.player_id === room.current_player_id)
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-  }, [bids, room.current_player_id, deletedBidIds]);
+  }, [bids, room.current_player_id]);
 
   const displayBids = useMemo(() => {
     const entries: Array<{
@@ -591,23 +591,25 @@ function BidHistoryPanel({
       amount: number;
       createdAt: string;
       isReset: boolean;
-    }> = dbBids.map((bid) => {
-      const team = teams.find((t) => t.id === bid.team_id);
-      return {
-        id: bid.id,
-        teamName: team?.name ?? 'Unknown',
-        amount: bid.amount,
-        createdAt: bid.created_at,
-        isReset: false,
-      };
-    });
+    }> = dbBids
+      .filter((bid) => !resetIds.has(bid.id))
+      .map((bid) => {
+        const team = teams.find((t) => t.id === bid.team_id);
+        return {
+          id: bid.id,
+          teamName: team?.name ?? 'Unknown',
+          amount: bid.amount,
+          createdAt: bid.created_at,
+          isReset: false,
+        };
+      });
 
-    if (resetBid) {
+    for (const r of resetBids) {
       entries.push({
-        id: 'reset',
-        teamName: resetBid.teamName,
-        amount: resetBid.amount,
-        createdAt: resetBid.createdAt,
+        id: 'reset-' + r.id,
+        teamName: r.teamName,
+        amount: r.amount,
+        createdAt: r.createdAt,
         isReset: true,
       });
     }
@@ -615,7 +617,7 @@ function BidHistoryPanel({
     entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return entries;
-  }, [dbBids, teams, resetBid]);
+  }, [dbBids, teams, resetIds, resetBids]);
 
   const goldIndex = useMemo(
     () => displayBids.findIndex((e) => !e.isReset),
@@ -628,8 +630,7 @@ function BidHistoryPanel({
     const topBid = dbBids[dbBids.length - 1];
     if (topBid) {
       const team = teams.find((t) => t.id === topBid.team_id);
-      setDeletedBidIds((prev) => new Set(prev).add(topBid.id));
-      setResetBid({ teamName: team?.name ?? 'Unknown', amount: topBid.amount, createdAt: topBid.created_at });
+      setResetBids((prev) => [...prev, { id: topBid.id, teamName: team?.name ?? 'Unknown', amount: topBid.amount, createdAt: topBid.created_at }]);
     }
     try {
       const res = await fetch('/api/admin/auction/reset-bid', {
@@ -640,11 +641,11 @@ function BidHistoryPanel({
       const payload = await res.json();
       if (!res.ok) {
         alert(payload.message ?? 'Failed to reset bid.');
-        setResetBid(null);
+        setResetBids((prev) => prev.slice(0, -1));
       }
     } catch {
       alert('Could not reset bid.');
-      setResetBid(null);
+      setResetBids((prev) => prev.slice(0, -1));
     } finally {
       setIsResetting(false);
     }
