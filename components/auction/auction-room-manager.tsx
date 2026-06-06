@@ -353,15 +353,15 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
             {queueIndex === 0 ? 'Start Auction' : 'Next Player'}
           </button>
         )}
-        <div className="rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl">
+        <div className="flex w-44 items-center justify-between gap-2 rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl">
           <span className="text-xs font-bold text-white">Players Left</span>
-          <span className="ml-2 text-xs text-white/60">
+          <span className="text-xs text-white/60">
             {players.length - purchases.length - (currentPlayer ? 1 : 0)}
           </span>
         </div>
         <button
           onClick={() => setManagersOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl transition hover:border-white/40"
+          className="flex w-44 items-center justify-between gap-2 rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl transition hover:border-white/40"
         >
           <span className="text-xs font-bold text-white">Managers</span>
           <span className="text-xs text-white/60">{teams.length} teams</span>
@@ -429,8 +429,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               )}
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
-              <p id="current-bid-display" className="mt-3 text-9xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
+              <p className="text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Current price</p>
+              <p id="current-bid-display" className="mt-3 text-9xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#BF2816' }}>
                 ${currency(room.current_bid || currentPlayer.base_price)}
               </p>
               <p className="mt-12 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>

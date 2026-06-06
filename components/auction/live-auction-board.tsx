@@ -322,8 +322,8 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           )}
         </div>
         <div className="text-center">
-          <p className="text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#264153' }}>Current price</p>
-          <p className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#264153' }}>
+          <p className="text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Current price</p>
+          <p className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#BF2816' }}>
             ${currency(liveRoom.current_bid || livePlayer.base_price)}
           </p>
           <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>
