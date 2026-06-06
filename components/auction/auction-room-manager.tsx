@@ -4,20 +4,12 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
-  Play, Loader2, Shield, Sparkles, Target, Trophy,
-  Gavel, X, Check, Users, ArrowLeft, Eye, OctagonX
+  Play, Loader2, Shield, Gavel, X, Check, Users, ArrowLeft, OctagonX, Pause
 } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
-import { currency, formatCategory } from '@/lib/utils';
-import type { AuctionRoom, Bid, Player, Team, PlayerCategory, Purchase } from '@/lib/types';
-
-const POSITIONS: { key: PlayerCategory; label: string; Icon: typeof Shield }[] = [
-  { key: 'defender', label: 'Defenders', Icon: Shield },
-  { key: 'midfielder', label: 'Midfielders', Icon: Sparkles },
-  { key: 'forward', label: 'Forwards', Icon: Target },
-  { key: 'goalkeeper', label: 'Goalkeepers', Icon: Trophy }
-];
+import { currency } from '@/lib/utils';
+import type { AuctionRoom, Bid, Player, Team, Purchase } from '@/lib/types';
 
 interface AuctionRoomManagerProps {
   division: string;
@@ -33,31 +25,20 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const [room, setRoom] = useState(initialRoom);
   const [purchases, setPurchases] = useState(initialPurchases);
-  const [activeBatch, setActiveBatch] = useState<PlayerCategory | null>(() => {
-    if (initialRoom.current_player_id) {
-      const player = players.find((p) => p.id === initialRoom.current_player_id);
-      return player?.category ?? null;
-    }
-    return null;
-  });
-  const [playerIndex, setPlayerIndex] = useState(0);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
     if (initialRoom.current_player_id) {
       return players.find((p) => p.id === initialRoom.current_player_id) ?? null;
     }
     return null;
   });
-  const [batchQueue, setBatchQueue] = useState<Player[]>(() => {
+  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players]);
+  const [queueIndex, setQueueIndex] = useState(() => {
     if (initialRoom.current_player_id) {
-      const player = players.find((p) => p.id === initialRoom.current_player_id);
-      if (player) {
-        const categoryPlayers = players.filter((p) => p.category === player.category);
-        const currentIdx = categoryPlayers.findIndex((p) => p.id === player.id);
-        if (currentIdx >= 0) return categoryPlayers.slice(currentIdx);
-      }
+      return Math.max(0, players.findIndex((p) => p.id === initialRoom.current_player_id));
     }
-    return [];
+    return 0;
   });
+  const [isPaused, setIsPaused] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
@@ -73,10 +54,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
   const advanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const notificationChannelRef = useRef<ReturnType<ReturnType<typeof createBrowserSupabase>['channel']> | null>(null);
-  const playerIndexRef = useRef(playerIndex);
-  playerIndexRef.current = playerIndex;
-  const batchQueueRef = useRef(batchQueue);
-  batchQueueRef.current = batchQueue;
+  const queueIndexRef = useRef(queueIndex);
+  queueIndexRef.current = queueIndex;
+  const playerQueueRef = useRef(playerQueue);
+  playerQueueRef.current = playerQueue;
 
   useEffect(() => {
     return () => {
@@ -84,25 +65,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     };
   }, []);
 
-  const isBatchComplete = useMemo(() => {
-    if (activeBatch === null) return false;
-    return playerIndex >= batchQueue.length && batchQueue.length > 0;
-  }, [activeBatch, playerIndex, batchQueue]);
-
-  const batchedCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const pos of POSITIONS) {
-      counts[pos.key] = players.filter((p) => p.category === pos.key).length;
-    }
-    return counts;
-  }, [players]);
-
   const highestBidder = useMemo(() => {
     if (!room.current_highest_team_id) return null;
     return teams.find((t) => t.id === room.current_highest_team_id) ?? null;
   }, [room.current_highest_team_id, teams]);
-
-  const bidCount = room.current_bid || (currentPlayer?.base_price ?? 0);
 
   const roomPlayerRef = useRef(initialRoom.current_player_id);
   roomPlayerRef.current = room.current_player_id;
@@ -177,23 +143,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     });
   }, [division]);
 
-  const runBatch = useCallback(async (position: PlayerCategory) => {
-    setActiveBatch(position);
-    setPlayerIndex(0);
-    setCurrentPlayer(null);
-    setMessage(null);
-    setNotification(null);
-
-    const positionPlayers = players.filter((p) => p.category === position);
-    if (positionPlayers.length === 0) {
-      setMessage(`No available ${formatCategory(position)}s.`);
-      return;
-    }
-
-    setBatchQueue(positionPlayers);
-    await startPlayer(positionPlayers[0]);
-  }, [players]);
-
   const startPlayer = useCallback(async (player: Player) => {
     setIsStarting(true);
     setMessage(null);
@@ -207,21 +156,16 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       if (res.ok) {
         setCurrentPlayer(player);
       } else {
-        if (payload.message?.toLowerCase().includes('not available')) {
-          setMessage(`${player.name} is no longer available. Skipping...`);
-          await new Promise((r) => setTimeout(r, 1500));
-          const q = batchQueueRef.current;
-          const idx = playerIndexRef.current;
-          const nextIndex = idx + 1;
-          if (nextIndex < q.length) {
-            setPlayerIndex(nextIndex);
-            await startPlayer(q[nextIndex]);
-          } else {
-            setActiveBatch(null);
-            setPlayerIndex(0);
-            setBatchQueue([]);
-            setMessage('All remaining players in this batch were already taken. Batch complete.');
-          }
+          if (payload.message?.toLowerCase().includes('not available')) {
+            setMessage(`${player.name} is no longer available. Skipping...`);
+            await new Promise((r) => setTimeout(r, 1500));
+            const nextIndex = queueIndexRef.current + 1;
+            if (nextIndex < playerQueueRef.current.length) {
+              setQueueIndex(nextIndex);
+              await startPlayer(playerQueueRef.current[nextIndex]);
+            } else {
+              setMessage('All remaining players were already taken.');
+            }
         } else {
           setMessage(payload.message || 'Failed to start player.');
         }
@@ -254,20 +198,18 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         broadcastOutcome(outcome, playerName, teamName, price);
 
         if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
-        advanceTimeoutRef.current = setTimeout(async () => {
-          setNotification(null);
-          const q = batchQueueRef.current;
-          const idx = playerIndexRef.current;
-          const nextIndex = idx + 1;
-          if (nextIndex < q.length) {
-            setPlayerIndex(nextIndex);
-            await startPlayer(q[nextIndex]);
-          } else {
-            setActiveBatch(null);
-            setPlayerIndex(0);
-            setBatchQueue([]);
-          }
-        }, 7000);
+        if (!isPaused) {
+          advanceTimeoutRef.current = setTimeout(async () => {
+            setNotification(null);
+            const nextIndex = queueIndexRef.current + 1;
+            if (nextIndex < playerQueueRef.current.length) {
+              setQueueIndex(nextIndex);
+              await startPlayer(playerQueueRef.current[nextIndex]);
+            } else {
+              setMessage('All players have been auctioned.');
+            }
+          }, 7000);
+        }
       } else {
         setMessage(payload.message || 'Failed to close lot.');
       }
@@ -276,7 +218,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer]);
+  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer, isPaused]);
 
   const endAuction = useCallback(async () => {
     if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
@@ -291,8 +233,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       if (res.ok) {
         setPurchases([]);
         setCurrentPlayer(null);
-        setActiveBatch(null);
-        setPlayerIndex(0);
         window.location.href = '/admin';
       } else {
         setMessage(payload.message || 'Failed to end auction.');
@@ -303,8 +243,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       setIsEnding(false);
     }
   }, [division, router]);
-
-  const inProgress = activeBatch !== null && !isBatchComplete && currentPlayer !== null;
 
   const [connections, setConnections] = useState<Record<string, boolean>>({});
   const [liveTeams, setLiveTeams] = useState(teams);
@@ -373,8 +311,6 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     return () => { supabase.removeChannel(channel); };
   }, [initialRoom.id]);
 
-  const displayBid = room.current_bid || (currentPlayer?.base_price ?? 0);
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -386,10 +322,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
           <Image src="/Genesislogo.png" alt="The Genesis" width={220} height={60} className="h-14 w-auto" priority />
         </Link>
         <div className="flex items-center gap-3">
-          {activeBatch && (
+          {currentPlayer && (
             <div className="text-right">
-              <p className="text-xs font-bold uppercase tracking-[0.1em] text-white">Active batch</p>
-              <p className="text-base font-black text-white">{formatCategory(activeBatch)}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-white">Player</p>
+              <p className="text-base font-black text-white">{queueIndex + 1}/{playerQueue.length}</p>
             </div>
           )}
           {room.join_code ? (
@@ -411,51 +347,35 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
 
 
       <div className="flex flex-wrap items-center gap-2">
-        {POSITIONS.map(({ key, label }) => {
-          const count = batchedCounts[key];
-          const isActive = activeBatch === key;
-          return (
-            <button
-              key={key}
-              onClick={() => { if (!inProgress) runBatch(key); }}
-              disabled={inProgress || count === 0}
-              className={`group relative flex items-center gap-1.5 rounded-xl border px-3 py-1.5 shadow-lg backdrop-blur-xl transition disabled:opacity-40 ${
-                isActive
-                  ? 'border-[#f5c542] bg-black/60'
-                  : 'border-white/20 bg-black/60 hover:border-white/40'
-              }`}
-            >
-              {isActive && !isBatchComplete && currentPlayer ? (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-lime opacity-75" />
-                  <span className="relative inline-flex h-3 w-3 rounded-full bg-lime" />
-                </span>
-              ) : null}
-              <div>
-                <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${isActive ? 'text-gold' : 'text-white'}`}>{label}</p>
-                <p className={`text-[10px] ${isActive ? 'text-white/70' : 'text-white/60'}`}>{count} players</p>
-              </div>
-              {!inProgress && count > 0 && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 opacity-0 backdrop-blur-sm transition group-hover:opacity-100">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gold px-3 py-1 text-[10px] font-bold text-white shadow-lg">
-                    <Play className="h-2.5 w-2.5" /> Run
-                  </span>
-                </div>
-              )}
-              {isActive && (
-                <div className="ml-auto">
-                  {isBatchComplete ? (
-                    <span className="rounded-full bg-lime/20 px-2 py-0.5 text-[10px] font-bold text-lime">Done</span>
-                  ) : (
-                    <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-bold text-gold">
-                      {Math.min(playerIndex + 1, batchQueue.length)}/{batchQueue.length}
-                    </span>
-                  )}
-                </div>
-              )}
-            </button>
-          );
-        })}
+        {!currentPlayer && !isStarting && queueIndex < playerQueue.length && (
+          <button
+            onClick={async () => {
+              setNotification(null);
+              await startPlayer(playerQueue[queueIndex]);
+            }}
+            className="flex items-center gap-2 rounded-xl bg-gold px-6 py-3 font-bold text-white shadow-lg transition hover:bg-gold/90"
+          >
+            <Play className="h-4 w-4" />
+            {queueIndex === 0 ? 'Start Auction' : 'Next Player'}
+          </button>
+        )}
+        {currentPlayer && (
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-bold text-white shadow-lg transition ${
+              isPaused ? 'bg-gold hover:bg-gold/90' : 'bg-gray-600 hover:bg-gray-500'
+            }`}
+          >
+            {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+            {isPaused ? 'Resume' : 'Pause'}
+          </button>
+        )}
+        <div className="rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl">
+          <span className="text-xs font-bold text-white">Players Left</span>
+          <span className="ml-2 text-xs text-white/60">
+            {playerQueue.length - queueIndex - (currentPlayer ? 1 : 0)}
+          </span>
+        </div>
         <button
           onClick={() => setManagersOpen(true)}
           className="flex items-center gap-2 rounded-xl border border-white/20 bg-black/60 px-4 py-2 shadow-lg backdrop-blur-xl transition hover:border-white/40"
@@ -480,7 +400,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 <span className="text-orange">is unsold</span>
               )}
             </p>
-            <p className="mt-6 text-sm text-gray-400">Next player starting soon...</p>
+            <p className="mt-6 text-sm text-gray-400">{isPaused ? 'Auction paused. Click Next Player to continue.' : 'Next player starting soon...'}</p>
           </div>
         </div>
       ) : isStarting ? (
@@ -547,18 +467,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         </div>
       )}
 
-      {activeBatch && !currentPlayer && !isStarting && !isBatchComplete && !notification && (
-        <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 py-10">
-          <div className="text-center">
-            <Play className="mx-auto h-8 w-8 text-gray-300" />
-            <p className="mt-2 text-base font-bold text-gray-400">Ready to start</p>
-            <button
-              onClick={() => startPlayer(batchQueue[playerIndex])}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gold px-5 py-2.5 font-bold text-white shadow transition hover:bg-gold/90"
-            >
-              <Gavel className="h-4 w-4" /> Start this player
-            </button>
-          </div>
+      {queueIndex >= playerQueue.length && playerQueue.length > 0 && !currentPlayer && !notification && (
+        <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-gray-500 bg-gray-900/50 py-10">
+          <p className="text-lg font-bold text-white/60">All players have been auctioned.</p>
         </div>
       )}
 
