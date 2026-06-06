@@ -517,25 +517,25 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
               <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#BF2816' }}>Highest bidder</p>
+              <div className="mt-8 flex justify-center gap-5">
+                <button
+                  disabled={isClosing}
+                  onClick={() => closeLot('unsold')}
+                  className="flex items-center gap-2 rounded-xl bg-[#1D3C50] px-8 py-3.5 font-bold text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
+                >
+                  {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+                  Mark Unsold
+                </button>
+                <button
+                  disabled={isClosing || !room.current_highest_team_id}
+                  onClick={() => closeLot('sold')}
+                  className="flex items-center gap-2 rounded-xl bg-[#BF2816] px-8 py-3.5 font-black text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
+                >
+                  {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  Mark Sold
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-5">
-            <button
-              disabled={isClosing}
-              onClick={() => closeLot('unsold')}
-              className="flex items-center gap-2 rounded-xl bg-[#1D3C50] px-8 py-3.5 font-bold text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
-            >
-              {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
-              Mark Unsold
-            </button>
-            <button
-              disabled={isClosing || !room.current_highest_team_id}
-              onClick={() => closeLot('sold')}
-              className="flex items-center gap-2 rounded-xl bg-[#BF2816] px-8 py-3.5 font-black text-white shadow transition hover:ring-2 hover:ring-gold disabled:opacity-40"
-            >
-              {isClosing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Mark Sold
-            </button>
           </div>
           <BidHistoryPanel
             bids={bids}
