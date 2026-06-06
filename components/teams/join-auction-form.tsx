@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { KeyRound, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export function JoinAuctionForm({ teamId }: { teamId: string }) {
   const router = useRouter();
@@ -36,14 +36,9 @@ export function JoinAuctionForm({ teamId }: { teamId: string }) {
 
   return (
     <form onSubmit={handleJoin} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
-      <div className="flex items-center gap-4">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan/20 to-purple/20">
-          <KeyRound className="size-7 text-cyan" />
-        </div>
-        <div className="flex-1">
-          <p className="text-2xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg">Join auction</p>
-          <p className="mt-1 text-sm text-white/50">Enter the 6-character code from the admin.</p>
-        </div>
+      <div>
+        <p className="text-2xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg">Join auction</p>
+        <p className="mt-1 text-sm text-white">Enter the 6-character code from the admin.</p>
       </div>
       <div className="mt-6 flex gap-3">
         <input
