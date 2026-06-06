@@ -578,31 +578,20 @@ function BidHistoryPanel({
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   }, [bids, room.current_player_id]);
 
-  const latestHighestIndex = useMemo(() => {
-    if (!room.current_highest_team_id) return -1;
-    let idx = -1;
-    for (let i = 0; i < dbBids.length; i++) {
-      if (dbBids[i].team_id === room.current_highest_team_id) idx = i;
-    }
-    return idx;
-  }, [dbBids, room.current_highest_team_id]);
-
   const displayBids = useMemo(() => {
     const entries: Array<{
       id: string;
       teamName: string;
       amount: number;
       createdAt: string;
-      isHighest: boolean;
       isReset: boolean;
-    }> = dbBids.map((bid, idx) => {
+    }> = dbBids.map((bid) => {
       const team = teams.find((t) => t.id === bid.team_id);
       return {
         id: bid.id,
         teamName: team?.name ?? 'Unknown',
         amount: bid.amount,
         createdAt: bid.created_at,
-        isHighest: idx === latestHighestIndex,
         isReset: false,
       };
     });
@@ -613,19 +602,19 @@ function BidHistoryPanel({
         teamName: resetBid.teamName,
         amount: resetBid.amount,
         createdAt: resetBid.createdAt,
-        isHighest: false,
         isReset: true,
       });
     }
 
     entries.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    if (entries.length > 1 && entries[0].isReset) {
-      [entries[0], entries[1]] = [entries[1], entries[0]];
-    }
-
     return entries;
-  }, [dbBids, teams, latestHighestIndex, resetBid]);
+  }, [dbBids, teams, resetBid]);
+
+  const goldIndex = useMemo(
+    () => displayBids.findIndex((e) => !e.isReset),
+    [displayBids]
+  );
 
   async function handleResetBid() {
     if (!confirm('Reset the most recent bid? This will remove the latest bid and restore the previous state.')) return;
@@ -681,16 +670,16 @@ function BidHistoryPanel({
               </tr>
             </thead>
             <tbody>
-              {displayBids.map((entry) => (
+              {displayBids.map((entry, idx) => (
                 <tr
                   key={entry.id}
                   className={`border-b border-white/10 last:border-0 ${entry.isReset ? 'bg-red-900/20' : ''}`}
                 >
-                  <td className={`px-4 py-2.5 ${entry.isReset ? 'font-bold text-red-400' : entry.isHighest ? 'font-bold text-gold' : 'text-white'}`}>
+                  <td className={`px-4 py-2.5 ${entry.isReset ? 'font-bold text-red-400' : idx === goldIndex ? 'font-bold text-gold' : 'text-white'}`}>
                     {entry.teamName}
-                    {entry.isReset ? ' (Reset)' : entry.isHighest ? ' (highest)' : ''}
+                    {entry.isReset ? ' (Reset)' : ''}
                   </td>
-                  <td className={`px-4 py-2.5 text-right font-bold ${entry.isReset ? 'text-red-400' : entry.isHighest ? 'text-gold' : 'text-white'}`}>
+                  <td className={`px-4 py-2.5 text-right font-bold ${entry.isReset ? 'text-red-400' : idx === goldIndex ? 'text-gold' : 'text-white'}`}>
                     ${currency(entry.amount)}
                   </td>
                 </tr>
