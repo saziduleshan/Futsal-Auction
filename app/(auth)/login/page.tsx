@@ -24,8 +24,9 @@ export default function LoginPage() {
         />
 
         <div className="relative z-10 w-full max-w-md px-4">
-          <div className="rounded-2xl p-8 md:p-10 shadow-2xl" style={{ backgroundColor: '#A3311C', filter: 'url(#roughpaper)' }}>
-            <div className="rounded-xl bg-black/50 p-8 backdrop-blur-sm">
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+            <div className="absolute inset-0" style={{ backgroundColor: '#A3311C', filter: 'url(#roughpaper)' }} />
+            <div className="relative rounded-xl bg-black/50 m-2 p-8 backdrop-blur-sm">
               <div className="text-center">
                 <Image
                   src="/Genesislogo.png"
