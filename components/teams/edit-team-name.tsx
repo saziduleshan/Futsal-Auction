@@ -83,7 +83,7 @@ export function EditTeamName({ team, canEdit }: { team: Team; canEdit: boolean }
 
   return (
     <div className="mt-4 flex items-center gap-3">
-      <h1 className="text-4xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg md:text-5xl">{name}</h1>
+      <h1 className="text-4xl font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg md:text-5xl">{name}</h1>
       {canEdit ? (
         <button
           onClick={() => setEditing(true)}
