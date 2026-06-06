@@ -21,7 +21,6 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
       .from('players')
       .select('*')
       .eq('division', division)
-      .eq('status', 'available')
       .order('name'),
     supabase.from('teams').select('*').eq('division', division).order('name')
   ]);

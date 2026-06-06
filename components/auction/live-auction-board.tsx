@@ -272,13 +272,13 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   if (notification) {
     return (
       <div className="flex flex-col items-center gap-8 py-20">
-        <div className={`w-full max-w-2xl rounded-2xl border-2 p-10 text-center shadow-lg backdrop-blur-xl ${notification.type === 'sold' ? 'border-lime/30 bg-black/60' : 'border-orange/30 bg-black/60'}`}>
-          <p className="text-4xl font-black uppercase tracking-[0.08em] text-white">{notification.playerName}</p>
-          <p className="mt-4 text-2xl font-bold text-white/70">
+        <div className="w-full max-w-2xl rounded-2xl border-2 p-10 text-center shadow-lg backdrop-blur-xl bg-black/60" style={{ borderColor: '#F4C542' }}>
+          <p className="text-4xl font-black uppercase tracking-[0.08em]" style={{ color: '#F4C542' }}>{notification.playerName}</p>
+          <p className="mt-4 text-2xl font-bold tracking-[0.04em] text-white/90">
             {notification.type === 'sold' ? (
-              <><span className="text-white/90">is sold to </span><span className="text-lime">{notification.teamName}</span><span className="text-white/90"> for </span><span className="text-gold">${currency(notification.price!)}</span></>
+              <><span className="text-white/80">is sold to </span><span className="font-black" style={{ color: '#F4C542' }}>{notification.teamName}</span><span className="text-white/80"> for </span><span className="font-black" style={{ color: '#F4C542' }}>${currency(notification.price!)}</span></>
             ) : (
-              <span className="text-orange">is unsold</span>
+              <span style={{ color: '#F4C542' }}>is unsold</span>
             )}
           </p>
           <p className="mt-6 text-sm text-white/60">Next player starting soon...</p>

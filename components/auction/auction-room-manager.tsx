@@ -31,10 +31,11 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return null;
   });
-  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players]);
+  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players.filter((p) => p.status === 'available')]);
   const [queueIndex, setQueueIndex] = useState(() => {
     if (initialRoom.current_player_id) {
-      return Math.max(0, players.findIndex((p) => p.id === initialRoom.current_player_id));
+      const allPlayers = players;
+      return Math.max(0, allPlayers.findIndex((p) => p.id === initialRoom.current_player_id));
     }
     return 0;
   });
@@ -391,8 +392,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               </>
             ) : (
               <>
-                <p className="text-6xl font-black uppercase tracking-[0.06em] text-white">{notification.playerName}</p>
-                <p className="mt-6 text-3xl font-bold tracking-[0.04em] text-orange">is unsold</p>
+                <p className="text-6xl font-black uppercase tracking-[0.06em]" style={{ color: '#F4C542' }}>{notification.playerName}</p>
+                <p className="mt-6 text-3xl font-bold tracking-[0.04em]" style={{ color: '#F4C542' }}>is unsold</p>
               </>
             )}
           </div>
