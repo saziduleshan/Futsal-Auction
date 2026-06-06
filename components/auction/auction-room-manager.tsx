@@ -31,11 +31,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return null;
   });
-  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => players.filter((p) => p.status === 'available'));
+  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players]);
   const [queueIndex, setQueueIndex] = useState(() => {
     if (initialRoom.current_player_id) {
-      const available = players.filter((p) => p.status === 'available');
-      return Math.max(0, available.findIndex((p) => p.id === initialRoom.current_player_id));
+      return Math.max(0, players.findIndex((p) => p.id === initialRoom.current_player_id));
     }
     return 0;
   });
@@ -190,9 +189,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         const teamName = outcome === 'sold' ? highestBidder?.name : undefined;
         const price = outcome === 'sold' ? room.current_bid : undefined;
 
-        if (outcome === 'sold') {
-          setPlayerQueue((prev) => prev.filter((p) => p.id !== currentPlayer.id));
-        } else {
+        if (outcome === 'unsold') {
           setPlayerQueue((prev) => [...prev, currentPlayer]);
         }
         setNotification({ type: outcome, playerName, teamName, price });
