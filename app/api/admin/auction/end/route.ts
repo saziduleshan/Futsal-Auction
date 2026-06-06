@@ -37,6 +37,14 @@ export async function POST(request: Request) {
     })
     .in('id', roomIds);
 
+  if (division) {
+    await supabase
+      .from('players')
+      .update({ status: 'available', sold_price: null, sold_to_team_id: null })
+      .eq('division', division)
+      .neq('status', 'available');
+  }
+
   return NextResponse.json({
     message: division
       ? `Auction ended for ${division}.`

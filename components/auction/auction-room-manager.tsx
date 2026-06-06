@@ -31,7 +31,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return null;
   });
-  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players.filter((p) => p.status === 'available')]);
+  const [playerQueue, setPlayerQueue] = useState<Player[]>(() => [...players]);
   const [queueIndex, setQueueIndex] = useState(() => {
     if (initialRoom.current_player_id) {
       const allPlayers = players;
@@ -330,6 +330,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               <p className="mt-0.5 text-lg font-black tracking-[0.25em] text-[#1D3C50]">{room.join_code}</p>
             </div>
           ) : null}
+          <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-center shadow-sm">
+            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-900">Sold</p>
+            <p className="mt-0.5 text-lg font-black tracking-[0.05em] text-[#1D3C50]">{purchases.length}</p>
+          </div>
           <button
             onClick={endAuction}
             disabled={isEnding}
