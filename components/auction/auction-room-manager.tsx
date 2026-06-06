@@ -187,6 +187,9 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
         const teamName = outcome === 'sold' ? highestBidder?.name : undefined;
         const price = outcome === 'sold' ? room.current_bid : undefined;
 
+        if (outcome === 'unsold') {
+          setPlayerQueue((prev) => [...prev, currentPlayer]);
+        }
         setNotification({ type: outcome, playerName, teamName, price });
         setCurrentPlayer(null);
         broadcastOutcome(outcome, playerName, teamName, price);
@@ -198,7 +201,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer]);
+  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer, setPlayerQueue]);
 
   const endAuction = useCallback(async () => {
     if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
@@ -370,22 +373,40 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       )}
 
       {notification ? (
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 py-20">
-          <div className={`rounded-2xl border-2 p-10 text-center shadow-lg ${notification.type === 'sold' ? 'border-lime bg-lime/5' : 'border-orange bg-orange/5'}`}>
-            <p className="text-3xl font-black uppercase tracking-[0.08em] text-gray-900">{notification.playerName}</p>
-            <p className="mt-4 text-xl font-bold text-gray-600">
-              {notification.type === 'sold' ? (
-                <><span className="text-gray-900">is sold to </span><span className="text-lime">{notification.teamName}</span><span className="text-gray-900"> for </span><span className="text-gold">${currency(notification.price!)}</span></>
-              ) : (
-                <span className="text-orange">is unsold</span>
-              )}
-            </p>
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 py-24">
+          <div className={`w-full rounded-3xl border-4 p-14 text-center shadow-2xl ${notification.type === 'sold' ? 'border-lime bg-black/70' : 'border-orange bg-black/70'}`}>
+            {notification.type === 'sold' ? (
+              <>
+                <p className="text-6xl font-black uppercase tracking-[0.06em] text-white">{notification.playerName}</p>
+                <p className="mt-6 text-3xl font-bold tracking-[0.04em] text-white/90">
+                  is sold to{' '}
+                  <span
+                    className="font-black"
+                    style={{ color: liveTeams.find((t) => t.name === notification.teamName)?.accent_color ?? '#F4C542' }}
+                  >
+                    {notification.teamName}
+                  </span>{' '}
+                  for{' '}
+                  <span
+                    className="font-black"
+                    style={{ color: liveTeams.find((t) => t.name === notification.teamName)?.accent_color ?? '#F4C542' }}
+                  >
+                    ${currency(notification.price!)}
+                  </span>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-6xl font-black uppercase tracking-[0.06em] text-white">{notification.playerName}</p>
+                <p className="mt-6 text-3xl font-bold tracking-[0.04em] text-orange">is unsold</p>
+              </>
+            )}
           </div>
           <button
             onClick={handleNextPlayer}
-            className="inline-flex items-center gap-2 rounded-xl bg-gold px-8 py-3.5 font-bold text-white shadow-lg transition hover:bg-gold/90"
+            className="inline-flex items-center gap-3 rounded-xl bg-gold px-10 py-4 text-lg font-black text-white shadow-lg transition hover:bg-gold/90"
           >
-            <Play className="h-4 w-4" /> Next Player
+            <Play className="h-5 w-5" /> Next Player
           </button>
         </div>
       ) : isStarting ? (

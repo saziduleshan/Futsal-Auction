@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     }).eq('id', room.current_player_id);
   } else {
     await supabase.from('players').update({
-      status: 'unsold',
+      status: 'available',
       sold_price: null,
       sold_to_team_id: null
     }).eq('id', room.current_player_id);
