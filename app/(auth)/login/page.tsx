@@ -17,14 +17,9 @@ export default function LoginPage() {
         </filter>
       </svg>
 
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: '#A3311C', filter: 'url(#roughpaper)' }}
-        />
-
-        <div className="relative z-10 w-full max-w-md px-4">
-          <div className="rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
+      <div className="flex min-h-screen items-center justify-center bg-gray-900 p-4">
+        <div className="w-full max-w-md rounded-2xl p-8 md:p-10 shadow-2xl" style={{ backgroundColor: '#A3311C', filter: 'url(#roughpaper)' }}>
+          <div className="rounded-xl bg-black/50 p-8 backdrop-blur-sm">
             <div className="text-center">
               <Image
                 src="/Genesislogo.png"
