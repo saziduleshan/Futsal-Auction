@@ -155,7 +155,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'men'
               ? 'bg-[#5C1510] text-white shadow-lg ring-2 ring-gold/60'
-              : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
+              : 'border border-white/20 bg-black/60 text-gold/80 shadow-lg backdrop-blur-sm hover:border-white/40 hover:bg-black/70 hover:text-gold'
           }`}
         >
           <Users className="h-4 w-4" />
@@ -169,7 +169,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'women'
               ? 'bg-[#0F2838] text-white shadow-lg ring-2 ring-gold/60'
-              : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
+              : 'border border-white/20 bg-black/60 text-gold/80 shadow-lg backdrop-blur-sm hover:border-white/40 hover:bg-black/70 hover:text-gold'
           }`}
         >
           <Users className="h-4 w-4" />
