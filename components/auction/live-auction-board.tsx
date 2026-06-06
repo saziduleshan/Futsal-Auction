@@ -35,26 +35,26 @@ function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDis
   const remaining = teamPurse ?? 0;
 
   return (
-    <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm">
+    <div className="w-full max-w-2xl rounded-2xl border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-6 py-4 text-left"
       >
         <div className="flex items-center gap-3">
-          <ShoppingBag className="h-5 w-5 text-white/40" />
+          <ShoppingBag className="h-5 w-5 text-white/70" />
           <div>
-            <p className="text-sm font-bold uppercase tracking-[0.1em] text-white/50">My purchases</p>
+            <p className="text-sm font-bold uppercase tracking-[0.1em] text-white">My purchases</p>
             <p className="mt-1 text-lg font-black text-white">{purchases.length} player{purchases.length !== 1 ? 's' : ''} bought</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-xs text-white/40">Spent</p>
+            <p className="text-xs text-white/60">Spent</p>
             <p className="font-bold text-orange-400">${currency(spent)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-white/40">Remaining</p>
-            <p className={`font-bold ${remaining > 0 ? 'text-lime' : 'text-red-400'}`}>${currency(remaining)}</p>
+            <p className="text-xs text-white/60">Remaining</p>
+            <p className={`font-bold ${remaining > 0 ? 'text-gold' : 'text-red-400'}`}>${currency(remaining)}</p>
           </div>
           {open ? <ChevronUp className="h-5 w-5 text-white/40" /> : <ChevronDown className="h-5 w-5 text-white/40" />}
         </div>
@@ -256,7 +256,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   if (ended) {
     return (
       <div className="flex flex-col items-center justify-center gap-6 py-24">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-12 text-center backdrop-blur-sm">
+        <div className="rounded-2xl border border-white/20 bg-black/60 p-12 text-center shadow-lg backdrop-blur-xl">
           <p className="text-4xl font-black uppercase tracking-[0.12em] text-white">Auction has ended</p>
           <p className="mt-3 text-sm text-white/40">Thank you for participating in The Genesis auction.</p>
           {teamSlug ? (
@@ -272,7 +272,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   if (notification) {
     return (
       <div className="flex flex-col items-center gap-8 py-20">
-        <div className={`w-full max-w-2xl rounded-2xl border-2 p-10 text-center backdrop-blur-sm ${notification.type === 'sold' ? 'border-lime/30 bg-lime/[0.04]' : 'border-orange/30 bg-orange/[0.04]'}`}>
+        <div className={`w-full max-w-2xl rounded-2xl border-2 p-10 text-center shadow-lg backdrop-blur-xl ${notification.type === 'sold' ? 'border-lime/30 bg-black/60' : 'border-orange/30 bg-black/60'}`}>
           <p className="text-4xl font-black uppercase tracking-[0.08em] text-white">{notification.playerName}</p>
           <p className="mt-4 text-2xl font-bold text-white/70">
             {notification.type === 'sold' ? (
@@ -281,7 +281,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
               <span className="text-orange">is unsold</span>
             )}
           </p>
-          <p className="mt-6 text-sm text-white/40">Next player starting soon...</p>
+          <p className="mt-6 text-sm text-white/60">Next player starting soon...</p>
         </div>
         <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
       </div>
@@ -291,10 +291,10 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   if (!livePlayer) {
     return (
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-8">
-        <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-12 text-center backdrop-blur-sm">
-          <Hourglass className="mx-auto h-16 w-16 text-white/20" />
+        <div className="w-full rounded-2xl border border-white/20 bg-black/60 p-12 text-center shadow-lg backdrop-blur-xl">
+          <Hourglass className="mx-auto h-16 w-16 text-white/60" />
           <p className="mt-6 text-2xl font-black uppercase tracking-[0.12em] text-white">Auction will start soon</p>
-          <p className="mt-2 text-sm text-white/40">Wait for the auctioneer to begin.</p>
+          <p className="mt-2 text-sm text-white/60">Wait for the auctioneer to begin.</p>
         </div>
         <PurchasesSection purchases={livePurchases} teamPurse={livePurse} />
       </div>
