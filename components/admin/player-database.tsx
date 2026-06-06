@@ -136,20 +136,17 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
 
   return (
     <div className="space-y-8">
-      <div className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 shadow-lg backdrop-blur-xl">
-        <div className="p-8">
-          <Link
-            href="/admin"
-            className="mb-4 inline-flex items-center gap-2 rounded-xl bg-[#0F2838] px-5 py-2.5 text-sm font-bold uppercase tracking-[0.16em] text-white transition hover:bg-[#0F2838]/80"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to admin
-          </Link>
-          <p className="badge border-gold/30 text-gold text-sm">Player database</p>
-          <h2 className="mt-4 text-3xl font-black uppercase tracking-[0.12em] text-gold">
-            Available players
-          </h2>
-        </div>
+      <div className="flex flex-col items-start gap-3">
+        <Link
+          href="/admin"
+          className="inline-flex items-center gap-2 text-base font-bold uppercase tracking-[0.18em] text-[#0F2838] transition hover:text-[#0F2838]/70"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to admin
+        </Link>
+        <h2 className="text-3xl font-black uppercase tracking-[0.12em] text-[#A3311C]">
+          Available players
+        </h2>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -157,7 +154,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           onClick={() => setActiveDivision('men')}
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'men'
-              ? 'bg-[#A3311C] text-white shadow-lg ring-2 ring-gold/60'
+              ? 'bg-[#5C1510] text-white shadow-lg ring-2 ring-gold/60'
               : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
@@ -171,7 +168,7 @@ export function PlayerDatabase({ players: initialPlayers }: PlayerDatabaseProps)
           onClick={() => setActiveDivision('women')}
           className={`flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] transition ${
             activeDivision === 'women'
-              ? 'bg-[#1D3C50] text-white shadow-lg ring-2 ring-gold/60'
+              ? 'bg-[#0F2838] text-white shadow-lg ring-2 ring-gold/60'
               : 'border border-white/20 bg-gray-400/30 text-gold/80 backdrop-blur-sm hover:border-white/40 hover:bg-gray-400/40 hover:text-gold'
           }`}
         >
