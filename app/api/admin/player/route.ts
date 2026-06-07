@@ -46,7 +46,6 @@ export async function POST(request: Request) {
     division,
     base_price: basePrice,
     card_image_url: cardImageUrl,
-    category: 'goalkeeper',
     created_by: session.userId
   });
 
