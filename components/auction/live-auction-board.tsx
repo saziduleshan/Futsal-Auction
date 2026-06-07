@@ -345,7 +345,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
       ) : (
         <>
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {INCREMENTS.map((inc) => {
+            {INCREMENTS.filter((inc) => !(inc <= 20 && Number(liveRoom.current_bid) >= 100)).map((inc) => {
               const isSelected = selectedIncrement === inc;
               const isDisabled = !canBid || isPending || isLeading;
               const bidAmount = Number(liveRoom.current_bid) + inc;
