@@ -69,17 +69,17 @@ create policy "Public can read auction_rooms" on auction_rooms for select using 
 create policy "Public can read bids" on bids for select using (true);
 
 insert into teams (name, slug, division, purse, accent_color) values
-('Men Team 1', 'men-team-1', 'men', 1000, '#11d5ff'),
-('Men Team 2', 'men-team-2', 'men', 1000, '#ff3cac'),
-('Men Team 3', 'men-team-3', 'men', 1000, '#a3ff12'),
-('Men Team 4', 'men-team-4', 'men', 1000, '#f8cf52'),
-('Men Team 5', 'men-team-5', 'men', 1000, '#7df9ff'),
-('Men Team 6', 'men-team-6', 'men', 1000, '#ff7a18'),
-('Men Team 7', 'men-team-7', 'men', 1000, '#9b5cff'),
-('Men Team 8', 'men-team-8', 'men', 1000, '#00f5a0'),
-('Women Team 1', 'women-team-1', 'women', 1000, '#11d5ff'),
-('Women Team 2', 'women-team-2', 'women', 1000, '#ff3cac'),
-('Women Team 3', 'women-team-3', 'women', 1000, '#a3ff12')
+('Los Matadores', 'los-matadores', 'men', 1000, '#11d5ff'),
+('Flying Dutchmen', 'flying-dutchmen', 'men', 1000, '#ff3cac'),
+('Baguette Battalion', 'baguette-battalion', 'men', 1000, '#a3ff12'),
+('The Wurst Case Scenario', 'the-wurst-case-scenario', 'men', 1000, '#f8cf52'),
+('M10', 'm10', 'men', 1000, '#7df9ff'),
+('Cai Cai FC', 'cai-cai-fc', 'men', 1000, '#ff7a18'),
+('Siuperstars', 'siuperstars', 'men', 1000, '#9b5cff'),
+('Iniestagram Influencers', 'iniestagram-influencers', 'men', 1000, '#00f5a0'),
+('Inazuma Eleven', 'inazuma-eleven', 'women', 1000, '#11d5ff'),
+('The Colonizers FC', 'the-colonizers-fc', 'women', 1000, '#ff3cac'),
+('Hazardous XI', 'hazardous-xi', 'women', 1000, '#a3ff12')
 on conflict (slug) do nothing;
 
 insert into auction_rooms (division, bid_increment, status)
@@ -88,17 +88,17 @@ on conflict (division) do nothing;
 
 insert into app_users (username, password_hash, display_name, role, team_id) values
 ('admin', '53f4de3d8580caea4011a850ad3490dc:8fc4498c9be3b2f2f45975ad71932a207b4344e03e5365217e8146e3b72372d998149e052e228b8a1cb4c318e6f37134ef333764b7db7b105690c78603fe0285', 'Auction Admin', 'admin', null),
-('mteam1', '67fc2601d26b885cd8cb75ad3443d8b0:29f6cd4eb4cc77227c53d9887abd08af89ab4ae4078118080aeb929f335075440929f29ef37b6a3ff505ec7cdc385ecfa81a13d0aedd32d33878dedc78e2b653', 'Men Team 1 Manager', 'team', (select id from teams where slug = 'men-team-1')),
-('mteam2', 'b95fdf9778ee11ab2d491c91661051b8:eff599b243914f1a4ce48cf540230c9e5ebffdfb939616b99908142fdf331f19c7e2584d74499a1277cbaeca223d65c223b8343b9a4ff5170ab2137a0d7a6cce', 'Men Team 2 Manager', 'team', (select id from teams where slug = 'men-team-2')),
-('mteam3', '75332905fb5f3960379e613c3f857a2f:7863cc16db616c62b4ba3198af6d0fe671de8bb35d963875c2377a10d7b893eaf67437412de6c6965d198d8fb4556a8a2f797a99195d49e800f4c742df17effc', 'Men Team 3 Manager', 'team', (select id from teams where slug = 'men-team-3')),
-('mteam4', '0e1a4d8b8aafbfcf9ef64ab5ecc02a5c:9513b9040f99fa5fc738a851d7de3256527e1583d2eb9cd1b4b4a0ae1f73bf5d01f4a4665cd96d5007af2ca221e7916b469000955133a538f7b56cc259eea0a2', 'Men Team 4 Manager', 'team', (select id from teams where slug = 'men-team-4')),
-('mteam5', '2b6515c27fde64b48afac987dc3030bf:a280105e51c9b807ba1e0f84c55055ad82a53ad3bcfd1707476bdb25f8f5da94f40acf8106dffc4dc57a3ea85c898720661030b47194ca0215e05d81ac1de42d', 'Men Team 5 Manager', 'team', (select id from teams where slug = 'men-team-5')),
-('mteam6', 'f1c56bde0188ee979d88b6c50edf282d:38d1c157d50c022670c10a6215251ea6b90c3a76298a08c80dbd8a9171ec78e8f7233e85b50cf9ab9d89987d79e6aa32ed0f0b8c47442559e74608ddc5f384c1', 'Men Team 6 Manager', 'team', (select id from teams where slug = 'men-team-6')),
-('mteam7', '85a31584516da6b3973289baab7db609:2d6124bee5eb301649d6548330ae3b617f7a3aa6f6c41db49fe4c31ef41226b7e78c6e5f8d716354941e142ccefcd465a59917518b3b2fb86f8d19ad7e8bce39', 'Men Team 7 Manager', 'team', (select id from teams where slug = 'men-team-7')),
-('mteam8', 'ec672b79adcbfef6babe451eb3ea2a29:ac23db8c49c83111342f2122fdc3d68d02ca810140f81e19686316f3ad8ec15d882ec951dd7042b6826b3ac563bcb9fe8a003bbbe002948949e18d670f721344', 'Men Team 8 Manager', 'team', (select id from teams where slug = 'men-team-8')),
-('fteam1', '1ec33516ad85072092119b4c5534a42e:07e0373e46bb1ad1bf4c446560e7f469a9ed5483835af2bd9bfc25cf339ea12e185e8aeb5e7754d8d79851353873d250c8b0304ecda3063103f9b7c2415490e2', 'Women Team 1 Manager', 'team', (select id from teams where slug = 'women-team-1')),
-('fteam2', '1a74c1fc216b0ec2362569450a1c6299:e4e400f4ff8bc1ffaa8dc46379dd96a4010848b3108d21db17a55a9049f6e36582c214a51fb08d1d19d0b94d29611543a28262faec816cc1ead284582e1f8b61', 'Women Team 2 Manager', 'team', (select id from teams where slug = 'women-team-2')),
-('fteam3', 'd610b4229b9fbccd19054fc9b433959f:74ec4e181a758493540bc70f48b3627d00b2c038d3c2ca6399eef4db6ede735511af1787e3a0d1977958485547854f90cd1ef06fddea697fcb6177c41b748d61', 'Women Team 3 Manager', 'team', (select id from teams where slug = 'women-team-3'))
+('losmatadores', 'ba889fd76a745e3572660309eb627b8c:633b231e5e798e5938852be139e533a54bc50eb7d08fc008fba062d7613a6afc07c5d6a4f818859a46d5496fa77da1da464a1b5c4ba95df3940789ca3ddfdb54', 'Los Matadores', 'team', (select id from teams where slug = 'los-matadores')),
+('flyingdutchmen', '1014217b2937fca6054e392846a10f98:f14f6dd64589958ff631654c5849f2ac1daa50a8db5d16564bc5a706f0d4582049fc0c899ed24b38250066187d4c9c8b1d57e514fb6a656656427aed0808dea2', 'Flying Dutchmen', 'team', (select id from teams where slug = 'flying-dutchmen')),
+('baguettebattalion', 'a25b3c69f34a69958c381415df79d58e:1d75ea191759dc79f8b6c4ef817f336e2731b37c74a175c6bb76aab495dc753d10515be90a8fb72415aa305972661198cc344e229341841f770cfd3ae434731c', 'Baguette Battalion', 'team', (select id from teams where slug = 'baguette-battalion')),
+('thewurstcasescenario', '8489b70ee325ea47579086d6ca83491f:bcf2f67ad5260078a1d583e77857f915afd7a3deaafde57f29952c0166c93a33a7bc526f53fd488df5fd5e97d8927de24b0ddc15478933d8c85f285035be6390', 'The Wurst Case Scenario', 'team', (select id from teams where slug = 'the-wurst-case-scenario')),
+('m10', 'b8a49a702c00f10000c758c815ca3d40:f0a287d80ef01a505a432ab704132129f9a93bc6b07db09f526671b8e37b9561597a3cc55bb88688c52c235fd2eadd6ed5e1de00277c5abc471babd49888db58', 'M10', 'team', (select id from teams where slug = 'm10')),
+('caicaifc', '331132b19793ab8c0d1ca78045a98416:b64f9f51504151661146e3ce340e6939b8e429cbc27a6e999d2ef5a772fc4f7c9f9a12a9a255dbfce50dbe17b4ee6834f0d518d6cfbb58c0d7810c4e1463c20b', 'Cai Cai FC', 'team', (select id from teams where slug = 'cai-cai-fc')),
+('siuperstars', '892982a89d0bfd6b1d7863d343039be4:adfef80fb7ac9d1bf9fc6f54357a4e24f9caf2193be15d4bfb578349c3af02eb99dc4d8a355fbd8631882164f05860f675bff630882faea30ee60780e8d0f20f', 'Siuperstars', 'team', (select id from teams where slug = 'siuperstars')),
+('iniestagraminfluencers', '600ec9a1c0c6b8e5a2641b4f821cc157:b5abe49b93404c498adf72cb6c0c5fa4cf177216924c31db003ca20dc15f8ce6a45db3349391a5f86deef44316bfa67f27f81ffae70c42418acbeb7cf8f942f3', 'Iniestagram Influencers', 'team', (select id from teams where slug = 'iniestagram-influencers')),
+('inazumaeleven', 'dbb05717037f9abefaaff6622d618b49:9e8f1d807ee613d1cf7831f0fdb49362f57a9fc39245bbb07eedc2754ca94567eb486c6691f11933174f3fafd94ba450cc9f5bf3a856167041caf6b74fba82b2', 'Inazuma Eleven', 'team', (select id from teams where slug = 'inazuma-eleven')),
+('thecolonizersfc', '70799d761ae10eba9c4afe5f142dd134:c2b0c2a1017960cd9bd8be833cb2d99b229acee18a5b30c46c0d7098d0370641ec43a69af7011cd6a306e488f747d27e60ce182baeb787fa211f7edba3dad06d', 'The Colonizers FC', 'team', (select id from teams where slug = 'the-colonizers-fc')),
+('hazardousxi', 'd5f58f7df3931e46ce2c4df67ebf14e2:9abde059dae3089a5a1b3e5520f6046430f000caf4a86a8ac7ad5b30c7568b9978b30eddf18e978f1cde5dee1af36f415bff5f4c11df0cbdda5fa4f272409900', 'Hazardous XI', 'team', (select id from teams where slug = 'hazardous-xi'))
 on conflict (username) do nothing;
 
 insert into storage.buckets (id, name, public)

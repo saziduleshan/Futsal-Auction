@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import type { Player, Purchase, Team } from '@/lib/types';
 import { JoinAuctionForm } from '@/components/teams/join-auction-form';
-import { EditTeamName } from '@/components/teams/edit-team-name';
 
 export function TeamRoster({ team, players, purchases, teamId, joinedRoomIds }: { team: Team; players: Player[]; purchases: Purchase[]; teamId: string; joinedRoomIds: string[] }) {
   const hasJoined = joinedRoomIds.length > 0;
@@ -13,7 +12,9 @@ export function TeamRoster({ team, players, purchases, teamId, joinedRoomIds }: 
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex-1">
             <span className="badge border-gold/30 text-gold">{team.division === 'men' ? 'Male Futsal' : 'Female Futsal'}</span>
-            <EditTeamName team={team} canEdit={canEdit} />
+            <div className="mt-4">
+              <h1 className="text-4xl font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg md:text-5xl">{team.name}</h1>
+            </div>
           </div>
         </div>
       </div>
