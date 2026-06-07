@@ -39,15 +39,18 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  const isModerator = user.username.startsWith('moderator');
+  const effectiveRole = isModerator ? 'moderator' : user.role;
+
   const token = createSessionToken({
     userId: user.id,
     username: user.username,
-    role: user.role,
+    role: effectiveRole,
     teamId: user.team_id
   });
 
   await setSessionCookie(token);
-  const redirectUrl = user.role === 'admin' ? '/admin' : user.team_id ? '/teams/me' : '/auction';
+  const redirectUrl = effectiveRole === 'admin' ? '/admin' : effectiveRole === 'moderator' ? '/moderator' : user.team_id ? '/teams/me' : '/auction';
 
   if (contentType.includes('application/json')) {
     return NextResponse.json({ redirect: redirectUrl });

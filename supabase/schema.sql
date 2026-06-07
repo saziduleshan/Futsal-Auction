@@ -3,7 +3,8 @@ create extension if not exists pgcrypto;
 create type division_t as enum ('men', 'women');
 create type player_status_t as enum ('available', 'sold', 'unsold');
 create type auction_status_t as enum ('idle', 'live', 'sold', 'unsold');
-create type user_role_t as enum ('admin', 'team');
+create type user_role_t as enum ('admin', 'moderator', 'team');
+alter type user_role_t add value if not exists 'moderator';
 
 create table if not exists teams (
   id uuid primary key default gen_random_uuid(),
@@ -88,6 +89,9 @@ on conflict (division) do nothing;
 
 insert into app_users (username, password_hash, display_name, role, team_id) values
 ('admin', '53f4de3d8580caea4011a850ad3490dc:8fc4498c9be3b2f2f45975ad71932a207b4344e03e5365217e8146e3b72372d998149e052e228b8a1cb4c318e6f37134ef333764b7db7b105690c78603fe0285', 'Auction Admin', 'admin', null),
+('moderator1', '29163569dc755f0bdf9719f39d465a9d:1effd64037c8b82d6b0e82b7d88079fa5ef30079b4afd51ae4457fe72338f3e24dc3d155cd349ff90a1cac97fa3136975642018c1f0908bdf2841f38cc71a3ea', 'Moderator 1', 'moderator', null),
+('moderator2', '6fa7fa321f0233d33e78baff51f1ed9d:3e6e45205f08c4abdefdd188b4efe965483dc9f63405d62aecb476e530bb5b6a0f230971285f4085832dfc4f2bdb326e58699a4ae0d6b656d31218260b36a55c', 'Moderator 2', 'moderator', null),
+('moderator3', 'c8f75cdb26f458dd0d9b1db1c226fa6b:b7a164b48a1d7e0f0f88ad9043ab1fb4e475a80c297c36a2aa6d9964bcccb4079e0b651fc1e64a69337b92c00f4a2821973d216857b1d1473968245ce3d03885', 'Moderator 3', 'moderator', null),
 ('losmatadores', 'ba889fd76a745e3572660309eb627b8c:633b231e5e798e5938852be139e533a54bc50eb7d08fc008fba062d7613a6afc07c5d6a4f818859a46d5496fa77da1da464a1b5c4ba95df3940789ca3ddfdb54', 'Los Matadores', 'team', (select id from teams where slug = 'los-matadores')),
 ('dutchmen', 'c23816c821e8c22159ff05a08ff572a7:3e4cef539e797ceff9d41495c30ecc973ff60373feb4405f1ab84766ade7fceda51b722459af43d1c438c276b8360fb2d044a245e82cd0e3f44cabea135eda02', 'Flying Dutchmen', 'team', (select id from teams where slug = 'flying-dutchmen')),
 ('battalion', '36388d41db6aba3c7a08dc201abe8a37:1488c3a0a8a664fea0903f176258fb55769261460b98f6cbc1ca626f36375ac600d7f90af55abe22ce0e2cec0429db0df2c149cc3b9b9aa10c18b79396d2e9d4', 'Baguette Battalion', 'team', (select id from teams where slug = 'baguette-battalion')),

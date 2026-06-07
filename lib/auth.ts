@@ -65,6 +65,12 @@ export async function requireAdmin() {
   return session;
 }
 
+export async function requireModerator() {
+  const session = await requireSession();
+  if (session.role !== 'admin' && session.role !== 'moderator') redirect('/auction');
+  return session;
+}
+
 export async function setSessionCookie(token: string) {
   const store = await cookies();
   store.set(COOKIE_NAME, token, {

@@ -6,7 +6,7 @@ import { slugify } from '@/lib/utils';
 
 export async function POST(request: Request) {
   const session = await getSession();
-  if (!session || session.role !== 'admin') {
+  if (!session || (session.role !== 'admin' && session.role !== 'moderator')) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 

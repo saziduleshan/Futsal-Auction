@@ -1,6 +1,6 @@
 export type Division = 'men' | 'women';
 export type AuctionStatus = 'idle' | 'live' | 'sold' | 'unsold';
-export type UserRole = 'admin' | 'team';
+export type UserRole = 'admin' | 'moderator' | 'team';
 
 export interface Team {
   id: string;
