@@ -171,10 +171,11 @@ create index if not exists idx_bids_created_at on bids(created_at desc);
 create index if not exists idx_purchases_room_id on purchases(room_id);
 create index if not exists idx_purchases_team_id on purchases(team_id);
 create index if not exists idx_players_division_status on players(division, status);
-create index if not exists idx_participants_room_team on auction_participants(room_id, team_id);
+create index if not exists idx_bids_room on bids(room_id, created_at desc);
+create index if not exists idx_bids_room_player on bids(room_id, player_id, created_at desc);
+create index if not exists idx_purchases_room on purchases(room_id, created_at desc);
+create index if not exists idx_purchases_team on purchases(team_id);
+create index if not exists idx_participants_room on auction_participants(room_id);
 
--- ═══════════════════════════════════════════════
--- MIGRATION: remove category column (run if upgrading)
--- ═══════════════════════════════════════════════
 -- alter table players drop column category;
 -- drop type if exists player_category_t;

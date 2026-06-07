@@ -56,14 +56,14 @@ export default async function AuctionPage() {
     const bundles: DivisionBundle[] = await Promise.all(
       activeDivisions.map(async (division) => {
         const [{ data: room }, { data: availablePlayers }, { data: teams }] = await Promise.all([
-          supabase.from('auction_rooms').select('*').eq('division', division).single<AuctionRoom>(),
-          supabase.from('players').select('*').eq('division', division).order('created_at', { ascending: false }).returns<Player[]>(),
-          supabase.from('teams').select('*').eq('division', division).order('name').returns<Team[]>()
+          supabase.from('auction_rooms').select('id, division, current_player_id, current_bid, current_highest_team_id, bid_increment, status, nominated_at, join_code, ended_at').eq('division', division).single<AuctionRoom>(),
+          supabase.from('players').select('id, name, division, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at').eq('division', division).order('created_at', { ascending: false }).returns<Player[]>(),
+          supabase.from('teams').select('id, name, slug, division, purse, accent_color').eq('division', division).order('name').returns<Team[]>()
         ]);
 
         const [purchasesResult, bidsResult] = await Promise.all([
-          supabase.from('purchases').select('*').eq('room_id', room!.id).order('created_at').returns<Purchase[]>(),
-          supabase.from('bids').select('*').eq('room_id', room!.id).order('created_at', { ascending: false }).limit(20).returns<Bid[]>()
+          supabase.from('purchases').select('id, room_id, player_id, team_id, price, created_at').eq('room_id', room!.id).order('created_at').returns<Purchase[]>(),
+          supabase.from('bids').select('id, room_id, player_id, team_id, amount, created_at').eq('room_id', room!.id).order('created_at', { ascending: false }).limit(20).returns<Bid[]>()
         ]);
 
         return {

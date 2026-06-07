@@ -110,6 +110,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
 
   const playerRef = useRef(livePlayer);
   playerRef.current = livePlayer;
+  const playerNameMapRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     setLivePurchases(initialPurchases ?? []);
@@ -123,45 +124,28 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     const supabase = createBrowserSupabase();
     let mounted = true;
 
-    if (roomId) {
-      const channel = supabase
-        .channel(`team-data-${roomId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, async (payload) => {
-          if (!mounted) return;
-          const p = payload.new as Purchase;
-          if (p.team_id !== viewerTeamId) return;
-          const { data: player } = await supabase.from('players').select('name').eq('id', p.player_id).single<{ name: string }>();
-          setLivePurchases((prev) => [...prev, { playerName: player?.name ?? 'Unknown', price: p.price }]);
-        })
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `id=eq.${viewerTeamId}` }, (payload) => {
-          if (!mounted) return;
-          const updated = payload.new as Team;
-          setLivePurse(updated.purse);
-        })
-        .subscribe();
-
-      return () => {
-        mounted = false;
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [roomId, viewerTeamId]);
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-    let mounted = true;
-
-    async function fetchPlayer(playerId: string | null) {
-      if (!playerId) {
-        if (mounted) setLivePlayer(null);
-        return;
-      }
-      const { data } = await supabase.from('players').select('*').eq('id', playerId).single();
-      if (data && mounted) setLivePlayer(data as Player);
-    }
+    supabase.from('players').select('id, name').eq('division', room.division)
+      .then(({ data }) => {
+        if (data) {
+          const map: Record<string, string> = {};
+          for (const p of data) map[p.id] = p.name;
+          if (mounted) playerNameMapRef.current = map;
+        }
+      });
 
     const channel = supabase
-      .channel(`team-auction-live-${room.division}`)
+      .channel(`team-auction-${room.division}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, (payload) => {
+        if (!mounted) return;
+        const p = payload.new as Purchase;
+        if (p.team_id !== viewerTeamId) return;
+        setLivePurchases((prev) => [...prev, { playerName: playerNameMapRef.current[p.player_id] ?? 'Unknown', price: p.price }]);
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `id=eq.${viewerTeamId}` }, (payload) => {
+        if (!mounted) return;
+        const updated = payload.new as Team;
+        setLivePurse(updated.purse);
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${room.division}` }, (payload) => {
         const updated = payload.new as AuctionRoom;
         if (!mounted) return;
@@ -170,9 +154,9 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
           setNotification(null);
           setMessage(null);
-          fetchPlayer(updated.current_player_id);
+          setLivePlayer(livePlayer && livePlayer.id !== updated.current_player_id ? null : livePlayer);
         } else if (!updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
-          fetchPlayer(null);
+          setLivePlayer(null);
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'players', filter: `division=eq.${room.division}` }, (payload) => {
@@ -191,14 +175,12 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
       })
       .subscribe();
 
-    fetchPlayer(room.current_player_id);
-
     return () => {
       mounted = false;
       supabase.removeChannel(channel);
       supabase.removeChannel(broadcastChannel);
     };
-  }, [room.division, room.current_player_id]);
+  }, [room.division, room.current_player_id, roomId, viewerTeamId]);
 
   const highestBidder = useMemo(() => {
     if (!liveRoom.current_highest_team_id) return null;

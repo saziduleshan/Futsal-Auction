@@ -55,26 +55,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unable to record purchase.' }, { status: 500 });
     }
 
-    const { error: teamUpdateError } = await supabase
+    const { data: updatedTeam, error: teamUpdateError } = await supabase
       .from('teams')
       .update({ purse: newPurse })
-      .eq('id', team.id);
+      .eq('id', team.id)
+      .eq('purse', team.purse)
+      .select('id');
 
-    if (teamUpdateError) {
+    if (teamUpdateError || !updatedTeam || updatedTeam.length === 0) {
       return NextResponse.json({ message: 'Sale recorded, but purse update failed.' }, { status: 500 });
     }
 
-    await supabase.from('players').update({
+    const { error: playerUpdateError } = await supabase.from('players').update({
       status: 'sold',
       sold_price: room.current_bid,
       sold_to_team_id: room.current_highest_team_id
     }).eq('id', room.current_player_id);
+
+    if (playerUpdateError) {
+      return NextResponse.json({ message: 'Player status update failed.' }, { status: 500 });
+    }
   } else {
-    await supabase.from('players').update({
+    const { error: playerUpdateError } = await supabase.from('players').update({
       status: 'available',
       sold_price: null,
       sold_to_team_id: null
     }).eq('id', room.current_player_id);
+
+    if (playerUpdateError) {
+      return NextResponse.json({ message: 'Player status update failed.' }, { status: 500 });
+    }
   }
 
   const { error: roomResetError } = await supabase
@@ -86,7 +96,8 @@ export async function POST(request: Request) {
       nominated_at: null,
       status: 'idle'
     })
-    .eq('id', room.id);
+    .eq('id', room.id)
+    .eq('current_player_id', room.current_player_id);
 
   if (roomResetError) {
     return NextResponse.json({ message: 'Auction room reset failed.' }, { status: 500 });

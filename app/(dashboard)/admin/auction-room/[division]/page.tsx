@@ -13,29 +13,29 @@ export default async function AuctionRoomPage({ params }: { params: Promise<{ di
 
   const supabase = createServerSupabase();
 
-  const roomResult = supabase.from('auction_rooms').select('*').eq('division', division).single();
+  const roomResult = supabase.from('auction_rooms').select('id, division, current_player_id, current_bid, current_highest_team_id, bid_increment, status, nominated_at, join_code, ended_at').eq('division', division).single();
 
   const [{ data: room }, { data: availablePlayers }, { data: teams }] = await Promise.all([
     roomResult,
     supabase
       .from('players')
-      .select('*')
+      .select('id, name, division, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at')
       .eq('division', division)
       .order('created_at', { ascending: false }),
-    supabase.from('teams').select('*').eq('division', division).order('name')
+    supabase.from('teams').select('id, name, slug, division, purse, accent_color').eq('division', division).order('name')
   ]);
 
   if (!room || !availablePlayers || !teams) notFound();
 
   const { data: purchases } = await supabase
     .from('purchases')
-    .select('*')
+    .select('id, room_id, player_id, team_id, price, created_at')
     .eq('room_id', room.id)
     .order('created_at');
 
   const { data: bids } = await supabase
     .from('bids')
-    .select('*')
+    .select('id, room_id, player_id, team_id, amount, created_at')
     .eq('room_id', room.id)
     .order('created_at', { ascending: false })
     .limit(20);

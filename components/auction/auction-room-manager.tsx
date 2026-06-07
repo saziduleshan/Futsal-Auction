@@ -1,10 +1,9 @@
 'use client';
 
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
-  Play, Loader2, Shield, Gavel, X, Check, Users, ArrowLeft, OctagonX, Pause
+  Play, Loader2, Shield, Gavel, X, Check, Users, ArrowLeft, OctagonX
 } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
@@ -21,8 +20,6 @@ interface AuctionRoomManagerProps {
 }
 
 export function AuctionRoomManager({ division, room: initialRoom, players, purchases: initialPurchases, teams, initialBids = [] }: AuctionRoomManagerProps) {
-  const router = useRouter();
-
   const [room, setRoom] = useState(initialRoom);
   const [purchases, setPurchases] = useState(initialPurchases);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(() => {
@@ -38,12 +35,12 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
     return 0;
   });
-  const advanceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const notificationChannelRef = useRef<ReturnType<ReturnType<typeof createBrowserSupabase>['channel']> | null>(null);
   const queueIndexRef = useRef(queueIndex);
   queueIndexRef.current = queueIndex;
   const playerQueueRef = useRef(playerQueue);
   playerQueueRef.current = playerQueue;
+  const roomRef = useRef(room);
+  roomRef.current = room;
 
   const [bids, setBids] = useState<Bid[]>(initialBids);
   const [notification, setNotification] = useState<{ type: 'sold' | 'unsold'; playerName: string; teamName?: string; price?: number } | null>(null);
@@ -53,11 +50,8 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [isEnding, setIsEnding] = useState(false);
   const [managersOpen, setManagersOpen] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      if (advanceTimeoutRef.current) clearTimeout(advanceTimeoutRef.current);
-    };
-  }, []);
+  const [connections, setConnections] = useState<Record<string, boolean>>({});
+  const [liveTeams, setLiveTeams] = useState(teams);
 
   const highestBidder = useMemo(() => {
     if (!room.current_highest_team_id) return null;
@@ -67,11 +61,23 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const roomPlayerRef = useRef(initialRoom.current_player_id);
   roomPlayerRef.current = room.current_player_id;
 
+  const broadcastChannelRef = useRef<ReturnType<ReturnType<typeof createBrowserSupabase>['channel']> | null>(null);
+
   useEffect(() => {
     const supabase = createBrowserSupabase();
+
+    supabase.from('auction_participants').select('team_id, connected').eq('room_id', initialRoom.id)
+      .then(({ data }) => {
+        if (data) {
+          const map: Record<string, boolean> = {};
+          for (const p of data) map[p.team_id] = p.connected;
+          setConnections(map);
+        }
+      });
+
     const channel = supabase
-      .channel(`auction-room-${room.division}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${room.division}` }, (payload) => {
+      .channel(`admin-auction-${division}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_rooms', filter: `division=eq.${division}` }, (payload) => {
         const updated = payload.new as AuctionRoom;
         setRoom(updated);
         if (updated.current_player_id && updated.current_player_id !== roomPlayerRef.current) {
@@ -80,62 +86,47 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
           setMessage(null);
         }
       })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [room.division]);
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-    const channel = supabase
-      .channel(`purchases-${division}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
-        const newPurchase = payload.new as Purchase;
-        if (payload.eventType === 'INSERT') {
-          setPurchases((prev) => [...prev, newPurchase]);
-        }
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        setPurchases((prev) => [...prev, payload.new as Purchase]);
       })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [division, initialRoom.id]);
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-    const channel = supabase
-      .channel(`bids-${initialRoom.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bids', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
         const newBid = payload.new as Bid;
-        setBids((prev) => {
-          if (prev.some((b) => b.id === newBid.id)) return prev;
-          return [newBid, ...prev];
-        });
+        setBids((prev) => prev.some((b) => b.id === newBid.id) ? prev : [newBid, ...prev]);
       })
       .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'bids', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
         const deleted = payload.old as Bid;
         setBids((prev) => prev.filter((b) => b.id !== deleted.id));
       })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `division=eq.${division}` }, (payload) => {
+        const updated = payload.new as Team;
+        setLiveTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_participants', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        const row = payload.new as { team_id: string; connected: boolean } | null;
+        if (row) setConnections((prev) => ({ ...prev, [row.team_id]: row.connected }));
+      })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [initialRoom.id]);
+    const broadcastChannel = supabase
+      .channel(`broadcast-${division}`)
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') broadcastChannelRef.current = broadcastChannel;
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(broadcastChannel);
+      broadcastChannelRef.current = null;
+    };
+  }, [division, initialRoom.id]);
 
   const broadcastOutcome = useCallback(async (outcome: 'sold' | 'unsold', playerName: string, teamName?: string, price?: number) => {
-    const supabase = createBrowserSupabase();
-    const ch = supabase.channel(`broadcast-${division}`);
-    notificationChannelRef.current = ch;
-    ch.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        ch.send({
-          type: 'broadcast',
-          event: 'close-outcome',
-          payload: { type: outcome, playerName, teamName, price }
-        });
-      }
+    broadcastChannelRef.current?.send({
+      type: 'broadcast',
+      event: 'close-outcome',
+      payload: { type: outcome, playerName, teamName, price }
     });
-  }, [division]);
+  }, []);
 
   const startPlayer = useCallback(async (player: Player) => {
     setIsStarting(true);
@@ -174,7 +165,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   }, [initialRoom.id]);
 
   const closeLot = useCallback(async (outcome: 'sold' | 'unsold') => {
-    if (!currentPlayer) return;
+    const player = currentPlayer;
+    const bidder = highestBidder;
+    const bid = roomRef.current.current_bid;
+    if (!player) return;
     setIsClosing(true);
     setMessage(null);
     try {
@@ -185,12 +179,12 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       });
       const payload = await res.json();
       if (res.ok) {
-        const playerName = currentPlayer.name;
-        const teamName = outcome === 'sold' ? highestBidder?.name : undefined;
-        const price = outcome === 'sold' ? room.current_bid : undefined;
+        const playerName = player.name;
+        const teamName = outcome === 'sold' ? bidder?.name : undefined;
+        const price = outcome === 'sold' ? bid : undefined;
 
         if (outcome === 'unsold') {
-          setPlayerQueue((prev) => [...prev, currentPlayer]);
+          setPlayerQueue((prev) => [...prev, player]);
         }
         setNotification({ type: outcome, playerName, teamName, price });
         setCurrentPlayer(null);
@@ -203,7 +197,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsClosing(false);
     }
-  }, [currentPlayer, initialRoom.id, room.current_bid, room.current_highest_team_id, highestBidder, broadcastOutcome, startPlayer, setPlayerQueue]);
+  }, [currentPlayer, initialRoom.id, highestBidder, broadcastOutcome]);
 
   const endAuction = useCallback(async () => {
     if (!confirm('End auction and clear all purchases? This cannot be undone.')) return;
@@ -227,7 +221,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     } finally {
       setIsEnding(false);
     }
-  }, [division, router]);
+  }, [division]);
 
   const handleNextPlayer = useCallback(async () => {
     setNotification(null);
@@ -244,17 +238,22 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [connections, setConnections] = useState<Record<string, boolean>>({});
   const [liveTeams, setLiveTeams] = useState(teams);
 
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-    const channel = supabase
-      .channel(`admin-teams-${division}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `division=eq.${division}` }, (payload) => {
-        const updated = payload.new as Team;
-        setLiveTeams((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [division]);
+  const { teamPurchasesMap, teamSpent } = useMemo(() => {
+    const purchasesMap: Record<string, Purchase[]> = {};
+    const spentMap: Record<string, number> = {};
+    for (const team of liveTeams) {
+      purchasesMap[team.id] = [];
+      spentMap[team.id] = 0;
+    }
+    for (const p of purchases) {
+      const list = purchasesMap[p.team_id];
+      if (list) {
+        list.push(p);
+        spentMap[p.team_id]! += p.price;
+      }
+    }
+    return { teamPurchasesMap: purchasesMap, teamSpent: spentMap };
+  }, [liveTeams, purchases]);
 
   const teamPurses = useMemo(() => {
     const map: Record<string, number> = {};
@@ -262,51 +261,11 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     return map;
   }, [liveTeams]);
 
-  const teamSpent = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const team of liveTeams) {
-      map[team.id] = purchases.filter((p) => p.team_id === team.id).reduce((sum, p) => sum + p.price, 0);
-    }
-    return map;
-  }, [liveTeams, purchases]);
-
-  const teamPurchasesMap = useMemo(() => {
-    const map: Record<string, Purchase[]> = {};
-    for (const team of liveTeams) map[team.id] = purchases.filter((p) => p.team_id === team.id);
-    return map;
-  }, [liveTeams, purchases]);
-
   const maxPurchases = useMemo(() => {
     return Math.max(14, ...liveTeams.map((t) => teamPurchasesMap[t.id]?.length ?? 0));
   }, [liveTeams, teamPurchasesMap]);
 
-  const getPlayerById = useCallback((id: string) => {
-    return players.find((p) => p.id === id) ?? null;
-  }, [players]);
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-
-    async function fetchConnections() {
-      const { data } = await supabase.from('auction_participants').select('team_id, connected').eq('room_id', initialRoom.id);
-      if (data) {
-        const map: Record<string, boolean> = {};
-        for (const p of data) map[p.team_id] = p.connected;
-        setConnections(map);
-      }
-    }
-    fetchConnections();
-
-    const channel = supabase
-      .channel(`participants-${initialRoom.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'auction_participants', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
-        const row = payload.new as { team_id: string; connected: boolean } | null;
-        if (row) setConnections((prev) => ({ ...prev, [row.team_id]: row.connected }));
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [initialRoom.id]);
+  const playerMap = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
 
   return (
     <div className="space-y-4">
@@ -538,7 +497,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                           const tp = teamPurchasesMap[team.id] ?? [];
                           const purchase = tp[rowIndex];
                           if (!purchase) return <td key={team.id} className="px-4 py-2.5 text-gray-300">—</td>;
-                          const player = getPlayerById(purchase.player_id);
+                          const player = playerMap.get(purchase.player_id);
                           return (
                             <td key={team.id} className="px-4 py-2.5">
                               <span className="font-semibold text-gray-800">{player?.name ?? 'Unknown'}</span>

@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Player is not available anymore.' }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from('auction_rooms')
     .update({
       current_player_id: player.id,
@@ -40,10 +40,16 @@ export async function POST(request: Request) {
       status: 'live',
       nominated_at: new Date().toISOString()
     })
-    .eq('id', room.id);
+    .eq('id', room.id)
+    .eq('status', 'idle')
+    .select('id');
 
   if (error) {
     return NextResponse.json({ message: 'Could not start the auction lot.' }, { status: 500 });
+  }
+
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ message: 'Auction is already running for this room.' }, { status: 409 });
   }
 
   return NextResponse.json({ message: 'Auction lot started.' });
