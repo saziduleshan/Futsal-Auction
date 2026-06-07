@@ -47,19 +47,12 @@ export function FutsalGround({ players, purchases }: { players: Player[]; purcha
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gold/10 via-amber-900/10 to-orange/10">
                   <div className="text-center">
-                    <p className="mt-2 px-2 text-sm font-black uppercase tracking-[0.08em] text-gray-500">
-                      {player.name}
-                    </p>
                   </div>
                 </div>
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                <p className="truncate text-xs font-black uppercase tracking-[0.04em] text-white drop-shadow-sm">
-                  {player.name}
-                </p>
-
-                <p className="mt-1 text-sm font-black text-gold drop-shadow-sm">${currency(purchasePrice)}</p>
+                <p className="text-sm font-black text-gold drop-shadow-sm">${currency(purchasePrice)}</p>
               </div>
             </div>
           </div>
