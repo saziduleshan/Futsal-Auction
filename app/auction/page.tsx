@@ -57,7 +57,7 @@ export default async function AuctionPage() {
       activeDivisions.map(async (division) => {
         const [{ data: room }, { data: availablePlayers }, { data: teams }] = await Promise.all([
           supabase.from('auction_rooms').select('*').eq('division', division).single<AuctionRoom>(),
-          supabase.from('players').select('*').eq('division', division).order('name').returns<Player[]>(),
+          supabase.from('players').select('*').eq('division', division).order('created_at', { ascending: false }).returns<Player[]>(),
           supabase.from('teams').select('*').eq('division', division).order('name').returns<Team[]>()
         ]);
 
