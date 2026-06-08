@@ -76,7 +76,7 @@ insert into teams (name, slug, division, purse, accent_color) values
 ('The Wurst Case Scenario', 'the-wurst-case-scenario', 'men', 1000, '#f8cf52'),
 ('M10', 'm10', 'men', 1000, '#7df9ff'),
 ('Cai Cai FC', 'cai-cai-fc', 'men', 1000, '#ff7a18'),
-('Siuperstars', 'siuperstars', 'men', 1000, '#9b5cff'),
+('Siuuperstars', 'siuuperstars', 'men', 1000, '#9b5cff'),
 ('Iniestagram Influencers', 'iniestagram-influencers', 'men', 1000, '#00f5a0'),
 ('Inazuma Eleven', 'inazuma-eleven', 'women', 1000, '#11d5ff'),
 ('The Colonizers FC', 'the-colonizers-fc', 'women', 1000, '#ff3cac'),
@@ -99,7 +99,10 @@ insert into app_users (username, password_hash, display_name, role, team_id) val
 ('iniestagram', '8dcd14510b05e0d8987ab2772bab9981:017245eea092296ca046d6d7e6b80b8502b67eee198e3499b00aec08f612b3b165d7dd057b2168881c335d10d6e1e6fcc546c5f2ff69960bc38d1de06a4f3e32', 'Iniestagram Influencers', 'team', (select id from teams where slug = 'iniestagram-influencers')),
 ('inazumaeleven', 'dbb05717037f9abefaaff6622d618b49:9e8f1d807ee613d1cf7831f0fdb49362f57a9fc39245bbb07eedc2754ca94567eb486c6691f11933174f3fafd94ba450cc9f5bf3a856167041caf6b74fba82b2', 'Inazuma Eleven', 'team', (select id from teams where slug = 'inazuma-eleven')),
 ('thecolonizersfc', '70799d761ae10eba9c4afe5f142dd134:c2b0c2a1017960cd9bd8be833cb2d99b229acee18a5b30c46c0d7098d0370641ec43a69af7011cd6a306e488f747d27e60ce182baeb787fa211f7edba3dad06d', 'The Colonizers FC', 'team', (select id from teams where slug = 'the-colonizers-fc')),
-('hazardousxi', 'd5f58f7df3931e46ce2c4df67ebf14e2:9abde059dae3089a5a1b3e5520f6046430f000caf4a86a8ac7ad5b30c7568b9978b30eddf18e978f1cde5dee1af36f415bff5f4c11df0cbdda5fa4f272409900', 'Hazardous XI', 'team', (select id from teams where slug = 'hazardous-xi'))
+('hazardousxi', 'd5f58f7df3931e46ce2c4df67ebf14e2:9abde059dae3089a5a1b3e5520f6046430f000caf4a86a8ac7ad5c30b7568b9978b30eddf18e978f1cde5dee1af36f415bff5f4c11df0cbdda5fa4f272409900', 'Hazardous XI', 'team', (select id from teams where slug = 'hazardous-xi')),
+('caicaifc', '5064d965331aab44f873604767ffd308:dbf5929b512f8fa42b6c909d0f1136a79f4edad500dd0d0d9f3667cf2dc59d788ca9748f244bf067a57bdc6d511cdba07c7fb701112dac5ecf870bc7c0a9b51d', 'Cai Cai FC', 'team', (select id from teams where slug = 'cai-cai-fc')),
+('m10', 'a07c32f2b6fc32fb11f6dc47080fa92b:ade249ebdc11a28bdf9f52d7a63e398db6c8c8c8c5fe0b61d0683703b7d3ff0e726816db219059eb25202543dacf81388049d5672087f274752a7344e7840fad', 'M10', 'team', (select id from teams where slug = 'm10')),
+('siuuperstars', 'a21f36ec0961075feb62f89da7c2f7cb:d7545a1dc3ea7710b98cd29afea1e8fa303dcf78f4eaa5d05b87da55b9efdc2f637fa0406fb7fb1694d4899113eb970bb2a61a3597f1bb283ebdcd1c85ae34e2', 'Siuuperstars', 'team', (select id from teams where slug = 'siuuperstars'))
 on conflict (username) do nothing;
 
 insert into storage.buckets (id, name, public)
