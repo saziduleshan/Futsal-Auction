@@ -1,33 +1,38 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 export function PlayerForm() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, setIsPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function onSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setMessage(null);
-    startTransition(async () => {
-      try {
-        const response = await fetch('/api/admin/player', {
-          method: 'POST',
-          body: formData
-        });
-        const payload = await response.json();
-        setMessage(payload.message ?? (response.ok ? 'Player created.' : 'Something went wrong.'));
-        if (response.ok) {
-          router.refresh();
-        }
-      } catch {
-        setMessage('Network error — could not reach server.');
+    setIsPending(true);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const response = await fetch('/api/admin/player', {
+        method: 'POST',
+        body: formData
+      });
+      const payload = await response.json();
+      setMessage(payload.message ?? (response.ok ? 'Player created.' : 'Something went wrong.'));
+      if (response.ok) {
+        formRef.current?.reset();
+        router.refresh();
       }
-    });
+    } catch {
+      setMessage('Network error — could not reach server.');
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
-    <form action={onSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="overflow-hidden rounded-[1.75rem] border border-white/20 bg-black/60 p-8 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="badge border-gold/30 text-gold">Player management</p>
