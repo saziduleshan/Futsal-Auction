@@ -112,6 +112,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
   const playerRef = useRef(livePlayer);
   playerRef.current = livePlayer;
   const playerNameMapRef = useRef<Record<string, string>>({});
+  const playerMapRef = useRef<Record<string, Player>>({});
 
   useEffect(() => {
     setLivePurchases(initialPurchases ?? []);
@@ -125,12 +126,19 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     const supabase = createBrowserSupabase();
     let mounted = true;
 
-    supabase.from('players').select('id, name').eq('division', room.division)
+    supabase.from('players').select('id, name, division, base_price, status, card_image_url, sold_price, sold_to_team_id, created_at').eq('division', room.division)
       .then(({ data }) => {
         if (data) {
-          const map: Record<string, string> = {};
-          for (const p of data) map[p.id] = p.name;
-          if (mounted) playerNameMapRef.current = map;
+          const nameMap: Record<string, string> = {};
+          const fullMap: Record<string, Player> = {};
+          for (const p of data) {
+            nameMap[p.id] = p.name;
+            fullMap[p.id] = p;
+          }
+          if (mounted) {
+            playerNameMapRef.current = nameMap;
+            playerMapRef.current = fullMap;
+          }
         }
       });
 
@@ -160,7 +168,12 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
           setNotification(null);
           setMessage(null);
-          setLivePlayer(livePlayer && livePlayer.id !== updated.current_player_id ? null : livePlayer);
+          const fetched = playerMapRef.current[updated.current_player_id];
+          if (fetched) {
+            setLivePlayer(fetched);
+          } else {
+            setLivePlayer(null);
+          }
         } else if (!updated.current_player_id && updated.current_player_id !== playerRef.current?.id) {
           setLivePlayer(null);
         }
