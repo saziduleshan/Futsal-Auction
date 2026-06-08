@@ -211,6 +211,13 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
     return teams.find((t) => t.id === liveRoom.current_highest_team_id) ?? null;
   }, [liveRoom.current_highest_team_id, teams]);
 
+  const bidderFontSize = useMemo(() => {
+    const name = highestBidder?.name ?? 'No bids';
+    if (name.length <= 8) return 'text-7xl';
+    if (name.length <= 15) return 'text-5xl';
+    return 'text-3xl';
+  }, [highestBidder]);
+
   const canBid = viewerRole === 'team' && viewerTeamId && liveRoom.status === 'live' && livePlayer;
   const isLeading = liveRoom.current_highest_team_id === viewerTeamId;
 
@@ -332,7 +339,7 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
           <p className="mt-3 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#BF2816' }}>
             ${currency(liveRoom.current_bid || livePlayer.base_price)}
           </p>
-          <p className="mt-12 text-7xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>
+          <p className={`mt-12 ${bidderFontSize} font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`} style={{ color: '#F4C542' }}>
             {highestBidder ? highestBidder.name : 'No bids'}
           </p>
           <p className="mt-2 text-xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>Highest bidder</p>

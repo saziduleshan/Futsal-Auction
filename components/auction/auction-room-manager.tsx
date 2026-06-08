@@ -59,6 +59,13 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     return teams.find((t) => t.id === room.current_highest_team_id) ?? null;
   }, [room.current_highest_team_id, teams]);
 
+  const bidderFontSize = useMemo(() => {
+    const name = highestBidder?.name ?? 'No bids';
+    if (name.length <= 8) return 'text-8xl';
+    if (name.length <= 15) return 'text-6xl';
+    return 'text-4xl';
+  }, [highestBidder]);
+
   const roomPlayerRef = useRef(initialRoom.current_player_id);
   roomPlayerRef.current = room.current_player_id;
 
@@ -427,7 +434,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
               <p id="current-bid-display" className="mt-3 text-9xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] transition-all" style={{ color: '#BF2816' }}>
                 ${currency(room.current_bid || currentPlayer.base_price)}
               </p>
-              <p className="mt-12 text-8xl font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>
+              <p className={`mt-12 ${bidderFontSize} font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]`} style={{ color: '#F4C542' }}>
                 {highestBidder ? highestBidder.name : 'No bids'}
               </p>
               <p className="mt-2 text-3xl font-bold uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" style={{ color: '#F4C542' }}>Highest bidder</p>
