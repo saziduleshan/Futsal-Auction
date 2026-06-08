@@ -4,6 +4,13 @@ import { getSession } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 import { slugify } from '@/lib/utils';
 
+const MAX_IMAGE_SIZE = 4 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+
+export async function GET() {
+  return NextResponse.json({ message: 'Method not allowed' }, { status: 405 });
+}
+
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session || (session.role !== 'admin' && session.role !== 'moderator')) {
@@ -24,6 +31,13 @@ export async function POST(request: Request) {
   let cardImageUrl: string | null = null;
 
   if (image instanceof File && image.size > 0) {
+    if (image.size > MAX_IMAGE_SIZE) {
+      return NextResponse.json({ message: 'Image must be under 4MB.' }, { status: 400 });
+    }
+    if (!ALLOWED_TYPES.includes(image.type)) {
+      return NextResponse.json({ message: 'Image must be JPEG, PNG, WebP, GIF, or AVIF.' }, { status: 400 });
+    }
+
     const extension = image.name.split('.').pop() || 'png';
     const fileName = `${slugify(name)}-${randomUUID()}.${extension}`;
 
