@@ -3,8 +3,8 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'node:crypt
 import { redirect } from 'next/navigation';
 import type { SessionPayload } from '@/lib/types';
 
-const COOKIE_NAME = 'joga_session';
-const MAX_AGE = 60 * 60 * 24 * 7;
+export const COOKIE_NAME = 'joga_session';
+export const MAX_AGE = 60 * 60 * 24 * 7;
 
 function getSecret() {
   const secret = process.env.SESSION_SECRET;

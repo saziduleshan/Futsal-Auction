@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createSessionToken, setSessionCookie, verifyPassword } from '@/lib/auth';
+import { createSessionToken, verifyPassword, COOKIE_NAME, MAX_AGE } from '@/lib/auth';
 import { createServerSupabase } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
@@ -50,11 +50,19 @@ export async function POST(request: Request) {
     teamId: user.team_id
   });
 
-  await setSessionCookie(token);
   const redirectUrl = effectiveRole === 'admin' ? '/admin' : effectiveRole === 'moderator' ? '/moderator' : user.team_id ? '/teams/me' : '/auction';
 
   if (contentType.includes('application/json')) {
-    return NextResponse.json({ redirect: redirectUrl });
+    const res = NextResponse.json({ redirect: redirectUrl });
+    res.cookies.set(COOKIE_NAME, token, {
+      httpOnly: true, sameSite: 'lax', secure: true, path: '/', maxAge: MAX_AGE
+    });
+    return res;
   }
-  return NextResponse.redirect(new URL(redirectUrl, request.url), { status: 303 });
+
+  const response = NextResponse.redirect(new URL(redirectUrl, request.url), { status: 303 });
+  response.cookies.set(COOKIE_NAME, token, {
+    httpOnly: true, sameSite: 'lax', secure: true, path: '/', maxAge: MAX_AGE
+  });
+  return response;
 }
