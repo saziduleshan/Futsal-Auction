@@ -192,6 +192,11 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         setNotification(payload.payload);
         setMessage(null);
       })
+      .on('broadcast', { event: 'cancel-purchase' }, (payload) => {
+        if (!mounted) return;
+        const { playerId } = payload.payload as { playerId: string };
+        setLivePurchases((prev) => prev.filter((p) => p.playerId !== playerId));
+      })
       .subscribe();
 
     return () => {

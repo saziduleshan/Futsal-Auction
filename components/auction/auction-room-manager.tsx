@@ -251,12 +251,18 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       });
       const payload = await res.json();
       if (res.ok) {
+        setPurchases((prev) => prev.filter((p) => p.id !== purchaseId));
         const player = players.find((p) => p.id === payload.playerId);
         if (player) {
           setCurrentPlayer(player);
           const idx = playerQueueRef.current.findIndex((p) => p.id === player.id);
           if (idx !== -1) setQueueIndex(idx);
         }
+        broadcastChannelRef.current?.send({
+          type: 'broadcast',
+          event: 'cancel-purchase',
+          payload: { playerId: payload.playerId }
+        });
       } else {
         setMessage(payload.message || 'Failed to cancel purchase.');
       }
