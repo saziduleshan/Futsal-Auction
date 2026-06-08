@@ -26,9 +26,8 @@ export async function POST(request: Request) {
   if (image instanceof File && image.size > 0) {
     const extension = image.name.split('.').pop() || 'png';
     const fileName = `${slugify(name)}-${randomUUID()}.${extension}`;
-    const fileBuffer = Buffer.from(await image.arrayBuffer());
 
-    const { error: uploadError } = await supabase.storage.from('player-cards').upload(fileName, fileBuffer, {
+    const { error: uploadError } = await supabase.storage.from('player-cards').upload(fileName, image, {
       contentType: image.type,
       upsert: false
     });

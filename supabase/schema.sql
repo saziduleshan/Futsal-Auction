@@ -112,6 +112,9 @@ on conflict (id) do nothing;
 create policy "Public can read player cards" on storage.objects
 for select using (bucket_id = 'player-cards');
 
+create policy "Admin can upload player cards" on storage.objects
+for insert with check (bucket_id = 'player-cards');
+
 alter publication supabase_realtime add table teams;
 alter publication supabase_realtime add table players;
 alter publication supabase_realtime add table auction_rooms;

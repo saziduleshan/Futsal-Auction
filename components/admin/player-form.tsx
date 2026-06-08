@@ -10,14 +10,18 @@ export function PlayerForm() {
   async function onSubmit(formData: FormData) {
     setMessage(null);
     startTransition(async () => {
-      const response = await fetch('/api/admin/player', {
-        method: 'POST',
-        body: formData
-      });
-      const payload = await response.json();
-      setMessage(payload.message ?? (response.ok ? 'Player created.' : 'Something went wrong.'));
-      if (response.ok) {
-        router.refresh();
+      try {
+        const response = await fetch('/api/admin/player', {
+          method: 'POST',
+          body: formData
+        });
+        const payload = await response.json();
+        setMessage(payload.message ?? (response.ok ? 'Player created.' : 'Something went wrong.'));
+        if (response.ok) {
+          router.refresh();
+        }
+      } catch {
+        setMessage('Network error — could not reach server.');
       }
     });
   }
