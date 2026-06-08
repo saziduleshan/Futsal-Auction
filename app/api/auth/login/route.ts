@@ -13,9 +13,10 @@ export async function POST(request: Request) {
     username = String(body.username ?? '').trim().toLowerCase();
     password = String(body.password ?? '');
   } else {
-    const formData = await request.formData();
-    username = String(formData.get('username') ?? '').trim().toLowerCase();
-    password = String(formData.get('password') ?? '');
+    const text = await request.text();
+    const params = new URLSearchParams(text);
+    username = String(params.get('username') ?? '').trim().toLowerCase();
+    password = String(params.get('password') ?? '');
   }
 
   if (!username || !password) {
