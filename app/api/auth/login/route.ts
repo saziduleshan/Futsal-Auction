@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     if (contentType.includes('application/json')) {
       return NextResponse.json({ message: 'Username and password are required.' }, { status: 400 });
     }
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/login', request.url), { status: 303 });
   }
 
   const supabase = createServerSupabase();
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     if (contentType.includes('application/json')) {
       return NextResponse.json({ message: 'Invalid username or password.' }, { status: 401 });
     }
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL('/login', request.url), { status: 303 });
   }
 
   const isModerator = user.username.startsWith('moderator');
@@ -56,5 +56,5 @@ export async function POST(request: Request) {
   if (contentType.includes('application/json')) {
     return NextResponse.json({ redirect: redirectUrl });
   }
-  return NextResponse.redirect(new URL(redirectUrl, request.url));
+  return NextResponse.redirect(new URL(redirectUrl, request.url), { status: 303 });
 }
