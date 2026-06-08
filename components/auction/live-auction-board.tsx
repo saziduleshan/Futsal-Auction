@@ -79,7 +79,7 @@ function PurchasesSection({ purchases, teamPurse }: { purchases: TeamPurchaseDis
                     <tr key={i} className="border-b border-white/5 last:border-0">
                       <td className="px-4 py-3 text-white/40">{i + 1}</td>
                       <td className="px-4 py-3 font-semibold text-white">{p.playerName}</td>
-                      <td className="px-4 py-3 text-right font-bold text-amber">${currency(p.price)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-white">${currency(p.price)}</td>
                     </tr>
                   ))}
                 </tbody>

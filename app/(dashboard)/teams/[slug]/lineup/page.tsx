@@ -32,7 +32,7 @@ export default async function LineupPage({ params }: { params: Promise<{ slug: s
       </Link>
 
       <div className="mb-8">
-        <h1 className="text-5xl font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg md:text-6xl">{bundle.team.name}</h1>
+        <h1 className={`font-black uppercase tracking-[0.12em] text-[#0F2838] drop-shadow-lg ${bundle.team.name.length > 20 ? 'text-3xl md:text-4xl' : bundle.team.name.length > 12 ? 'text-4xl md:text-5xl' : 'text-5xl md:text-6xl'}`}>{bundle.team.name}</h1>
         <p className="mt-3 text-lg text-[#0F2838]">{bundle.players.length} player{bundle.players.length !== 1 ? 's' : ''} in squad</p>
       </div>
 

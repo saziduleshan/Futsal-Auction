@@ -5,6 +5,7 @@ import { JoinAuctionForm } from '@/components/teams/join-auction-form';
 export function TeamRoster({ team, players, purchases, teamId, joinedRoomIds }: { team: Team; players: Player[]; purchases: Purchase[]; teamId: string; joinedRoomIds: string[] }) {
   const hasJoined = joinedRoomIds.length > 0;
   const canEdit = teamId === team.id;
+  const teamNameSize = team.name.length > 20 ? 'text-2xl md:text-3xl' : team.name.length > 12 ? 'text-3xl md:text-4xl' : 'text-4xl md:text-5xl';
 
   return (
     <div className="space-y-8">
@@ -13,7 +14,7 @@ export function TeamRoster({ team, players, purchases, teamId, joinedRoomIds }: 
           <div className="flex-1">
             <span className="badge border-gold/30 text-gold">{team.division === 'men' ? 'Male Futsal' : 'Female Futsal'}</span>
             <div className="mt-4">
-              <h1 className="text-4xl font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg md:text-5xl">{team.name}</h1>
+              <h1 className={`font-black uppercase tracking-[0.12em] text-gold drop-shadow-lg ${teamNameSize}`}>{team.name}</h1>
             </div>
           </div>
         </div>
