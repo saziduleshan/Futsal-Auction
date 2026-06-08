@@ -10,6 +10,7 @@ import { AuctionRoomManager } from '@/components/auction/auction-room-manager';
 import type { Bid, Division, Purchase, Player, Team, AuctionRoom } from '@/lib/types';
 
 interface TeamPurchaseDisplay {
+  playerId: string;
   playerName: string;
   price: number;
 }
@@ -127,6 +128,7 @@ export default async function AuctionPage() {
     }
 
     purchases = rawPurchases.map((p) => ({
+      playerId: p.player_id,
       playerName: nameMap[p.player_id] ?? 'Unknown',
       price: p.price
     }));

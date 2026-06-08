@@ -3,7 +3,7 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import {
-  Play, Loader2, Shield, Gavel, X, Check, Users, ArrowLeft, OctagonX
+  Play, Loader2, Shield, Gavel, X, Check, Users, ArrowLeft, OctagonX, RotateCcw
 } from 'lucide-react';
 import Link from 'next/link';
 import { createBrowserSupabase } from '@/lib/supabase/browser';
@@ -48,6 +48,7 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
   const [isStarting, setIsStarting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [managersOpen, setManagersOpen] = useState(false);
 
   const [connections, setConnections] = useState<Record<string, boolean>>({});
@@ -88,6 +89,10 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'purchases', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
         setPurchases((prev) => [...prev, payload.new as Purchase]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'purchases', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
+        const deleted = payload.old as Purchase;
+        setPurchases((prev) => prev.filter((p) => p.id !== deleted.id));
       })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bids', filter: `room_id=eq.${initialRoom.id}` }, (payload) => {
         const newBid = payload.new as Bid;
@@ -235,8 +240,32 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
     }
   }, [startPlayer]);
 
-  const [connections, setConnections] = useState<Record<string, boolean>>({});
-  const [liveTeams, setLiveTeams] = useState(teams);
+  const cancelPurchase = useCallback(async (purchaseId: string) => {
+    if (!confirm('Cancel this purchase? The player will return to auction and the team will be refunded.')) return;
+    setIsCancelling(true);
+    try {
+      const res = await fetch('/api/admin/auction/cancel-purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ purchaseId, roomId: initialRoom.id })
+      });
+      const payload = await res.json();
+      if (res.ok) {
+        const player = players.find((p) => p.id === payload.playerId);
+        if (player) {
+          setCurrentPlayer(player);
+          const idx = playerQueueRef.current.findIndex((p) => p.id === player.id);
+          if (idx !== -1) setQueueIndex(idx);
+        }
+      } else {
+        setMessage(payload.message || 'Failed to cancel purchase.');
+      }
+    } catch {
+      setMessage('Could not cancel purchase.');
+    } finally {
+      setIsCancelling(false);
+    }
+  }, [initialRoom.id, players]);
 
   const { teamPurchasesMap, teamSpent } = useMemo(() => {
     const purchasesMap: Record<string, Purchase[]> = {};
@@ -502,6 +531,14 @@ export function AuctionRoomManager({ division, room: initialRoom, players, purch
                             <td key={team.id} className="px-4 py-2.5">
                               <span className="font-semibold text-gray-800">{player?.name ?? 'Unknown'}</span>
                               <span className="ml-2 font-bold text-gold">${currency(purchase.price)}</span>
+                              <button
+                                onClick={() => cancelPurchase(purchase.id)}
+                                disabled={!!currentPlayer || isCancelling}
+                                className="ml-2 inline-flex items-center gap-0.5 rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-bold text-red-500 transition hover:bg-red-100 disabled:opacity-30"
+                                title="Cancel purchase (refund team)"
+                              >
+                                <RotateCcw className="h-3 w-3" />
+                              </button>
                             </td>
                           );
                         })}

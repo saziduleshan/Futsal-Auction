@@ -9,6 +9,7 @@ import { currency } from '@/lib/utils';
 import type { AuctionRoom, Bid, Player, Team, UserRole, Purchase } from '@/lib/types';
 
 interface TeamPurchaseDisplay {
+  playerId: string;
   playerName: string;
   price: number;
 }
@@ -139,7 +140,12 @@ export function LiveAuctionBoard({ divisionLabel, viewerRole, viewerTeamId, room
         if (!mounted) return;
         const p = payload.new as Purchase;
         if (p.team_id !== viewerTeamId) return;
-        setLivePurchases((prev) => [...prev, { playerName: playerNameMapRef.current[p.player_id] ?? 'Unknown', price: p.price }]);
+        setLivePurchases((prev) => [...prev, { playerId: p.player_id, playerName: playerNameMapRef.current[p.player_id] ?? 'Unknown', price: p.price }]);
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'purchases', filter: `room_id=eq.${roomId}` }, (payload) => {
+        if (!mounted) return;
+        const deleted = payload.old as Purchase;
+        setLivePurchases((prev) => prev.filter((p) => p.playerId !== deleted.player_id));
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'teams', filter: `id=eq.${viewerTeamId}` }, (payload) => {
         if (!mounted) return;
